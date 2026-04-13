@@ -1,0 +1,881 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ripoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #080808;
+  --s1: #111111;
+  --s2: #181818;
+  --s3: #222222;
+  --s4: #2a2a2a;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --border3: rgba(255,255,255,0.16);
+  --text: #F2EDE4;
+  --text2: rgba(242,237,228,0.55);
+  --text3: rgba(242,237,228,0.3);
+  --accent: #E8C547;
+  --accent2: #D4A832;
+  --accent-dim: rgba(232,197,71,0.12);
+  --accent-dim2: rgba(232,197,71,0.06);
+  --green: #4ADE80;
+  --green-dim: rgba(74,222,128,0.1);
+  --red: #F87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --r-sm: 12px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); overscroll-behavior: none; }
+body { font-family: 'Syne', sans-serif; color: var(--text); overflow-x: hidden; }
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.4;
+}
+
+/* ── SCREENS ── */
+.screen { display: none; max-width: 430px; margin: 0 auto; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+.scroll-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
+
+/* ── LOADING ── */
+#loadingScreen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; gap: 16px;
+}
+.load-logo { font-family: 'Instrument Serif', serif; font-size: 48px; font-style: italic; color: var(--text); }
+.load-logo span { color: var(--accent); }
+.load-spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.load-text { font-size: 12px; color: var(--text3); letter-spacing: 2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ── AUTH SCREEN ── */
+.auth-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1.5rem; gap: 2rem; }
+.auth-logo { font-family: 'Instrument Serif', serif; font-size: 56px; font-style: italic; }
+.auth-logo span { color: var(--accent); }
+.auth-tagline { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; max-width: 280px; }
+.auth-card { width: 100%; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.75rem; display: flex; flex-direction: column; gap: 12px; }
+.auth-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.auth-input {
+  width: 100%; padding: 14px 16px; border-radius: var(--r-md);
+  border: 0.5px solid var(--border2); background: var(--s2);
+  color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; outline: none;
+  transition: border-color 0.15s;
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-input::placeholder { color: var(--text3); }
+.auth-btn {
+  width: 100%; padding: 15px; border-radius: var(--r-md); border: none;
+  background: var(--accent); color: #080808; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.auth-btn:active { transform: scale(0.98); }
+.auth-btn:disabled { background: var(--s3); color: var(--text3); cursor: not-allowed; }
+.auth-switch { font-size: 12px; color: var(--text3); text-align: center; cursor: pointer; }
+.auth-switch span { color: var(--accent); }
+.auth-error { font-size: 12px; color: var(--red); text-align: center; display: none; }
+.auth-error.show { display: block; }
+
+/* ── TOP BAR ── */
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 3.5rem 1.5rem 1rem; }
+.wordmark { font-family: 'Instrument Serif', serif; font-size: 28px; font-style: italic; color: var(--text); }
+.wordmark span { color: var(--accent); }
+.streak-pill { display: flex; align-items: center; gap: 5px; background: var(--accent-dim); border: 0.5px solid rgba(232,197,71,0.25); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+.day-label { padding: 0 1.5rem; font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+
+/* ── IMAGE CARD ── */
+.image-card { margin: 0 1.25rem; border-radius: var(--r-xl); overflow: hidden; position: relative; background: var(--s2); border: 0.5px solid var(--border2); }
+.image-card canvas { display: block; width: 100%; }
+.image-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, rgba(8,8,8,0.9) 100%); }
+.image-card-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1.5rem; }
+.item-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 10px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+.item-title-overlay { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1.2; color: white; }
+.item-location-overlay { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; }
+.loc-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.challenge-num { position: absolute; top: 14px; right: 14px; background: rgba(8,8,8,0.5); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); }
+.img-loading { width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text3); font-size: 12px; letter-spacing: 1px; }
+
+/* ── GUESS CARD ── */
+.guess-card { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.guess-card-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.input-row { display: flex; align-items: center; gap: 2px; border-bottom: 1.5px solid var(--border3); padding-bottom: 0.75rem; margin-bottom: 1.25rem; transition: border-color 0.2s; }
+.input-row:focus-within { border-color: var(--accent); }
+.dollar { font-family: 'Instrument Serif', serif; font-size: 42px; font-style: italic; color: var(--text3); line-height: 1; margin-right: 4px; }
+.price-field { flex: 1; background: transparent; border: none; outline: none; font-family: 'Instrument Serif', serif; font-size: 52px; font-style: italic; color: var(--text); line-height: 1; width: 100%; min-width: 0; }
+.price-field::placeholder { color: var(--text3); }
+.cta-btn { width: 100%; padding: 17px; border-radius: var(--r-md); border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.cta-btn:active { transform: scale(0.98); opacity: 0.9; }
+.cta-btn:disabled { background: var(--s3); color: var(--text3); cursor: not-allowed; }
+.already-played { text-align: center; padding: 1rem; font-size: 13px; color: var(--text2); line-height: 1.6; }
+.already-played strong { color: var(--accent); }
+
+/* ── MINI STATS ── */
+.mini-stats { display: flex; gap: 10px; margin: 1rem 1.25rem 0; }
+.mini-stat { flex: 1; background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r-md); padding: 0.875rem 1rem; text-align: center; }
+.mini-stat-val { font-family: 'Instrument Serif', serif; font-size: 20px; font-style: italic; color: var(--text); }
+.mini-stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 2px; }
+
+/* ── REVEAL SCREEN ── */
+.reveal-top { padding: 3.5rem 1.5rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.reveal-wordmark { font-family: 'Instrument Serif', serif; font-size: 22px; font-style: italic; }
+.reveal-wordmark span { color: var(--accent); }
+.result-badge { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+.result-badge.great { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(74,222,128,0.2); }
+.result-badge.ok { background: var(--accent-dim); color: var(--accent); border: 0.5px solid rgba(232,197,71,0.2); }
+.result-badge.miss { background: var(--red-dim); color: var(--red); border: 0.5px solid rgba(248,113,113,0.2); }
+
+.price-hero { margin: 0 1.25rem; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.price-hero-image { width: 100%; background: var(--s2); }
+.price-hero-image canvas { display: block; width: 100%; }
+.price-hero-body { padding: 1.25rem 1.5rem 1.5rem; }
+.reveal-item-name { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 3px; }
+.reveal-location { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; margin-bottom: 1.25rem; }
+.prices-row { display: grid; grid-template-columns: 1fr 1px 1fr; background: var(--s2); border-radius: var(--r-md); overflow: hidden; }
+.price-col { padding: 1rem; text-align: center; }
+.price-divider { background: var(--border2); margin: 0.75rem 0; }
+.pcol-label { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+.pcol-value { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; line-height: 1; }
+.pcol-value.real { color: var(--green); }
+
+.accuracy-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.acc-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
+.acc-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.acc-num { font-family: 'Instrument Serif', serif; font-size: 44px; font-style: italic; line-height: 1; }
+.acc-num.great { color: var(--green); }
+.acc-num.ok { color: var(--accent); }
+.acc-num.miss { color: var(--red); }
+.track { height: 6px; background: var(--s3); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.track-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+.track-fill.great { background: var(--green); }
+.track-fill.ok { background: var(--accent); }
+.track-fill.miss { background: var(--red); }
+.crowd-line { font-size: 13px; color: var(--text2); font-weight: 500; }
+.crowd-line strong { color: var(--text); }
+
+.city-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.section-header { padding: 1.25rem 1.5rem 0.875rem; border-bottom: 0.5px solid var(--border); }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.city-entry { display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); gap: 12px; opacity: 0; transform: translateY(6px); transition: all 0.4s ease-out; }
+.city-entry:last-child { border-bottom: none; }
+.city-entry.visible { opacity: 1; transform: translateY(0); }
+.city-entry.highlight { background: var(--accent-dim2); }
+.city-rank { width: 22px; height: 22px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
+.city-entry.highlight .city-rank { background: var(--accent-dim); color: var(--accent); }
+.city-info { flex: 1; }
+.city-entry-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.today-chip { font-size: 9px; font-weight: 700; letter-spacing: 1px; background: var(--accent-dim); color: var(--accent); padding: 2px 7px; border-radius: 10px; }
+.city-entry-state { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.city-bar-bg { height: 3px; background: var(--s3); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.city-bar-inner { height: 100%; border-radius: 2px; background: var(--border3); transition: width 0.8s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+.city-entry.highlight .city-bar-inner { background: var(--accent); }
+.city-price-val { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: var(--text); white-space: nowrap; }
+.city-entry.highlight .city-price-val { color: var(--accent); }
+
+.hl-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.hl-q { font-size: 15px; font-weight: 600; color: var(--text); text-align: center; margin-bottom: 1rem; line-height: 1.4; }
+.hl-q em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--accent); }
+.hl-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hl-b { padding: 14px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text2); transition: all 0.15s; letter-spacing: 0.5px; }
+.hl-b.picked-h { background: var(--green-dim); border-color: rgba(74,222,128,0.3); color: var(--green); }
+.hl-b.picked-l { background: var(--red-dim); border-color: rgba(248,113,113,0.3); color: var(--red); }
+.hl-feedback { margin-top: 12px; font-size: 12px; color: var(--text3); text-align: center; display: none; line-height: 1.5; }
+.hl-feedback.show { display: block; }
+
+.why-box { margin: 1rem 1.25rem 0; background: var(--accent-dim2); border: 0.5px solid rgba(232,197,71,0.15); border-radius: var(--r-xl); padding: 1.5rem; }
+.why-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
+.why-body { font-size: 14px; color: var(--text2); line-height: 1.65; }
+
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1rem 1.25rem 0; }
+.share-b { padding: 16px; border-radius: var(--r-md); border: none; background: var(--text); color: var(--bg); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.share-b:active { transform: scale(0.97); }
+.next-b { padding: 16px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.next-b:hover { border-color: var(--border3); color: var(--text); }
+
+/* ── PROFILE ── */
+.profile-top-bar { padding: 3.5rem 1.5rem 1.5rem; }
+.profile-greeting { font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.profile-name-display { font-family: 'Instrument Serif', serif; font-size: 36px; font-style: italic; }
+.iq-hero { margin: 0 1.25rem; background: var(--accent); border-radius: var(--r-xl); padding: 2rem 1.75rem; display: flex; align-items: flex-end; justify-content: space-between; position: relative; overflow: hidden; }
+.iq-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(0,0,0,0.06); }
+.iq-left { position: relative; z-index: 1; }
+.iq-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(8,8,8,0.5); margin-bottom: 6px; }
+.iq-number { font-family: 'Instrument Serif', serif; font-size: 80px; font-style: italic; line-height: 1; color: #080808; }
+.iq-sub { font-size: 13px; font-weight: 600; color: rgba(8,8,8,0.55); margin-top: 4px; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 1rem 1.25rem 0; }
+.stat-tile { background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r-lg); padding: 1.125rem 1rem; text-align: center; }
+.st-val { font-family: 'Instrument Serif', serif; font-size: 28px; font-style: italic; color: var(--text); line-height: 1; }
+.st-val.streak { color: var(--accent); }
+.st-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 5px; }
+.history-wrap { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.hist-item { display: flex; align-items: center; gap: 14px; padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); }
+.hist-item:last-child { border-bottom: none; }
+.hist-icon { width: 42px; height: 42px; border-radius: 12px; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.hist-info { flex: 1; }
+.hist-name { font-size: 14px; font-weight: 600; }
+.hist-city { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.hist-score { font-family: 'Instrument Serif', serif; font-size: 20px; font-style: italic; }
+.hist-score.g { color: var(--green); }
+.hist-score.b { color: var(--red); }
+.signout-btn { margin: 1rem 1.25rem 0; width: calc(100% - 2.5rem); padding: 14px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: transparent; color: var(--text3); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.5px; transition: all 0.15s; }
+.signout-btn:hover { color: var(--red); border-color: rgba(248,113,113,0.3); }
+.empty-history { padding: 2rem; text-align: center; font-size: 13px; color: var(--text3); }
+
+/* ── NAV ── */
+.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 0.875rem 2rem 2rem; background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 100; display: flex; gap: 10px; }
+.nav-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s1); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.nav-tab.active { background: var(--s2); border-color: var(--border3); color: var(--text); }
+.nav-tab.active .nav-dot { background: var(--accent); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--s4); transition: background 0.15s; }
+
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--s2); border: 0.5px solid var(--border2); border-radius: 20px; padding: 10px 20px; font-size: 13px; color: var(--text); z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── ANIMATIONS ── */
+@keyframes up-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.a1 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.a2 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
+.a3 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.16s both; }
+.a4 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.24s both; }
+.a5 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.32s both; }
+.a6 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="load-logo">Rip<span>off</span></div>
+  <div class="load-spinner"></div>
+  <div class="load-text">Loading today's challenge</div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<!-- AUTH SCREEN -->
+<div class="screen" id="s-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">Rip<span>off</span></div>
+    <div class="auth-tagline">One item. One city. One guess.<br>How well do you know real prices?</div>
+    <div class="auth-card">
+      <div class="auth-title" id="authTitle">Create account</div>
+      <input class="auth-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" type="password" id="authPassword" placeholder="Password (min 6 characters)" autocomplete="current-password">
+      <div class="auth-error" id="authError"></div>
+      <button class="auth-btn" id="authBtn" onclick="handleAuth()">Get Started</button>
+      <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">Already have an account? <span>Sign in</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- CHALLENGE SCREEN -->
+<div class="screen" id="s-challenge">
+  <div class="scroll-body">
+    <div class="top-bar a1">
+      <div class="wordmark">Rip<span>off</span></div>
+      <div class="streak-pill" id="streakPill">🔥 0 Day Streak</div>
+    </div>
+    <div class="day-label a1" id="challengeDateLabel">Loading...</div>
+    <div class="image-card a2" id="imageCard">
+      <div class="img-loading" id="imgLoading">
+        <div class="load-spinner"></div>
+        <div>Generating image...</div>
+      </div>
+      <div class="image-overlay" id="imgOverlay" style="display:none"></div>
+      <div class="image-card-bottom" id="imgBottom" style="display:none">
+        <div class="item-tag" id="itemTag">🛒 Category</div>
+        <div class="item-title-overlay" id="itemTitle">Loading...</div>
+        <div class="item-location-overlay">
+          <div class="loc-dot"></div>
+          <span id="itemLocation">Loading...</span>
+        </div>
+      </div>
+      <div class="challenge-num" id="challengeNum">#—</div>
+    </div>
+    <div class="guess-card a3">
+      <div class="guess-card-label">What does this cost here?</div>
+      <div class="input-row" id="inputRow">
+        <div class="dollar">$</div>
+        <input class="price-field" type="number" id="priceIn" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+      </div>
+      <div id="guessArea">
+        <button class="cta-btn" id="submitBtn" onclick="submitGuess()">Submit Guess</button>
+      </div>
+    </div>
+    <div class="mini-stats a4">
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statAvg">—</div>
+        <div class="mini-stat-label">Avg Score</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statIQ">500</div>
+        <div class="mini-stat-label">Market IQ</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statPlayed">0</div>
+        <div class="mini-stat-label">Days Played</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- REVEAL SCREEN -->
+<div class="screen" id="s-reveal">
+  <div class="scroll-body">
+    <div class="reveal-top">
+      <div class="reveal-wordmark">Rip<span>off</span></div>
+      <div class="result-badge great" id="resultBadge">Sharp Eye</div>
+    </div>
+    <div class="price-hero a1">
+      <div class="price-hero-image" id="revealImgWrap">
+        <canvas id="revealCanvas" height="200"></canvas>
+      </div>
+      <div class="price-hero-body">
+        <div class="reveal-item-name" id="revealItemName">—</div>
+        <div class="reveal-location"><div class="loc-dot"></div><span id="revealLocation">—</span></div>
+        <div class="prices-row">
+          <div class="price-col">
+            <div class="pcol-label">Real Price</div>
+            <div class="pcol-value real" id="realPriceVal">—</div>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-col">
+            <div class="pcol-label">Your Guess</div>
+            <div class="pcol-value" id="yourGuessVal">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accuracy-section a2">
+      <div class="acc-top">
+        <div class="acc-title">Accuracy</div>
+        <div class="acc-num great" id="accNum">—%</div>
+      </div>
+      <div class="track"><div class="track-fill great" id="trackFill"></div></div>
+      <div class="crowd-line">You beat <strong id="crowdVal">—</strong> of players today</div>
+    </div>
+    <div class="city-section a3">
+      <div class="section-header"><div class="section-title">Same item · Different cities</div></div>
+      <div id="cityList"></div>
+    </div>
+    <div class="hl-section a4">
+      <div class="hl-q">Is this higher or lower than<br><em>where you live?</em></div>
+      <div class="hl-btns">
+        <button class="hl-b" id="hlH" onclick="pickHL('higher')">↑ Higher</button>
+        <button class="hl-b" id="hlL" onclick="pickHL('lower')">↓ Lower</button>
+      </div>
+      <div class="hl-feedback" id="hlFeed"></div>
+    </div>
+    <div class="why-box a5" id="whyBox" style="display:none">
+      <div class="why-eyebrow">Why so pricey?</div>
+      <div class="why-body" id="whyBody"></div>
+    </div>
+    <div class="action-row a6">
+      <button class="share-b" onclick="doShare()">Share Result</button>
+      <button class="next-b" onclick="goTo('profile')">My Profile →</button>
+    </div>
+  </div>
+</div>
+
+<!-- PROFILE SCREEN -->
+<div class="screen" id="s-profile">
+  <div class="scroll-body">
+    <div class="profile-top-bar a1">
+      <div class="profile-greeting">Your stats</div>
+      <div class="profile-name-display" id="profileGreeting">Good evening.</div>
+    </div>
+    <div class="iq-hero a2">
+      <div class="iq-left">
+        <div class="iq-eyebrow">Market IQ</div>
+        <div class="iq-number" id="profileIQ">500</div>
+        <div class="iq-sub" id="profileIQSub">Keep playing to build your score</div>
+      </div>
+    </div>
+    <div class="stats-row a3">
+      <div class="stat-tile"><div class="st-val" id="pStatPlayed">0</div><div class="st-label">Days</div></div>
+      <div class="stat-tile"><div class="st-val streak" id="pStatStreak">🔥 0</div><div class="st-label">Streak</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatAvg">—</div><div class="st-label">Avg Score</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatTop50">0</div><div class="st-label">Top 50%</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatTop10" style="color:var(--green)">0</div><div class="st-label">Top 10%</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatLongest">0</div><div class="st-label">Best Streak</div></div>
+    </div>
+    <div class="history-wrap a4">
+      <div class="section-header"><div class="section-title">Recent Results</div></div>
+      <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
+    </div>
+    <button class="signout-btn a5" onclick="signOut()">Sign out</button>
+  </div>
+</div>
+
+<!-- NAV -->
+<div class="nav" id="mainNav" style="display:none">
+  <div class="nav-tab active" id="nt-play" onclick="goTo('challenge')">
+    <div class="nav-dot"></div>Play
+  </div>
+  <div class="nav-tab" id="nt-profile" onclick="goTo('profile')">
+    <div class="nav-dot"></div>Profile
+  </div>
+</div>
+
+<script>
+// ── SUPABASE INIT ──────────────────────────────────────
+const SUPABASE_URL = 'https://oykmltysvbcspwvjiusq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uIPT0OTFXf0I3FPVxkmapw_H5aw7aa6';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+// ── STATE ──────────────────────────────────────────────
+let currentUser = null;
+let currentProfile = null;
+let todayChallenge = null;
+let todayCityPrices = [];
+let userGuess = 0;
+let isAuthMode = 'signup';
+
+// ── INIT ──────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadApp();
+  } else {
+    hideLoading();
+    goTo('auth');
+  }
+});
+
+async function loadApp() {
+  await Promise.all([loadChallenge(), loadProfile()]);
+  hideLoading();
+  document.getElementById('mainNav').style.display = 'flex';
+  goTo('challenge');
+}
+
+function hideLoading() {
+  const el = document.getElementById('loadingScreen');
+  el.style.opacity = '0';
+  el.style.transition = 'opacity 0.4s';
+  setTimeout(() => el.style.display = 'none', 400);
+}
+
+// ── AUTH ──────────────────────────────────────────────
+function toggleAuthMode() {
+  isAuthMode = isAuthMode === 'signup' ? 'signin' : 'signup';
+  document.getElementById('authTitle').textContent = isAuthMode === 'signup' ? 'Create account' : 'Welcome back';
+  document.getElementById('authBtn').textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
+  document.getElementById('authSwitch').innerHTML = isAuthMode === 'signup'
+    ? 'Already have an account? <span>Sign in</span>'
+    : "Don't have an account? <span>Sign up</span>";
+  document.getElementById('authError').classList.remove('show');
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authBtn');
+  const errEl = document.getElementById('authError');
+  errEl.classList.remove('show');
+  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
+  btn.disabled = true;
+  btn.textContent = 'Please wait...';
+  try {
+    let result;
+    if (isAuthMode === 'signup') {
+      result = await sb.auth.signUp({ email, password });
+      if (result.error) throw result.error;
+      if (result.data.user) {
+        await sb.from('profiles').insert({ id: result.data.user.id, username: email.split('@')[0] });
+        currentUser = result.data.user;
+      }
+    } else {
+      result = await sb.auth.signInWithPassword({ email, password });
+      if (result.error) throw result.error;
+      currentUser = result.data.user;
+    }
+    document.getElementById('loadingScreen').style.display = 'flex';
+    document.getElementById('loadingScreen').style.opacity = '1';
+    await loadApp();
+  } catch (err) {
+    showAuthError(err.message || 'Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  document.getElementById('mainNav').style.display = 'none';
+  goTo('auth');
+}
+
+// ── LOAD CHALLENGE ────────────────────────────────────
+async function loadChallenge() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await sb
+      .from('challenges')
+      .select(`*, items(*), cities(*)`)
+      .eq('challenge_date', today)
+      .single();
+
+    if (error || !data) {
+      // Try to get the most recent challenge if today's doesn't exist
+      const { data: recent } = await sb
+        .from('challenges')
+        .select(`*, items(*), cities(*)`)
+        .order('challenge_date', { ascending: false })
+        .limit(1)
+        .single();
+      todayChallenge = recent;
+    } else {
+      todayChallenge = data;
+    }
+
+    if (!todayChallenge) return;
+
+    // Load city comparisons
+    const { data: cityData } = await sb
+      .from('city_prices')
+      .select(`*, cities(*)`)
+      .eq('challenge_id', todayChallenge.id)
+      .order('price', { ascending: false });
+    todayCityPrices = cityData || [];
+
+    updateChallengeUI();
+    await checkAlreadyPlayed();
+  } catch (err) {
+    console.error('Challenge load error:', err);
+  }
+}
+
+function updateChallengeUI() {
+  if (!todayChallenge) return;
+  const item = todayChallenge.items;
+  const city = todayChallenge.cities;
+  const dateStr = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  document.getElementById('challengeDateLabel').textContent = dateStr + ' · Daily Challenge';
+  document.getElementById('itemTag').textContent = item.emoji + ' ' + item.category;
+  document.getElementById('itemTitle').textContent = item.name;
+  document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+
+  // Draw image
+  drawItemImage('mainCanvas', item.name, item.emoji, 400, 300);
+  document.getElementById('imgLoading').style.display = 'none';
+  document.getElementById('imgOverlay').style.display = 'block';
+  document.getElementById('imgBottom').style.display = 'block';
+}
+
+async function checkAlreadyPlayed() {
+  if (!currentUser || !todayChallenge) return;
+  const { data } = await sb
+    .from('guesses')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('challenge_id', todayChallenge.id)
+    .single();
+
+  if (data) {
+    document.getElementById('guessArea').innerHTML = `
+      <div class="already-played">
+        You already played today!<br>
+        Your score: <strong>${data.accuracy}%</strong><br>
+        <small style="color:var(--text3);font-size:11px">Come back tomorrow for a new challenge</small>
+      </div>`;
+    document.getElementById('inputRow').style.opacity = '0.3';
+    document.getElementById('inputRow').style.pointerEvents = 'none';
+  }
+}
+
+// ── LOAD PROFILE ─────────────────────────────────────
+async function loadProfile() {
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data) {
+    currentProfile = data;
+    updateProfileUI();
+  }
+}
+
+function updateProfileUI() {
+  if (!currentProfile) return;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
+  document.getElementById('profileGreeting').textContent = greeting;
+  document.getElementById('profileIQ').textContent = currentProfile.market_iq;
+  document.getElementById('streakPill').textContent = '🔥 ' + currentProfile.streak + ' Day Streak';
+  document.getElementById('statIQ').textContent = currentProfile.market_iq;
+  document.getElementById('statPlayed').textContent = currentProfile.total_played;
+  document.getElementById('pStatPlayed').textContent = currentProfile.total_played;
+  document.getElementById('pStatStreak').textContent = '🔥 ' + currentProfile.streak;
+  document.getElementById('pStatTop50').textContent = currentProfile.total_top50;
+  document.getElementById('pStatTop10').textContent = currentProfile.total_top10;
+  document.getElementById('pStatLongest').textContent = currentProfile.longest_streak;
+  const iqPct = Math.min(99, Math.round((currentProfile.market_iq - 300) / 7));
+  document.getElementById('profileIQSub').textContent = currentProfile.total_played > 0
+    ? `Better than ${iqPct}% of players globally`
+    : 'Keep playing to build your score';
+  if (currentProfile.total_played > 0) {
+    document.getElementById('pStatAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
+    document.getElementById('statAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
+  }
+  loadHistory();
+}
+
+async function loadHistory() {
+  const { data } = await sb
+    .from('guesses')
+    .select(`*, challenges(*, items(*), cities(*))`)
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (!data || data.length === 0) return;
+  const container = document.getElementById('historyList');
+  container.innerHTML = data.map(g => {
+    const item = g.challenges?.items;
+    const city = g.challenges?.cities;
+    const cls = g.accuracy >= 60 ? 'g' : 'b';
+    return `<div class="hist-item">
+      <div class="hist-icon">${item?.emoji || '🛒'}</div>
+      <div class="hist-info">
+        <div class="hist-name">${item?.name || '—'}</div>
+        <div class="hist-city">${city?.name || '—'}, ${city?.state || ''}</div>
+      </div>
+      <div class="hist-score ${cls}">${g.accuracy}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SUBMIT GUESS ──────────────────────────────────────
+async function submitGuess() {
+  const val = parseFloat(document.getElementById('priceIn').value);
+  if (!val || val <= 0) {
+    const row = document.getElementById('inputRow');
+    row.style.borderColor = 'var(--red)';
+    setTimeout(() => row.style.borderColor = '', 700);
+    return;
+  }
+  userGuess = val;
+  const realPrice = parseFloat(todayChallenge.real_price);
+  const diff = Math.abs(val - realPrice);
+  const accuracy = Math.max(0, Math.round((1 - diff / realPrice) * 100));
+  const crowdPct = accuracy >= 85 ? 87 : accuracy >= 70 ? 71 : accuracy >= 50 ? 48 : 24;
+
+  // Save to database
+  try {
+    await sb.from('guesses').insert({
+      user_id: currentUser.id,
+      challenge_id: todayChallenge.id,
+      guess_amount: val,
+      accuracy: accuracy,
+      crowd_percentile: crowdPct
+    });
+
+    // Update profile stats
+    const newPlayed = (currentProfile.total_played || 0) + 1;
+    const newStreak = (currentProfile.streak || 0) + 1;
+    const newIQ = Math.min(999, Math.max(100, Math.round(currentProfile.market_iq + (accuracy - 70) * 2)));
+    const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : currentProfile.total_top50;
+    const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : currentProfile.total_top10;
+    const newLongest = Math.max(newStreak, currentProfile.longest_streak || 0);
+
+    await sb.from('profiles').update({
+      total_played: newPlayed,
+      streak: newStreak,
+      market_iq: newIQ,
+      total_top50: newTop50,
+      total_top10: newTop10,
+      longest_streak: newLongest
+    }).eq('id', currentUser.id);
+
+    currentProfile = { ...currentProfile, total_played: newPlayed, streak: newStreak, market_iq: newIQ, total_top50: newTop50, total_top10: newTop10, longest_streak: newLongest };
+  } catch (err) {
+    console.error('Save error:', err);
+  }
+
+  showReveal(val, realPrice, accuracy, crowdPct);
+}
+
+function showReveal(guess, realPrice, accuracy, crowdPct) {
+  const item = todayChallenge.items;
+  const city = todayChallenge.cities;
+  const cls = accuracy >= 75 ? 'great' : accuracy >= 50 ? 'ok' : 'miss';
+  const label = accuracy >= 85 ? 'Sharp Eye' : accuracy >= 70 ? 'Close Call' : accuracy >= 50 ? 'Getting Warm' : 'Way Off';
+
+  document.getElementById('revealItemName').textContent = item.name;
+  document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
+  document.getElementById('yourGuessVal').textContent = '$' + guess.toFixed(2);
+  document.getElementById('accNum').textContent = accuracy + '%';
+  document.getElementById('accNum').className = 'acc-num ' + cls;
+  document.getElementById('trackFill').className = 'track-fill ' + cls;
+  document.getElementById('resultBadge').textContent = label;
+  document.getElementById('resultBadge').className = 'result-badge ' + cls;
+  document.getElementById('crowdVal').textContent = crowdPct + '% of players';
+
+  // City comparisons
+  const maxPrice = Math.max(...todayCityPrices.map(c => parseFloat(c.price)));
+  const cityListEl = document.getElementById('cityList');
+  cityListEl.innerHTML = todayCityPrices.map((c, i) => {
+    const isToday = c.city_id === todayChallenge.city_id;
+    const pct = Math.round((parseFloat(c.price) / maxPrice) * 100);
+    return `<div class="city-entry${isToday ? ' highlight' : ''}" id="ce${i}">
+      <div class="city-rank">${i+1}</div>
+      <div class="city-info">
+        <div class="city-entry-name">${c.cities.name}${isToday ? ' <span class="today-chip">Today</span>' : ''}</div>
+        <div class="city-entry-state">${c.cities.state}</div>
+        <div class="city-bar-bg"><div class="city-bar-inner" id="cb${i}"></div></div>
+      </div>
+      <div class="city-price-val">$${parseFloat(c.price).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  // Why text
+  if (todayChallenge.why_text) {
+    document.getElementById('whyBody').textContent = todayChallenge.why_text;
+    document.getElementById('whyBox').style.display = 'block';
+  }
+
+  // Draw reveal image
+  const rc = document.getElementById('revealCanvas');
+  if (rc) {
+    const w = document.getElementById('revealImgWrap').offsetWidth || 380;
+    drawItemImage('revealCanvas', item.name, item.emoji, w, 200);
+  }
+
+  goTo('reveal');
+
+  setTimeout(() => {
+    document.getElementById('trackFill').style.width = accuracy + '%';
+    todayCityPrices.forEach((_, i) => {
+      setTimeout(() => {
+        const ce = document.getElementById('ce' + i);
+        const cb = document.getElementById('cb' + i);
+        if (ce) ce.classList.add('visible');
+        if (cb) {
+          const pct = Math.round((parseFloat(todayCityPrices[i].price) / maxPrice) * 100);
+          cb.style.width = pct + '%';
+        }
+      }, i * 100);
+    });
+  }, 300);
+
+  updateProfileUI();
+}
+
+// ── HIGHER LOWER ──────────────────────────────────────
+async function pickHL(choice) {
+  document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
+  document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
+  const feed = document.getElementById('hlFeed');
+  feed.textContent = choice === 'higher'
+    ? '64% of players say this costs more than in their city.'
+    : 'Interesting — only 36% said this was cheaper. You might live somewhere pricey!';
+  feed.classList.add('show');
+
+  // Save to database
+  if (currentUser && todayChallenge) {
+    await sb.from('guesses').update({ higher_lower: choice })
+      .eq('user_id', currentUser.id).eq('challenge_id', todayChallenge.id);
+  }
+}
+
+// ── SHARE ─────────────────────────────────────────────
+function doShare() {
+  const acc = document.getElementById('accNum').textContent;
+  const item = todayChallenge?.items?.name || 'Daily Item';
+  const city = todayChallenge?.cities?.name || 'Unknown City';
+  const realPrice = todayChallenge?.real_price || '—';
+  const txt = `RIPOFF — ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'})}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nReal: $${parseFloat(realPrice).toFixed(2)} / My guess: $${userGuess.toFixed(2)}\nAccuracy: ${acc}\n\nripoff.game`;
+  if (navigator.share) {
+    navigator.share({ text: txt });
+  } else {
+    navigator.clipboard?.writeText(txt);
+    showToast('Result copied to clipboard!');
+  }
+}
+
+// ── CANVAS DRAWING ────────────────────────────────────
+function drawItemImage(canvasId, itemName, emoji, w, h) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+
+  // Background
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, '#1a1610');
+  bg.addColorStop(1, '#0d0d0d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // Dot grid
+  ctx.fillStyle = 'rgba(255,255,255,0.025)';
+  for (let x = 20; x < w; x += 28)
+    for (let y = 20; y < h; y += 28) {
+      ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI*2); ctx.fill();
+    }
+
+  // Glow
+  const glow = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.4);
+  glow.addColorStop(0, 'rgba(232,197,71,0.08)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  // Emoji
+  const fontSize = Math.round(Math.min(w, h) * 0.35);
+  ctx.font = fontSize + 'px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 20;
+  ctx.fillText(emoji || '🛒', w/2, h/2);
+  ctx.shadowBlur = 0;
+
+  // Gold accent line
+  ctx.fillStyle = 'rgba(232,197,71,0.4)';
+  ctx.fillRect(0, h-2, w, 2);
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+function goTo(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + name).classList.add('active');
+  ['play', 'profile'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
+  if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
+  if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'challenge' && todayChallenge) {
+    setTimeout(() => drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, document.getElementById('mainCanvas').parentElement.offsetWidth, 300), 50);
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
