@@ -287,17 +287,14 @@ body::after {
     </div>
     <div class="day-label a1" id="challengeDateLabel">Loading...</div>
     <div class="image-card a2" id="imageCard">
-      <div class="img-loading" id="imgLoading">
-        <div class="load-spinner"></div>
-        <div>Generating image...</div>
-      </div>
-      <div class="image-overlay" id="imgOverlay" style="display:none"></div>
-      <div class="image-card-bottom" id="imgBottom" style="display:none">
+      <canvas id="mainCanvas" width="400" height="300" style="display:block;width:100%"></canvas>
+      <div class="image-overlay"></div>
+      <div class="image-card-bottom" id="imgBottom">
         <div class="item-tag" id="itemTag">🛒 Category</div>
-        <div class="item-title-overlay" id="itemTitle">Loading...</div>
+        <div class="item-title-overlay" id="itemTitle">Loading today's challenge...</div>
         <div class="item-location-overlay">
           <div class="loc-dot"></div>
-          <span id="itemLocation">Loading...</span>
+          <span id="itemLocation">Please wait</span>
         </div>
       </div>
       <div class="challenge-num" id="challengeNum">#—</div>
@@ -575,12 +572,16 @@ function updateChallengeUI() {
   document.getElementById('itemTag').textContent = item.emoji + ' ' + item.category;
   document.getElementById('itemTitle').textContent = item.name;
   document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0', '').replace('2026-', '');
 
   // Draw image
-  drawItemImage('mainCanvas', item.name, item.emoji, 400, 300);
-  document.getElementById('imgLoading').style.display = 'none';
-  document.getElementById('imgOverlay').style.display = 'block';
-  document.getElementById('imgBottom').style.display = 'block';
+  setTimeout(() => {
+    const mc = document.getElementById('mainCanvas');
+    if (mc) {
+      const w = mc.parentElement.offsetWidth || 400;
+      drawItemImage('mainCanvas', item.name, item.emoji, w, 300);
+    }
+  }, 100);
 }
 
 async function checkAlreadyPlayed() {
