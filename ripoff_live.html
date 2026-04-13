@@ -330,7 +330,10 @@ body::after {
 <div class="screen" id="s-reveal">
   <div class="scroll-body">
     <div class="reveal-top">
-      <div class="reveal-wordmark">Rip<span>off</span></div>
+      <div>
+        <div class="reveal-wordmark">Rip<span>off</span></div>
+        <div style="font-size:11px;color:var(--text3);letter-spacing:1.5px;margin-top:2px;" id="revealDateLabel"></div>
+      </div>
       <div class="result-badge great" id="resultBadge">Sharp Eye</div>
     </div>
     <div class="price-hero a1">
@@ -742,6 +745,9 @@ function showReveal(guess, realPrice, accuracy, crowdPct) {
   document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
   document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
   document.getElementById('yourGuessVal').textContent = '$' + guess.toFixed(2);
+  const challengeDateFormatted = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  const revealDateEl = document.getElementById('revealDateLabel');
+  if (revealDateEl) revealDateEl.textContent = challengeDateFormatted;
   document.getElementById('accNum').textContent = accuracy + '%';
   document.getElementById('accNum').className = 'acc-num ' + cls;
   document.getElementById('trackFill').className = 'track-fill ' + cls;
@@ -1346,6 +1352,13 @@ function goTo(name) {
   if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'challenge' && todayChallenge) {
+    if (alreadyPlayed) {
+      // Already played — go straight to reveal
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('s-reveal').classList.add('active');
+      document.getElementById('nt-play')?.classList.add('active');
+      return;
+    }
     setTimeout(() => {
       const mc = document.getElementById('mainCanvas');
       if (mc) {
