@@ -528,15 +528,22 @@ async function loadChallenge() {
     const today = new Date().toISOString().split('T')[0];
     const { data, error } = await sb
       .from('challenges')
-      .select(`*, items(*), cities(*)`)
+      .select(`
+        id, challenge_date, real_price, why_text, image_url, city_id,
+        items ( id, name, description, category, emoji ),
+        cities ( id, name, state, zip )
+      `)
       .eq('challenge_date', today)
       .single();
 
     if (error || !data) {
-      // Try to get the most recent challenge if today's doesn't exist
       const { data: recent } = await sb
         .from('challenges')
-        .select(`*, items(*), cities(*)`)
+        .select(`
+          id, challenge_date, real_price, why_text, image_url, city_id,
+          items ( id, name, description, category, emoji ),
+          cities ( id, name, state, zip )
+        `)
         .order('challenge_date', { ascending: false })
         .limit(1)
         .single();
@@ -544,6 +551,7 @@ async function loadChallenge() {
     } else {
       todayChallenge = data;
     }
+    console.log('Challenge loaded:', todayChallenge);
 
     if (!todayChallenge) return;
 
