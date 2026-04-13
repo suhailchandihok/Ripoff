@@ -833,41 +833,501 @@ function drawItemImage(canvasId, itemName, emoji, w, h) {
   if (!c) return;
   c.width = w; c.height = h;
   const ctx = c.getContext('2d');
+  const cx = w/2, cy = h/2;
 
-  // Background
+  // Dark background
   const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, '#1a1610');
+  bg.addColorStop(0, '#1c1a14');
   bg.addColorStop(1, '#0d0d0d');
   ctx.fillStyle = bg;
   ctx.fillRect(0, 0, w, h);
 
-  // Dot grid
-  ctx.fillStyle = 'rgba(255,255,255,0.025)';
-  for (let x = 20; x < w; x += 28)
-    for (let y = 20; y < h; y += 28) {
-      ctx.beginPath(); ctx.arc(x, y, 1, 0, Math.PI*2); ctx.fill();
+  // Dot grid texture
+  ctx.fillStyle = 'rgba(255,255,255,0.018)';
+  for (let x = 24; x < w; x += 32)
+    for (let y = 24; y < h; y += 32) {
+      ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI*2); ctx.fill();
     }
 
-  // Glow
-  const glow = ctx.createRadialGradient(w/2, h/2, 0, w/2, h/2, w*0.4);
-  glow.addColorStop(0, 'rgba(232,197,71,0.08)');
+  // Radial glow behind subject
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w,h)*0.45);
+  glow.addColorStop(0, 'rgba(232,197,71,0.1)');
   glow.addColorStop(1, 'transparent');
   ctx.fillStyle = glow;
   ctx.fillRect(0, 0, w, h);
 
-  // Emoji
-  const fontSize = Math.round(Math.min(w, h) * 0.35);
+  // Draw subject based on item name
+  const name = (itemName || '').toLowerCase();
+  ctx.save();
+  if (name.includes('egg')) drawEggs(ctx, cx, cy, w, h);
+  else if (name.includes('milk')) drawMilk(ctx, cx, cy, w, h);
+  else if (name.includes('bread')) drawBread(ctx, cx, cy, w, h);
+  else if (name.includes('beef') || name.includes('burger') || name.includes('big mac')) drawBurger(ctx, cx, cy, w, h);
+  else if (name.includes('chicken')) drawChicken(ctx, cx, cy, w, h);
+  else if (name.includes('latte') || name.includes('coffee')) drawCoffee(ctx, cx, cy, w, h);
+  else if (name.includes('gas') || name.includes('fuel')) drawGas(ctx, cx, cy, w, h);
+  else if (name.includes('beer') || name.includes('pint')) drawBeer(ctx, cx, cy, w, h);
+  else if (name.includes('pizza')) drawPizza(ctx, cx, cy, w, h);
+  else if (name.includes('haircut')) drawScissors(ctx, cx, cy, w, h);
+  else if (name.includes('gym')) drawGym(ctx, cx, cy, w, h);
+  else if (name.includes('movie')) drawMovie(ctx, cx, cy, w, h);
+  else if (name.includes('hotel')) drawHotel(ctx, cx, cy, w, h);
+  else if (name.includes('rent') || name.includes('apartment')) drawHouse(ctx, cx, cy, w, h);
+  else drawGenericEmoji(ctx, cx, cy, w, h, emoji);
+  ctx.restore();
+
+  // Bottom gold line
+  ctx.fillStyle = 'rgba(232,197,71,0.35)';
+  ctx.fillRect(0, h-2, w, 2);
+}
+
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function shadow(ctx, blur, color, ox, oy) {
+  ctx.shadowBlur = blur; ctx.shadowColor = color;
+  ctx.shadowOffsetX = ox||0; ctx.shadowOffsetY = oy||0;
+}
+function noShadow(ctx) { ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0; }
+
+function drawEggs(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/320;
+  // Carton base
+  shadow(ctx, 30, 'rgba(0,0,0,0.6)', 0, 8);
+  ctx.fillStyle = '#c8a96e';
+  rr(ctx, cx-100*s, cy-40*s, 200*s, 90*s, 10*s);
+  ctx.fill();
+  noShadow(ctx);
+  // Carton lid
+  ctx.fillStyle = '#e0be85';
+  rr(ctx, cx-100*s, cy-80*s, 200*s, 48*s, 8*s);
+  ctx.fill();
+  // Dividers
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5;
+  [-33,33].forEach(dx => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-40*s);
+    ctx.lineTo(cx+dx*s, cy+50*s);
+    ctx.stroke();
+  });
+  // Label text
+  ctx.fillStyle = 'rgba(80,50,10,0.55)';
+  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('GRADE A LARGE', cx, cy-60*s);
+  // Three eggs
+  [[-60,10],[0,10],[60,10]].forEach(([dx,dy]) => {
+    shadow(ctx, 10, 'rgba(0,0,0,0.4)', 0, 4);
+    ctx.beginPath();
+    ctx.ellipse(cx+dx*s, cy+dy*s, 22*s, 30*s, 0, 0, Math.PI*2);
+    const eg = ctx.createRadialGradient(cx+dx*s-6*s, cy+dy*s-10*s, 2*s, cx+dx*s, cy+dy*s, 28*s);
+    eg.addColorStop(0, '#f5f0e0'); eg.addColorStop(0.5,'#e8dcc0'); eg.addColorStop(1,'#c8b890');
+    ctx.fillStyle = eg; ctx.fill();
+    noShadow(ctx);
+    ctx.beginPath();
+    ctx.ellipse(cx+dx*s-7*s, cy+dy*s-10*s, 6*s, 4*s, -0.4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
+  });
+}
+
+function drawMilk(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Jug body
+  ctx.fillStyle = '#e8e0d0';
+  rr(ctx, cx-45*s, cy-60*s, 90*s, 130*s, 12*s);
+  ctx.fill();
+  noShadow(ctx);
+  // Handle
+  ctx.strokeStyle = '#d0c8b8'; ctx.lineWidth = 12*s; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(cx+55*s, cy+10*s, 28*s, -Math.PI*0.5, Math.PI*0.5);
+  ctx.stroke();
+  // Label
+  ctx.fillStyle = '#1a6b3a';
+  rr(ctx, cx-38*s, cy-20*s, 76*s, 50*s, 6*s);
+  ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${Math.round(14*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('MILK', cx, cy+5*s);
+  ctx.font = `${Math.round(9*s)}px sans-serif`;
+  ctx.fillText('WHOLE', cx, cy+18*s);
+  // Cap
+  ctx.fillStyle = '#c8460a';
+  rr(ctx, cx-20*s, cy-78*s, 40*s, 22*s, 8*s);
+  ctx.fill();
+}
+
+function drawBread(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Loaf body
+  ctx.fillStyle = '#c8860a';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy+20*s, 85*s, 55*s, 0, 0, Math.PI*2);
+  ctx.fill();
+  noShadow(ctx);
+  // Top dome
+  const lg = ctx.createRadialGradient(cx-20*s, cy-30*s, 5*s, cx, cy, 80*s);
+  lg.addColorStop(0, '#e8a020'); lg.addColorStop(1, '#a06808');
+  ctx.fillStyle = lg;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 80*s, 60*s, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Score lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2*s;
+  [-30,0,30].forEach(dx => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-30*s);
+    ctx.quadraticCurveTo(cx+dx*s+10*s, cy, cx+dx*s, cy+30*s);
+    ctx.stroke();
+  });
+  // Sesame dots
+  ctx.fillStyle = 'rgba(255,220,100,0.6)';
+  [[-20,-20],[10,-30],[30,-10],[-35,-5],[0,0]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 4*s, 2*s, 0.5, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawBurger(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Bottom bun
+  ctx.fillStyle = '#c8860a';
+  ctx.beginPath(); ctx.ellipse(cx, cy+55*s, 75*s, 18*s, 0, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Patty
+  ctx.fillStyle = '#6b3010';
+  ctx.beginPath(); ctx.ellipse(cx, cy+35*s, 72*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
+  // Cheese
+  ctx.fillStyle = '#e8b820';
+  ctx.beginPath(); ctx.ellipse(cx, cy+20*s, 76*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
+  // Lettuce
+  ctx.fillStyle = '#3a8a20';
+  ctx.beginPath(); ctx.ellipse(cx, cy+8*s, 80*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+  // Tomato
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath(); ctx.ellipse(cx, cy-4*s, 70*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+  // Top bun
+  const bg = ctx.createRadialGradient(cx-20*s, cy-45*s, 5*s, cx, cy-20*s, 65*s);
+  bg.addColorStop(0,'#e8a020'); bg.addColorStop(1,'#b07010');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.ellipse(cx, cy-22*s, 72*s, 38*s, 0, 0, Math.PI*2); ctx.fill();
+  // Sesame seeds
+  ctx.fillStyle = 'rgba(255,220,100,0.7)';
+  [[-25,-48],[0,-55],[25,-48],[-12,-42],[15,-42]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 5*s, 3*s, 0.3, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawChicken(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Plate
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath(); ctx.ellipse(cx, cy+40*s, 90*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Chicken breast shape
+  const cg = ctx.createRadialGradient(cx-15*s, cy-15*s, 5*s, cx, cy, 70*s);
+  cg.addColorStop(0,'#f0d080'); cg.addColorStop(0.5,'#d4a040'); cg.addColorStop(1,'#a06820');
+  ctx.fillStyle = cg;
+  ctx.beginPath();
+  ctx.moveTo(cx-60*s, cy+30*s);
+  ctx.bezierCurveTo(cx-70*s, cy-20*s, cx-20*s, cy-60*s, cx+20*s, cy-50*s);
+  ctx.bezierCurveTo(cx+60*s, cy-40*s, cx+65*s, cy+10*s, cx+50*s, cy+35*s);
+  ctx.bezierCurveTo(cx+20*s, cy+50*s, cx-30*s, cy+50*s, cx-60*s, cy+30*s);
+  ctx.fill();
+  // Grill marks
+  ctx.strokeStyle = 'rgba(80,40,0,0.4)'; ctx.lineWidth = 4*s; ctx.lineCap='round';
+  [[-20,0],[0,0],[20,0]].forEach(([dx]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s-20*s, cy-20*s);
+    ctx.lineTo(cx+dx*s+10*s, cy+20*s);
+    ctx.stroke();
+  });
+}
+
+function drawCoffee(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Cup body
+  ctx.fillStyle = '#e8e0d4';
+  ctx.beginPath();
+  ctx.moveTo(cx-45*s, cy-30*s);
+  ctx.lineTo(cx-38*s, cy+60*s);
+  ctx.lineTo(cx+38*s, cy+60*s);
+  ctx.lineTo(cx+45*s, cy-30*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Green sleeve
+  ctx.fillStyle = '#1a6b3a';
+  rr(ctx, cx-46*s, cy+5*s, 92*s, 38*s, 4*s); ctx.fill();
+  // Coffee surface
+  ctx.fillStyle = '#3a1a0a';
+  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 45*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
+  // Latte art
+  ctx.strokeStyle = 'rgba(200,160,80,0.6)'; ctx.lineWidth = 2*s;
+  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 20*s, 6*s, 0, 0, Math.PI*2); ctx.stroke();
+  // Handle
+  ctx.strokeStyle = '#d0c8bc'; ctx.lineWidth = 8*s;
+  ctx.beginPath(); ctx.arc(cx+52*s, cy+20*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
+  // Steam
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3*s; ctx.lineCap='round';
+  [[-15,0],[0,0],[15,0]].forEach(([dx]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-45*s);
+    ctx.quadraticCurveTo(cx+dx*s+8*s, cy-60*s, cx+dx*s, cy-75*s);
+    ctx.stroke();
+  });
+}
+
+function drawGas(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Pump body
+  ctx.fillStyle = '#c83020';
+  rr(ctx, cx-40*s, cy-50*s, 80*s, 110*s, 10*s); ctx.fill();
+  noShadow(ctx);
+  // Screen
+  ctx.fillStyle = '#1a1a2a';
+  rr(ctx, cx-28*s, cy-38*s, 56*s, 36*s, 6*s); ctx.fill();
+  ctx.fillStyle = '#4ade80';
+  ctx.font = `bold ${Math.round(14*s)}px monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('$4.89', cx, cy-20*s);
+  // Nozzle
+  ctx.fillStyle = '#888';
+  rr(ctx, cx+38*s, cy-10*s, 30*s, 12*s, 4*s); ctx.fill();
+  ctx.fillStyle = '#666';
+  rr(ctx, cx+62*s, cy-20*s, 8*s, 30*s, 3*s); ctx.fill();
+  // Price label
+  ctx.fillStyle = '#e8c547';
+  rr(ctx, cx-28*s, cy+10*s, 56*s, 28*s, 4*s); ctx.fill();
+  ctx.fillStyle = '#080808';
+  ctx.font = `bold ${Math.round(10*s)}px sans-serif`;
+  ctx.fillText('REGULAR', cx, cy+24*s);
+}
+
+function drawBeer(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Glass body
+  ctx.fillStyle = 'rgba(200,160,40,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(cx-35*s, cy-50*s);
+  ctx.lineTo(cx-42*s, cy+60*s);
+  ctx.lineTo(cx+42*s, cy+60*s);
+  ctx.lineTo(cx+35*s, cy-50*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Glass shine
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(cx-28*s, cy-45*s);
+  ctx.lineTo(cx-20*s, cy-45*s);
+  ctx.lineTo(cx-25*s, cy+50*s);
+  ctx.lineTo(cx-33*s, cy+50*s);
+  ctx.closePath(); ctx.fill();
+  // Foam
+  ctx.fillStyle = '#f5f0e8';
+  ctx.beginPath(); ctx.ellipse(cx, cy-50*s, 38*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
+  // Bubble details on foam
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  [[-15,-55],[5,-62],[20,-52],[-5,-45]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 4*s, 0, Math.PI*2); ctx.fill();
+  });
+  // Handle
+  ctx.strokeStyle = 'rgba(200,160,40,0.8)'; ctx.lineWidth = 10*s;
+  ctx.beginPath(); ctx.arc(cx+50*s, cy+10*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
+}
+
+function drawPizza(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 8);
+  // Full pie
+  ctx.fillStyle = '#c87820';
+  ctx.beginPath(); ctx.arc(cx, cy, 80*s, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Sauce
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath(); ctx.arc(cx, cy, 68*s, 0, Math.PI*2); ctx.fill();
+  // Cheese
+  ctx.fillStyle = '#f0d060';
+  ctx.beginPath(); ctx.arc(cx, cy, 60*s, 0, Math.PI*2); ctx.fill();
+  // Slice lines
+  ctx.strokeStyle = '#c87820'; ctx.lineWidth = 3*s;
+  for(let i=0; i<6; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(i*Math.PI/3)*80*s, cy + Math.sin(i*Math.PI/3)*80*s);
+    ctx.stroke();
+  }
+  // Pepperoni
+  ctx.fillStyle = '#a02818';
+  [[0,-35],[30,20],[-30,20],[0,10],[-20,-20],[20,-20]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 8*s, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawScissors(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  ctx.strokeStyle = '#c8c8d8'; ctx.lineWidth = 10*s; ctx.lineCap='round';
+  // Blade 1
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx-50*s, cy-60*s);
+  ctx.stroke();
+  // Blade 2
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx+50*s, cy-60*s);
+  ctx.stroke();
+  noShadow(ctx);
+  // Pivot
+  ctx.fillStyle = '#e8c547';
+  ctx.beginPath(); ctx.arc(cx, cy, 10*s, 0, Math.PI*2); ctx.fill();
+  // Handles
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 14*s;
+  ctx.beginPath();
+  ctx.moveTo(cx-8*s, cy+10*s);
+  ctx.lineTo(cx-35*s, cy+60*s);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx+8*s, cy+10*s);
+  ctx.lineTo(cx+35*s, cy+60*s);
+  ctx.stroke();
+  // Handle rings
+  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 8*s;
+  ctx.beginPath(); ctx.ellipse(cx-42*s, cy+65*s, 18*s, 14*s, 0.3, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx+42*s, cy+65*s, 18*s, 14*s, -0.3, 0, Math.PI*2); ctx.stroke();
+}
+
+function drawGym(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Bar
+  ctx.fillStyle = '#888';
+  rr(ctx, cx-80*s, cy-8*s, 160*s, 16*s, 6*s); ctx.fill();
+  noShadow(ctx);
+  // Weights left
+  ctx.fillStyle = '#444';
+  rr(ctx, cx-90*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
+  rr(ctx, cx-75*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
+  // Weights right
+  rr(ctx, cx+70*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
+  rr(ctx, cx+61*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
+  // Center grip
+  ctx.fillStyle = '#666';
+  rr(ctx, cx-25*s, cy-8*s, 50*s, 16*s, 4*s); ctx.fill();
+}
+
+function drawMovie(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Ticket body
+  ctx.fillStyle = '#e8c547';
+  rr(ctx, cx-80*s, cy-35*s, 160*s, 70*s, 10*s); ctx.fill();
+  noShadow(ctx);
+  // Tear line
+  ctx.strokeStyle = '#b8950a'; ctx.lineWidth = 2*s; ctx.setLineDash([6*s, 4*s]);
+  ctx.beginPath(); ctx.moveTo(cx+30*s, cy-35*s); ctx.lineTo(cx+30*s, cy+35*s); ctx.stroke();
+  ctx.setLineDash([]);
+  // Left notch
+  ctx.fillStyle = '#0d0d0d';
+  ctx.beginPath(); ctx.arc(cx-80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
+  // Text
+  ctx.fillStyle = '#080808';
+  ctx.font = `bold ${Math.round(13*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('ADMIT ONE', cx-20*s, cy-8*s);
+  ctx.font = `${Math.round(10*s)}px sans-serif`;
+  ctx.fillText('CINEMA', cx-20*s, cy+8*s);
+  // Stub stars
+  ctx.fillStyle = '#b8950a';
+  ctx.font = `${Math.round(16*s)}px serif`;
+  ctx.fillText('★', cx+50*s, cy);
+}
+
+function drawHotel(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Building
+  ctx.fillStyle = '#3a3a4a';
+  rr(ctx, cx-60*s, cy-60*s, 120*s, 120*s, 6*s); ctx.fill();
+  noShadow(ctx);
+  // Windows
+  ctx.fillStyle = '#e8c547';
+  [[-30,-40],[-10,-40],[10,-40],[30,-40],
+   [-30,-15],[-10,-15],[10,-15],[30,-15],
+   [-30,10],[-10,10],[10,10],[30,10]].forEach(([dx,dy]) => {
+    rr(ctx, cx+dx*s-8*s, cy+dy*s-10*s, 16*s, 20*s, 2*s); ctx.fill();
+  });
+  // Door
+  ctx.fillStyle = '#c8860a';
+  rr(ctx, cx-12*s, cy+30*s, 24*s, 30*s, 3*s); ctx.fill();
+  // Sign
+  ctx.fillStyle = '#e8c547';
+  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle = '#080808';
+  rr(ctx, cx-35*s, cy-75*s, 70*s, 22*s, 4*s);
+  ctx.fillStyle = '#e8c547'; ctx.fill();
+  ctx.fillStyle = '#080808';
+  ctx.fillText('HOTEL', cx, cy-64*s);
+}
+
+function drawHouse(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Roof
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-75*s);
+  ctx.lineTo(cx-75*s, cy-15*s);
+  ctx.lineTo(cx+75*s, cy-15*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Chimney
+  ctx.fillStyle = '#a02818';
+  rr(ctx, cx+30*s, cy-80*s, 18*s, 40*s, 2*s); ctx.fill();
+  // Walls
+  ctx.fillStyle = '#e8dcc0';
+  rr(ctx, cx-65*s, cy-15*s, 130*s, 80*s, 4*s); ctx.fill();
+  // Door
+  ctx.fillStyle = '#8a5a20';
+  rr(ctx, cx-15*s, cy+20*s, 30*s, 45*s, 4*s); ctx.fill();
+  // Doorknob
+  ctx.fillStyle = '#e8c547';
+  ctx.beginPath(); ctx.arc(cx+8*s, cy+44*s, 4*s, 0, Math.PI*2); ctx.fill();
+  // Windows
+  ctx.fillStyle = '#a8d8f0';
+  rr(ctx, cx-52*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
+  rr(ctx, cx+24*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
+  ctx.strokeStyle = '#6888a0'; ctx.lineWidth = 2*s;
+  ctx.beginPath(); ctx.moveTo(cx-38*s, cy-5*s); ctx.lineTo(cx-38*s, cy+23*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-52*s, cy+9*s); ctx.lineTo(cx-24*s, cy+9*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+38*s, cy-5*s); ctx.lineTo(cx+38*s, cy+23*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+24*s, cy+9*s); ctx.lineTo(cx+52*s, cy+9*s); ctx.stroke();
+}
+
+function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
+  const fontSize = Math.round(Math.min(w,h) * 0.38);
   ctx.font = fontSize + 'px serif';
   ctx.textAlign = 'center';
   ctx.textBaseline = 'middle';
   ctx.shadowColor = 'rgba(0,0,0,0.5)';
   ctx.shadowBlur = 20;
-  ctx.fillText(emoji || '🛒', w/2, h/2);
+  ctx.fillText(emoji || '🛒', cx, cy);
   ctx.shadowBlur = 0;
-
-  // Gold accent line
-  ctx.fillStyle = 'rgba(232,197,71,0.4)';
-  ctx.fillRect(0, h-2, w, 2);
 }
 
 // ── NAVIGATION ────────────────────────────────────────
