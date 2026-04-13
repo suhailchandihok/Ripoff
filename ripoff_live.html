@@ -94,7 +94,7 @@ body::after {
 
 /* ── IMAGE CARD ── */
 .image-card { margin: 0 1.25rem; border-radius: var(--r-xl); overflow: hidden; position: relative; background: var(--s2); border: 0.5px solid var(--border2); }
-.image-card canvas { display: block; width: 100%; }
+.image-card canvas { display: block; width: 100%; height: 300px; }
 .image-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, rgba(8,8,8,0.9) 100%); }
 .image-card-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1.5rem; }
 .item-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 10px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
@@ -287,7 +287,7 @@ body::after {
     </div>
     <div class="day-label a1" id="challengeDateLabel">Loading...</div>
     <div class="image-card a2" id="imageCard">
-      <canvas id="mainCanvas" width="400" height="300" style="display:block;width:100%"></canvas>
+      <canvas id="mainCanvas" width="400" height="300" style="display:block;width:100%;height:300px;background:#1c1a14"></canvas>
       <div class="image-overlay"></div>
       <div class="image-card-bottom" id="imgBottom">
         <div class="item-tag" id="itemTag">🛒 Category</div>
@@ -583,14 +583,18 @@ function updateChallengeUI() {
   document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
   document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0', '').replace('2026-', '');
 
-  // Draw image
-  setTimeout(() => {
+  // Draw image - retry until canvas has width
+  function tryDraw(attempts) {
     const mc = document.getElementById('mainCanvas');
-    if (mc) {
-      const w = mc.parentElement.offsetWidth || 400;
+    if (!mc) return;
+    const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
+    if (w > 50) {
       drawItemImage('mainCanvas', item.name, item.emoji, w, 300);
+    } else if (attempts < 20) {
+      setTimeout(() => tryDraw(attempts + 1), 100);
     }
-  }, 100);
+  }
+  setTimeout(() => tryDraw(0), 150);
 }
 
 async function checkAlreadyPlayed() {
@@ -769,11 +773,14 @@ function showReveal(guess, realPrice, accuracy, crowdPct) {
   }
 
   // Draw reveal image
-  const rc = document.getElementById('revealCanvas');
-  if (rc) {
-    const w = document.getElementById('revealImgWrap').offsetWidth || 380;
-    drawItemImage('revealCanvas', item.name, item.emoji, w, 200);
-  }
+  setTimeout(() => {
+    const rc = document.getElementById('revealCanvas');
+    if (rc) {
+      const wrap = document.getElementById('revealImgWrap');
+      const w = wrap?.offsetWidth || rc.offsetWidth || 380;
+      drawItemImage('revealCanvas', item.name, item.emoji, w || 380, 200);
+    }
+  }, 200);
 
   goTo('reveal');
 
@@ -1339,7 +1346,13 @@ function goTo(name) {
   if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'challenge' && todayChallenge) {
-    setTimeout(() => drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, document.getElementById('mainCanvas').parentElement.offsetWidth, 300), 50);
+    setTimeout(() => {
+      const mc = document.getElementById('mainCanvas');
+      if (mc) {
+        const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
+        drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, w || 400, 300);
+      }
+    }, 200);
   }
 }
 
