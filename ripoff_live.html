@@ -369,7 +369,7 @@ body::after {
         <div class="acc-num great" id="accNum">—%</div>
       </div>
       <div class="track"><div class="track-fill great" id="trackFill"></div></div>
-      <div class="crowd-line">You beat <strong id="crowdVal">—</strong> of players today</div>
+
     </div>
     <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0.75rem;">
@@ -910,9 +910,7 @@ async function pickHL(choice) {
   document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
   document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
   const feed = document.getElementById('hlFeed');
-  feed.textContent = choice === 'higher'
-    ? '64% of players say this costs more than in their city.'
-    : 'Interesting — only 36% said this was cheaper. You might live somewhere pricey!';
+  feed.textContent = choice === 'higher' ? 'Got it — noted for your location.' : 'Got it — noted for your location.';
   feed.classList.add('show');
 
   // Save to database
