@@ -1,289 +1,1381 @@
--- ============================================
--- RIPOFF — Randomized Challenge Schedule
--- All prices from BLS government data
--- No item repeats on consecutive days
--- No city repeats within 7 days
--- ============================================
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ripoff</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+:root {
+  --bg: #080808;
+  --s1: #111111;
+  --s2: #181818;
+  --s3: #222222;
+  --s4: #2a2a2a;
+  --border: rgba(255,255,255,0.06);
+  --border2: rgba(255,255,255,0.1);
+  --border3: rgba(255,255,255,0.16);
+  --text: #F2EDE4;
+  --text2: rgba(242,237,228,0.55);
+  --text3: rgba(242,237,228,0.3);
+  --accent: #E8C547;
+  --accent2: #D4A832;
+  --accent-dim: rgba(232,197,71,0.12);
+  --accent-dim2: rgba(232,197,71,0.06);
+  --green: #4ADE80;
+  --green-dim: rgba(74,222,128,0.1);
+  --red: #F87171;
+  --red-dim: rgba(248,113,113,0.1);
+  --r-sm: 12px; --r-md: 16px; --r-lg: 24px; --r-xl: 32px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; background: var(--bg); overscroll-behavior: none; }
+body { font-family: 'Syne', sans-serif; color: var(--text); overflow-x: hidden; }
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none; z-index: 9999; opacity: 0.4;
+}
 
--- First clean up existing challenges from April 14 onwards
-delete from city_prices where challenge_id in (
-  select id from challenges where challenge_date >= '2026-04-14'
-);
-delete from challenges where challenge_date >= '2026-04-14';
+/* ── SCREENS ── */
+.screen { display: none; max-width: 430px; margin: 0 auto; min-height: 100vh; flex-direction: column; }
+.screen.active { display: flex; }
+.scroll-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
 
-do $$
-declare
-  -- Items
-  v_eggs uuid; v_milk uuid; v_bread uuid;
-  v_beef uuid; v_chicken uuid; v_gas uuid; v_electric uuid;
+/* ── LOADING ── */
+#loadingScreen {
+  position: fixed; inset: 0; background: var(--bg);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  z-index: 1000; gap: 16px;
+}
+.load-logo { font-family: 'Instrument Serif', serif; font-size: 48px; font-style: italic; color: var(--text); }
+.load-logo span { color: var(--accent); }
+.load-spinner { width: 28px; height: 28px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; }
+.load-text { font-size: 12px; color: var(--text3); letter-spacing: 2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
-  -- Cities
-  v_nyc uuid; v_la uuid; v_chicago uuid; v_houston uuid;
-  v_miami uuid; v_sf uuid; v_seattle uuid; v_boston uuid;
-  v_dc uuid; v_honolulu uuid; v_austin uuid; v_nashville uuid;
-  v_denver uuid; v_portland uuid; v_minneapolis uuid;
-  v_atlanta uuid; v_phoenix uuid; v_charlotte uuid;
-  v_sandiego uuid; v_neworleans uuid; v_boise uuid;
-  v_tulsa uuid; v_anchorage uuid; v_fargo uuid;
-  v_billings uuid; v_omaha uuid; v_provo uuid;
-  v_buffalo uuid; v_elp uuid; v_burlington uuid;
+/* ── AUTH SCREEN ── */
+.auth-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1.5rem; gap: 2rem; }
+.auth-logo { font-family: 'Instrument Serif', serif; font-size: 56px; font-style: italic; }
+.auth-logo span { color: var(--accent); }
+.auth-tagline { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; max-width: 280px; }
+.auth-card { width: 100%; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.75rem; display: flex; flex-direction: column; gap: 12px; }
+.auth-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
+.auth-input {
+  width: 100%; padding: 14px 16px; border-radius: var(--r-md);
+  border: 0.5px solid var(--border2); background: var(--s2);
+  color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; outline: none;
+  transition: border-color 0.15s;
+}
+.auth-input:focus { border-color: var(--accent); }
+.auth-input::placeholder { color: var(--text3); }
+.auth-btn {
+  width: 100%; padding: 15px; border-radius: var(--r-md); border: none;
+  background: var(--accent); color: #080808; font-family: 'Syne', sans-serif;
+  font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
+  cursor: pointer; transition: all 0.15s; margin-top: 4px;
+}
+.auth-btn:active { transform: scale(0.98); }
+.auth-btn:disabled { background: var(--s3); color: var(--text3); cursor: not-allowed; }
+.auth-switch { font-size: 12px; color: var(--text3); text-align: center; cursor: pointer; }
+.auth-switch span { color: var(--accent); }
+.auth-error { font-size: 12px; color: var(--red); text-align: center; display: none; }
+.auth-error.show { display: block; }
 
-  v_cid uuid;
+/* ── TOP BAR ── */
+.top-bar { display: flex; align-items: center; justify-content: space-between; padding: 3.5rem 1.5rem 1rem; }
+.wordmark { font-family: 'Instrument Serif', serif; font-size: 28px; font-style: italic; color: var(--text); }
+.wordmark span { color: var(--accent); }
+.streak-pill { display: flex; align-items: center; gap: 5px; background: var(--accent-dim); border: 0.5px solid rgba(232,197,71,0.25); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
+.day-label { padding: 0 1.5rem; font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
 
-begin
-  select id into v_eggs from items where name = 'One Dozen Large Eggs';
-  select id into v_milk from items where name = 'Gallon of Whole Milk';
-  select id into v_bread from items where name = 'Loaf of White Bread';
-  select id into v_beef from items where name = 'Pound of Ground Beef';
-  select id into v_chicken from items where name = 'Pound of Chicken Breast';
-  select id into v_gas from items where name = 'Gallon of Regular Gas';
-  select id into v_electric from items where name = 'Monthly Electricity Bill';
+/* ── IMAGE CARD ── */
+.image-card { margin: 0 1.25rem; border-radius: var(--r-xl); overflow: hidden; position: relative; background: var(--s2); border: 0.5px solid var(--border2); }
+.image-card canvas { display: block; width: 100%; height: 300px; }
+.image-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, rgba(8,8,8,0.9) 100%); }
+.image-card-bottom { position: absolute; bottom: 0; left: 0; right: 0; padding: 1.25rem 1.5rem; }
+.item-tag { display: inline-flex; align-items: center; gap: 5px; background: rgba(255,255,255,0.08); backdrop-filter: blur(10px); border: 0.5px solid rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 10px; font-size: 10px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,0.7); margin-bottom: 8px; }
+.item-title-overlay { font-family: 'Instrument Serif', serif; font-size: 26px; line-height: 1.2; color: white; }
+.item-location-overlay { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; }
+.loc-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
+.challenge-num { position: absolute; top: 14px; right: 14px; background: rgba(8,8,8,0.5); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); }
+.img-loading { width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text3); font-size: 12px; letter-spacing: 1px; }
 
-  select id into v_nyc from cities where name = 'New York City';
-  select id into v_la from cities where name = 'Los Angeles';
-  select id into v_chicago from cities where name = 'Chicago';
-  select id into v_houston from cities where name = 'Houston';
-  select id into v_miami from cities where name = 'Miami';
-  select id into v_sf from cities where name = 'San Francisco';
-  select id into v_seattle from cities where name = 'Seattle';
-  select id into v_boston from cities where name = 'Boston';
-  select id into v_dc from cities where name = 'Washington';
-  select id into v_honolulu from cities where name = 'Honolulu';
-  select id into v_austin from cities where name = 'Austin';
-  select id into v_nashville from cities where name = 'Nashville';
-  select id into v_denver from cities where name = 'Denver';
-  select id into v_portland from cities where name = 'Portland';
-  select id into v_minneapolis from cities where name = 'Minneapolis';
-  select id into v_atlanta from cities where name = 'Atlanta';
-  select id into v_phoenix from cities where name = 'Phoenix';
-  select id into v_charlotte from cities where name = 'Charlotte';
-  select id into v_sandiego from cities where name = 'San Diego';
-  select id into v_neworleans from cities where name = 'New Orleans';
-  select id into v_boise from cities where name = 'Boise';
-  select id into v_tulsa from cities where name = 'Tulsa';
-  select id into v_anchorage from cities where name = 'Anchorage';
-  select id into v_fargo from cities where name = 'Fargo';
-  select id into v_billings from cities where name = 'Billings';
-  select id into v_omaha from cities where name = 'Omaha';
-  select id into v_provo from cities where name = 'Provo';
-  select id into v_buffalo from cities where name = 'Buffalo';
-  select id into v_elp from cities where name = 'El Paso';
-  select id into v_burlington from cities where name = 'Burlington';
+/* ── GUESS CARD ── */
+.guess-card { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.guess-card-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
+.input-row { display: flex; align-items: center; gap: 2px; border-bottom: 1.5px solid var(--border3); padding-bottom: 0.75rem; margin-bottom: 1.25rem; transition: border-color 0.2s; }
+.input-row:focus-within { border-color: var(--accent); }
+.dollar { font-family: 'Instrument Serif', serif; font-size: 42px; font-style: italic; color: var(--text3); line-height: 1; margin-right: 4px; }
+.price-field { flex: 1; background: transparent; border: none; outline: none; font-family: 'Instrument Serif', serif; font-size: 52px; font-style: italic; color: var(--text); line-height: 1; width: 100%; min-width: 0; }
+.price-field::placeholder { color: var(--text3); }
+.cta-btn { width: 100%; padding: 17px; border-radius: var(--r-md); border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.cta-btn:active { transform: scale(0.98); opacity: 0.9; }
+.cta-btn:disabled { background: var(--s3); color: var(--text3); cursor: not-allowed; }
+.already-played { text-align: center; padding: 1rem; font-size: 13px; color: var(--text2); line-height: 1.6; }
+.already-played strong { color: var(--accent); }
 
-  -- APR 14 — Gas in San Francisco
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-14', v_gas, v_sf, 4.72, 'BLS APU0400744714 Mar 2026', '2026-04-14',
-    'California requires a unique fuel blend not used anywhere else in the country. Combined with one of the highest state gas taxes and limited refinery capacity, SF consistently ranks among the most expensive cities for gas.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_sf, 4.72),(v_cid, v_la, 4.65),(v_cid, v_seattle, 4.21),
-  (v_cid, v_denver, 3.45),(v_cid, v_houston, 2.98),(v_cid, v_tulsa, 2.79);
+/* ── MINI STATS ── */
+.mini-stats { display: flex; gap: 10px; margin: 1rem 1.25rem 0; }
+.mini-stat { flex: 1; background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r-md); padding: 0.875rem 1rem; text-align: center; }
+.mini-stat-val { font-family: 'Instrument Serif', serif; font-size: 20px; font-style: italic; color: var(--text); }
+.mini-stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 2px; }
 
-  -- APR 15 — Milk in Miami
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-15', v_milk, v_miami, 4.89, 'BLS APU0300000709 Mar 2026', '2026-04-14',
-    'Miami has seen dramatic price increases following a massive post-2020 population boom. Increased demand, high commercial rents, and Florida''s heat-related distribution costs push milk prices above southern averages.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_miami, 4.89),(v_cid, v_nyc, 5.12),(v_cid, v_atlanta, 3.89),
-  (v_cid, v_nashville, 3.72),(v_cid, v_tulsa, 3.45),(v_cid, v_houston, 3.62);
+/* ── REVEAL SCREEN ── */
+.reveal-top { padding: 3.5rem 1.5rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
+.reveal-wordmark { font-family: 'Instrument Serif', serif; font-size: 22px; font-style: italic; }
+.reveal-wordmark span { color: var(--accent); }
+.result-badge { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700; letter-spacing: 0.5px; }
+.result-badge.great { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(74,222,128,0.2); }
+.result-badge.ok { background: var(--accent-dim); color: var(--accent); border: 0.5px solid rgba(232,197,71,0.2); }
+.result-badge.miss { background: var(--red-dim); color: var(--red); border: 0.5px solid rgba(248,113,113,0.2); }
 
-  -- APR 16 — Chicken in New York City
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-16', v_chicken, v_nyc, 5.89, 'BLS APU0100706111 Mar 2026', '2026-04-14',
-    'NYC chicken prices are driven by sky-high retail rents — a grocery store in Manhattan pays more per square foot than almost any city on Earth — plus union labor requirements and last-mile delivery costs into dense urban neighborhoods.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_nyc, 5.89),(v_cid, v_boston, 5.42),(v_cid, v_chicago, 4.32),
-  (v_cid, v_atlanta, 3.98),(v_cid, v_houston, 3.89),(v_cid, v_tulsa, 3.72);
+.price-hero { margin: 0 1.25rem; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.price-hero-image { width: 100%; background: var(--s2); }
+.price-hero-image canvas { display: block; width: 100%; }
+.price-hero-body { padding: 1.25rem 1.5rem 1.5rem; }
+.reveal-item-name { font-family: 'Instrument Serif', serif; font-size: 22px; margin-bottom: 3px; }
+.reveal-location { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 5px; margin-bottom: 1.25rem; }
+.prices-row { display: grid; grid-template-columns: 1fr 1px 1fr; background: var(--s2); border-radius: var(--r-md); overflow: hidden; }
+.price-col { padding: 1rem; text-align: center; }
+.price-divider { background: var(--border2); margin: 0.75rem 0; }
+.pcol-label { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
+.pcol-value { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; line-height: 1; }
+.pcol-value.real { color: var(--green); }
 
-  -- APR 17 — Electricity in Phoenix
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-17', v_electric, v_phoenix, 142.00, 'BLS APU0400721311 Mar 2026', '2026-04-14',
-    'Phoenix has some of the highest electricity bills in the US despite cheap per-KWH rates. Extreme desert heat forces AC to run nearly year-round — the average Phoenix home uses almost double the electricity of a home in the Northeast.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_phoenix, 142.00),(v_cid, v_houston, 138.00),(v_cid, v_miami, 131.00),
-  (v_cid, v_nyc, 112.00),(v_cid, v_chicago, 98.00),(v_cid, v_seattle, 89.00);
+.accuracy-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.acc-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
+.acc-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.acc-num { font-family: 'Instrument Serif', serif; font-size: 44px; font-style: italic; line-height: 1; }
+.acc-num.great { color: var(--green); }
+.acc-num.ok { color: var(--accent); }
+.acc-num.miss { color: var(--red); }
+.track { height: 6px; background: var(--s3); border-radius: 3px; overflow: hidden; margin-bottom: 10px; }
+.track-fill { height: 100%; border-radius: 3px; transition: width 1.2s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+.track-fill.great { background: var(--green); }
+.track-fill.ok { background: var(--accent); }
+.track-fill.miss { background: var(--red); }
+.crowd-line { font-size: 13px; color: var(--text2); font-weight: 500; }
+.crowd-line strong { color: var(--text); }
 
-  -- APR 18 — Bread in Tulsa
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-18', v_bread, v_tulsa, 2.99, 'BLS APU0300702111 Mar 2026', '2026-04-14',
-    'Tulsa is consistently one of the most affordable cities in America. Oklahoma''s low cost of living, proximity to wheat farming regions, and lower minimum wage than coastal states keep grocery prices well below national averages.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_tulsa, 2.99),(v_cid, v_houston, 3.12),(v_cid, v_chicago, 3.89),
-  (v_cid, v_denver, 3.95),(v_cid, v_boston, 4.89),(v_cid, v_nyc, 4.62);
+.city-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.section-header { padding: 1.25rem 1.5rem 0.875rem; border-bottom: 0.5px solid var(--border); }
+.section-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
+.city-entry { display: flex; align-items: center; padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); gap: 12px; opacity: 0; transform: translateY(6px); transition: all 0.4s ease-out; }
+.city-entry:last-child { border-bottom: none; }
+.city-entry.visible { opacity: 1; transform: translateY(0); }
+.city-entry.highlight { background: var(--accent-dim2); }
+.city-rank { width: 22px; height: 22px; border-radius: 50%; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; color: var(--text3); flex-shrink: 0; }
+.city-entry.highlight .city-rank { background: var(--accent-dim); color: var(--accent); }
+.city-info { flex: 1; }
+.city-entry-name { font-size: 14px; font-weight: 600; color: var(--text); display: flex; align-items: center; gap: 8px; }
+.today-chip { font-size: 9px; font-weight: 700; letter-spacing: 1px; background: var(--accent-dim); color: var(--accent); padding: 2px 7px; border-radius: 10px; }
+.city-entry-state { font-size: 11px; color: var(--text3); margin-top: 1px; }
+.city-bar-bg { height: 3px; background: var(--s3); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+.city-bar-inner { height: 100%; border-radius: 2px; background: var(--border3); transition: width 0.8s cubic-bezier(0.16,1,0.3,1); width: 0%; }
+.city-entry.highlight .city-bar-inner { background: var(--accent); }
+.city-price-val { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: var(--text); white-space: nowrap; }
+.city-entry.highlight .city-price-val { color: var(--accent); }
 
-  -- APR 19 — Ground Beef in Los Angeles
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-19', v_beef, v_la, 7.12, 'BLS APU0400703112 Mar 2026', '2026-04-14',
-    'LA ground beef prices reflect California''s strict agricultural regulations, high minimum wage of $16/hour, and expensive commercial real estate for grocery stores. The state also has unique labeling requirements that add compliance costs.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_la, 7.12),(v_cid, v_sf, 7.42),(v_cid, v_chicago, 5.89),
-  (v_cid, v_atlanta, 5.45),(v_cid, v_houston, 4.98),(v_cid, v_tulsa, 4.79);
+.hl-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.hl-q { font-size: 15px; font-weight: 600; color: var(--text); text-align: center; margin-bottom: 1rem; line-height: 1.4; }
+.hl-q em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--accent); }
+.hl-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.hl-b { padding: 14px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; cursor: pointer; color: var(--text2); transition: all 0.15s; letter-spacing: 0.5px; }
+.hl-b.picked-h { background: var(--green-dim); border-color: rgba(74,222,128,0.3); color: var(--green); }
+.hl-b.picked-l { background: var(--red-dim); border-color: rgba(248,113,113,0.3); color: var(--red); }
+.hl-feedback { margin-top: 12px; font-size: 12px; color: var(--text3); text-align: center; display: none; line-height: 1.5; }
+.hl-feedback.show { display: block; }
 
-  -- APR 20 — Eggs in Anchorage
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-20', v_eggs, v_anchorage, 8.36, 'BLS APU0400000703 Mar 2026 + Alaska logistics premium', '2026-04-14',
-    'Anchorage has some of the most expensive groceries in America. Nearly all food must be shipped or flown in from the continental US, adding massive logistics costs. A dozen eggs that costs $3 in Tulsa can cost nearly three times that in Alaska.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_anchorage, 8.36),(v_cid, v_honolulu, 7.69),(v_cid, v_nyc, 6.15),
-  (v_cid, v_chicago, 4.89),(v_cid, v_nashville, 4.12),(v_cid, v_tulsa, 3.89);
+.why-box { margin: 1rem 1.25rem 0; background: var(--accent-dim2); border: 0.5px solid rgba(232,197,71,0.15); border-radius: var(--r-xl); padding: 1.5rem; }
+.why-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
+.why-body { font-size: 14px; color: var(--text2); line-height: 1.65; }
 
-  -- APR 21 — Gas in Houston
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-21', v_gas, v_houston, 2.98, 'BLS APU0300744714 Mar 2026', '2026-04-14',
-    'Houston sits at the heart of America''s oil and gas industry. With refineries practically next door, Texas''s low state gas tax, and no city income tax keeping business costs down, Houston consistently has the cheapest gas of any major US city.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_houston, 2.98),(v_cid, v_tulsa, 2.79),(v_cid, v_chicago, 3.72),
-  (v_cid, v_nyc, 3.89),(v_cid, v_seattle, 4.21),(v_cid, v_sf, 4.72);
+.action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1rem 1.25rem 0; }
+.share-b { padding: 16px; border-radius: var(--r-md); border: none; background: var(--text); color: var(--bg); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.share-b:active { transform: scale(0.97); }
+.next-b { padding: 16px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
+.next-b:hover { border-color: var(--border3); color: var(--text); }
 
-  -- APR 22 — Milk in Seattle
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-22', v_milk, v_seattle, 4.42, 'BLS APU0400000709 Mar 2026', '2026-04-14',
-    'Seattle''s high minimum wage — among the highest in the nation — flows through the entire supply chain from farm workers to grocery clerks, pushing food prices noticeably above the national average despite the Pacific Northwest''s agricultural abundance.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_seattle, 4.42),(v_cid, v_sf, 5.49),(v_cid, v_denver, 3.89),
-  (v_cid, v_minneapolis, 3.72),(v_cid, v_omaha, 3.42),(v_cid, v_tulsa, 3.45);
+/* ── PROFILE ── */
+.profile-top-bar { padding: 3.5rem 1.5rem 1.5rem; }
+.profile-greeting { font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.profile-name-display { font-family: 'Instrument Serif', serif; font-size: 36px; font-style: italic; }
+.iq-hero { margin: 0 1.25rem; background: var(--accent); border-radius: var(--r-xl); padding: 2rem 1.75rem; display: flex; align-items: flex-end; justify-content: space-between; position: relative; overflow: hidden; }
+.iq-hero::before { content: ''; position: absolute; top: -40px; right: -40px; width: 180px; height: 180px; border-radius: 50%; background: rgba(0,0,0,0.06); }
+.iq-left { position: relative; z-index: 1; }
+.iq-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: rgba(8,8,8,0.5); margin-bottom: 6px; }
+.iq-number { font-family: 'Instrument Serif', serif; font-size: 80px; font-style: italic; line-height: 1; color: #080808; }
+.iq-sub { font-size: 13px; font-weight: 600; color: rgba(8,8,8,0.55); margin-top: 4px; }
+.stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 1rem 1.25rem 0; }
+.stat-tile { background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r-lg); padding: 1.125rem 1rem; text-align: center; }
+.st-val { font-family: 'Instrument Serif', serif; font-size: 28px; font-style: italic; color: var(--text); line-height: 1; }
+.st-val.streak { color: var(--accent); }
+.st-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 5px; }
+.history-wrap { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
+.hist-item { display: flex; align-items: center; gap: 14px; padding: 1rem 1.5rem; border-bottom: 0.5px solid var(--border); }
+.hist-item:last-child { border-bottom: none; }
+.hist-icon { width: 42px; height: 42px; border-radius: 12px; background: var(--s3); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+.hist-info { flex: 1; }
+.hist-name { font-size: 14px; font-weight: 600; }
+.hist-city { font-size: 11px; color: var(--text3); margin-top: 2px; }
+.hist-score { font-family: 'Instrument Serif', serif; font-size: 20px; font-style: italic; }
+.hist-score.g { color: var(--green); }
+.hist-score.b { color: var(--red); }
+.signout-btn { margin: 1rem 1.25rem 0; width: calc(100% - 2.5rem); padding: 14px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: transparent; color: var(--text3); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 600; cursor: pointer; letter-spacing: 0.5px; transition: all 0.15s; }
+.signout-btn:hover { color: var(--red); border-color: rgba(248,113,113,0.3); }
+.empty-history { padding: 2rem; text-align: center; font-size: 13px; color: var(--text3); }
 
-  -- APR 23 — Electricity in Seattle
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-23', v_electric, v_seattle, 89.00, 'BLS APU0400721311 Mar 2026', '2026-04-14',
-    'Seattle has some of the lowest electricity bills of any major US city. The Pacific Northwest''s massive hydroelectric dams on the Columbia River provide cheap, clean power — Seattle City Light charges some of the lowest rates in the nation.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_seattle, 89.00),(v_cid, v_portland, 92.00),(v_cid, v_denver, 98.00),
-  (v_cid, v_nyc, 112.00),(v_cid, v_miami, 131.00),(v_cid, v_phoenix, 142.00);
+/* ── NAV ── */
+.nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 0.875rem 2rem 2rem; background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 100; display: flex; gap: 10px; }
+.nav-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s1); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.nav-tab.active { background: var(--s2); border-color: var(--border3); color: var(--text); }
+.nav-tab.active .nav-dot { background: var(--accent); }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--s4); transition: background 0.15s; }
 
-  -- APR 24 — Chicken in Atlanta
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-24', v_chicken, v_atlanta, 3.98, 'BLS APU0300706111 Mar 2026', '2026-04-14',
-    'Georgia is the number one chicken producing state in America. Atlanta''s proximity to major Tyson and Perdue processing plants in rural Georgia means shorter supply chains and lower prices at the grocery store compared to most major cities.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_atlanta, 3.98),(v_cid, v_nashville, 4.12),(v_cid, v_chicago, 4.32),
-  (v_cid, v_boston, 5.42),(v_cid, v_nyc, 5.89),(v_cid, v_sf, 5.45);
+/* ── TOAST ── */
+.toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--s2); border: 0.5px solid var(--border2); border-radius: 20px; padding: 10px 20px; font-size: 13px; color: var(--text); z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-  -- APR 25 — Bread in San Francisco
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-25', v_bread, v_sf, 5.12, 'BLS APU0400702111 Mar 2026', '2026-04-14',
-    'San Francisco has the most expensive grocery prices of any major US city. Retail rents in SF can exceed $500 per square foot annually — those costs get passed directly to shoppers. A loaf of bread that costs $3 in Oklahoma costs $5 here.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_sf, 5.12),(v_cid, v_nyc, 4.62),(v_cid, v_boston, 4.89),
-  (v_cid, v_chicago, 3.89),(v_cid, v_nashville, 3.42),(v_cid, v_tulsa, 2.99);
+/* ── ANIMATIONS ── */
+@keyframes up-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+.a1 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) both; }
+.a2 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
+.a3 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.16s both; }
+.a4 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.24s both; }
+.a5 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.32s both; }
+.a6 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.4s both; }
+</style>
+</head>
+<body>
 
-  -- APR 26 — Gas in Fargo
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-26', v_gas, v_fargo, 3.12, 'BLS APU0200744714 Mar 2026', '2026-04-14',
-    'Fargo benefits from North Dakota''s proximity to Midwest refineries and a relatively low state gas tax. The city consistently ranks among the most affordable for fuel in the northern US, a sharp contrast to coastal cities.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_fargo, 3.12),(v_cid, v_omaha, 3.18),(v_cid, v_chicago, 3.72),
-  (v_cid, v_denver, 3.45),(v_cid, v_seattle, 4.21),(v_cid, v_sf, 4.72);
+<!-- LOADING -->
+<div id="loadingScreen">
+  <div class="load-logo">Rip<span>off</span></div>
+  <div class="load-spinner"></div>
+  <div class="load-text">Loading today's challenge</div>
+</div>
 
-  -- APR 27 — Eggs in Chicago
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-27', v_eggs, v_chicago, 4.89, 'BLS APU0200000703 Mar 2026', '2026-04-14',
-    'Chicago sits in the middle of the country''s egg producing heartland. Midwest farms supply the region efficiently, keeping prices noticeably lower than coastal cities. Illinois''s competitive grocery market also helps keep prices in check.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_chicago, 4.89),(v_cid, v_minneapolis, 4.72),(v_cid, v_denver, 5.12),
-  (v_cid, v_nyc, 6.15),(v_cid, v_sf, 5.82),(v_cid, v_anchorage, 8.36);
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
-  -- APR 28 — Milk in Honolulu
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-28', v_milk, v_honolulu, 6.89, 'BLS APU0400000709 Mar 2026 + Hawaii logistics premium', '2026-04-14',
-    'Hawaii has some of the highest food prices in the nation. All dairy must either be produced locally at great expense or shipped thousands of miles across the Pacific. A gallon of milk that costs $3.45 in Tulsa costs nearly double in Honolulu.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_honolulu, 6.89),(v_cid, v_anchorage, 6.42),(v_cid, v_sf, 5.49),
-  (v_cid, v_nyc, 5.12),(v_cid, v_denver, 3.89),(v_cid, v_tulsa, 3.45);
+<!-- AUTH SCREEN -->
+<div class="screen" id="s-auth">
+  <div class="auth-wrap">
+    <div class="auth-logo">Rip<span>off</span></div>
+    <div class="auth-tagline">One item. One city. One guess.<br>How well do you know real prices?</div>
+    <div class="auth-card">
+      <div class="auth-title" id="authTitle">Create account</div>
+      <input class="auth-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
+      <input class="auth-input" type="password" id="authPassword" placeholder="Password (min 6 characters)" autocomplete="current-password">
+      <div class="auth-error" id="authError"></div>
+      <button class="auth-btn" id="authBtn" onclick="handleAuth()">Get Started</button>
+      <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">Already have an account? <span>Sign in</span></div>
+    </div>
+  </div>
+</div>
 
-  -- APR 29 — Beef in Boston
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-29', v_beef, v_boston, 6.89, 'BLS APU0100703112 Mar 2026', '2026-04-14',
-    'Boston consistently ranks among the most expensive cities for groceries in the US. High union labor costs, expensive retail leases in dense neighborhoods, and a strong local economy with high incomes all drive grocery prices up significantly.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_boston, 6.89),(v_cid, v_dc, 7.12),(v_cid, v_nyc, 7.42),
-  (v_cid, v_chicago, 5.89),(v_cid, v_nashville, 5.12),(v_cid, v_tulsa, 4.79);
+<!-- CHALLENGE SCREEN -->
+<div class="screen" id="s-challenge">
+  <div class="scroll-body">
+    <div class="top-bar a1">
+      <div class="wordmark">Rip<span>off</span></div>
+      <div class="streak-pill" id="streakPill">🔥 0 Day Streak</div>
+    </div>
+    <div class="day-label a1" id="challengeDateLabel">Loading...</div>
+    <div class="image-card a2" id="imageCard">
+      <canvas id="mainCanvas" width="400" height="300" style="display:block;width:100%;height:300px;background:#1c1a14"></canvas>
+      <div class="image-overlay"></div>
+      <div class="image-card-bottom" id="imgBottom">
+        <div class="item-tag" id="itemTag">🛒 Category</div>
+        <div class="item-title-overlay" id="itemTitle">Loading today's challenge...</div>
+        <div class="item-location-overlay">
+          <div class="loc-dot"></div>
+          <span id="itemLocation">Please wait</span>
+        </div>
+      </div>
+      <div class="challenge-num" id="challengeNum">#—</div>
+    </div>
+    <div class="guess-card a3">
+      <div class="guess-card-label">What does this cost here?</div>
+      <div class="input-row" id="inputRow">
+        <div class="dollar">$</div>
+        <input class="price-field" type="number" id="priceIn" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
+      </div>
+      <div id="guessArea">
+        <button class="cta-btn" id="submitBtn" onclick="submitGuess()">Submit Guess</button>
+      </div>
+    </div>
+    <div class="mini-stats a4">
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statAvg">—</div>
+        <div class="mini-stat-label">Avg Score</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statIQ">500</div>
+        <div class="mini-stat-label">Market IQ</div>
+      </div>
+      <div class="mini-stat">
+        <div class="mini-stat-val" id="statPlayed">0</div>
+        <div class="mini-stat-label">Days Played</div>
+      </div>
+    </div>
+  </div>
+</div>
 
-  -- APR 30 — Gas in Billings
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-04-30', v_gas, v_billings, 3.22, 'BLS APU0200744714 Mar 2026', '2026-04-14',
-    'Montana has no state sales tax which keeps many consumer goods cheaper than surrounding states. Billings also serves as a regional hub for oil refining, giving it better access to fuel supply and keeping gas prices competitive.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_billings, 3.22),(v_cid, v_denver, 3.45),(v_cid, v_chicago, 3.72),
-  (v_cid, v_seattle, 4.21),(v_cid, v_la, 4.65),(v_cid, v_honolulu, 4.98);
+<!-- REVEAL SCREEN -->
+<div class="screen" id="s-reveal">
+  <div class="scroll-body">
+    <div class="reveal-top">
+      <div>
+        <div class="reveal-wordmark">Rip<span>off</span></div>
+        <div style="font-size:11px;color:var(--text3);letter-spacing:1.5px;margin-top:2px;" id="revealDateLabel"></div>
+      </div>
+      <div class="result-badge great" id="resultBadge">Sharp Eye</div>
+    </div>
+    <div class="price-hero a1">
+      <div class="price-hero-image" id="revealImgWrap">
+        <canvas id="revealCanvas" height="200"></canvas>
+      </div>
+      <div class="price-hero-body">
+        <div class="reveal-item-name" id="revealItemName">—</div>
+        <div class="reveal-location"><div class="loc-dot"></div><span id="revealLocation">—</span></div>
+        <div class="prices-row">
+          <div class="price-col">
+            <div class="pcol-label">Real Price</div>
+            <div class="pcol-value real" id="realPriceVal">—</div>
+          </div>
+          <div class="price-divider"></div>
+          <div class="price-col">
+            <div class="pcol-label">Your Guess</div>
+            <div class="pcol-value" id="yourGuessVal">—</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="accuracy-section a2">
+      <div class="acc-top">
+        <div class="acc-title">Accuracy</div>
+        <div class="acc-num great" id="accNum">—%</div>
+      </div>
+      <div class="track"><div class="track-fill great" id="trackFill"></div></div>
+      <div class="crowd-line">You beat <strong id="crowdVal">—</strong> of players today</div>
+    </div>
+    <div class="city-section a3">
+      <div class="section-header"><div class="section-title">Same item · Different cities</div></div>
+      <div id="cityList"></div>
+    </div>
+    <div class="hl-section a4">
+      <div class="hl-q">Is this higher or lower than<br><em>where you live?</em></div>
+      <div class="hl-btns">
+        <button class="hl-b" id="hlH" onclick="pickHL('higher')">↑ Higher</button>
+        <button class="hl-b" id="hlL" onclick="pickHL('lower')">↓ Lower</button>
+      </div>
+      <div class="hl-feedback" id="hlFeed"></div>
+    </div>
+    <div class="why-box a5" id="whyBox" style="display:none">
+      <div class="why-eyebrow">Why so pricey?</div>
+      <div class="why-body" id="whyBody"></div>
+    </div>
+    <div class="action-row a6">
+      <button class="share-b" onclick="doShare()">Share Result</button>
+      <button class="next-b" onclick="goTo('profile')">My Profile →</button>
+    </div>
+  </div>
+</div>
 
-  -- MAY 01 — Chicken in Omaha
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-01', v_chicken, v_omaha, 3.79, 'BLS APU0200706111 Mar 2026', '2026-04-14',
-    'Omaha is home to some of the largest meat processing operations in the world. Being in the heart of America''s agricultural belt means Omaha residents pay some of the lowest prices for poultry anywhere in the country.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_omaha, 3.79),(v_cid, v_chicago, 4.32),(v_cid, v_denver, 4.45),
-  (v_cid, v_boston, 5.42),(v_cid, v_sf, 5.45),(v_cid, v_nyc, 5.89);
+<!-- PROFILE SCREEN -->
+<div class="screen" id="s-profile">
+  <div class="scroll-body">
+    <div class="profile-top-bar a1">
+      <div class="profile-greeting">Your stats</div>
+      <div class="profile-name-display" id="profileGreeting">Good evening.</div>
+    </div>
+    <div class="iq-hero a2">
+      <div class="iq-left">
+        <div class="iq-eyebrow">Market IQ</div>
+        <div class="iq-number" id="profileIQ">500</div>
+        <div class="iq-sub" id="profileIQSub">Keep playing to build your score</div>
+      </div>
+    </div>
+    <div class="stats-row a3">
+      <div class="stat-tile"><div class="st-val" id="pStatPlayed">0</div><div class="st-label">Days</div></div>
+      <div class="stat-tile"><div class="st-val streak" id="pStatStreak">🔥 0</div><div class="st-label">Streak</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatAvg">—</div><div class="st-label">Avg Score</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatTop50">0</div><div class="st-label">Top 50%</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatTop10" style="color:var(--green)">0</div><div class="st-label">Top 10%</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatLongest">0</div><div class="st-label">Best Streak</div></div>
+    </div>
+    <div class="history-wrap a4">
+      <div class="section-header"><div class="section-title">Recent Results</div></div>
+      <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
+    </div>
+    <button class="signout-btn a5" onclick="signOut()">Sign out</button>
+  </div>
+</div>
 
-  -- MAY 02 — Electricity in New Orleans
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-02', v_electric, v_neworleans, 128.00, 'BLS APU0300721311 Mar 2026', '2026-04-14',
-    'New Orleans has high electricity bills driven by its brutal summer heat and humidity. Air conditioning runs heavily for 6+ months a year, and Louisiana''s aging grid infrastructure means Entergy customers face some of the highest rates in the South.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_neworleans, 128.00),(v_cid, v_houston, 138.00),(v_cid, v_nyc, 112.00),
-  (v_cid, v_chicago, 98.00),(v_cid, v_denver, 98.00),(v_cid, v_seattle, 89.00);
+<!-- NAV -->
+<div class="nav" id="mainNav" style="display:none">
+  <div class="nav-tab active" id="nt-play" onclick="goTo('challenge')">
+    <div class="nav-dot"></div>Play
+  </div>
+  <div class="nav-tab" id="nt-profile" onclick="goTo('profile')">
+    <div class="nav-dot"></div>Profile
+  </div>
+</div>
 
-  -- MAY 03 — Bread in Minneapolis
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-03', v_bread, v_minneapolis, 3.72, 'BLS APU0200702111 Mar 2026', '2026-04-14',
-    'Minneapolis sits in the middle of the wheat belt. Minnesota''s grain producing heritage and strong cooperative grocery culture — including a large number of food co-ops — help keep bread prices reasonable despite the city''s cold climate and higher wages.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_minneapolis, 3.72),(v_cid, v_chicago, 3.89),(v_cid, v_denver, 3.95),
-  (v_cid, v_seattle, 4.42),(v_cid, v_boston, 4.89),(v_cid, v_sf, 5.12);
+<script>
+// ── SUPABASE INIT ──────────────────────────────────────
+const SUPABASE_URL = 'https://oykmltysvbcspwvjiusq.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_uIPT0OTFXf0I3FPVxkmapw_H5aw7aa6';
+const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-  -- MAY 04 — Eggs in Houston
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-04', v_eggs, v_houston, 4.12, 'BLS APU0300000703 Mar 2026', '2026-04-14',
-    'Houston benefits from Texas''s massive egg producing industry — the state is one of the top egg producers in the country. Low state taxes, no city income tax, and fierce grocery competition keep egg prices among the lowest of any major US city.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_houston, 4.12),(v_cid, v_tulsa, 3.89),(v_cid, v_chicago, 4.89),
-  (v_cid, v_denver, 5.12),(v_cid, v_nyc, 6.15),(v_cid, v_anchorage, 8.36);
+// ── STATE ──────────────────────────────────────────────
+let currentUser = null;
+let currentProfile = null;
+let todayChallenge = null;
+let todayCityPrices = [];
+let userGuess = 0;
+let isAuthMode = "signup";
+let alreadyPlayed = false;
 
-  -- MAY 05 — Gas in Portland
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-05', v_gas, v_portland, 4.18, 'BLS APU0400744714 Mar 2026', '2026-04-14',
-    'Oregon''s gas prices are pushed up by the state''s ban on self-service gas — you legally cannot pump your own gas in Oregon. Paying an attendant adds labor cost to every gallon sold, making Portland one of the pricier cities for fuel in the Pacific Northwest.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_portland, 4.18),(v_cid, v_seattle, 4.21),(v_cid, v_denver, 3.45),
-  (v_cid, v_chicago, 3.72),(v_cid, v_houston, 2.98),(v_cid, v_tulsa, 2.79);
+// ── INIT ──────────────────────────────────────────────
+window.addEventListener('load', async () => {
+  const { data: { session } } = await sb.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadApp();
+  } else {
+    hideLoading();
+    goTo('auth');
+  }
+});
 
-  -- MAY 06 — Milk in Washington DC
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-06', v_milk, v_dc, 5.42, 'BLS APU0100000709 Mar 2026', '2026-04-14',
-    'Washington DC''s cost of living ranks among the highest in the nation. The city''s high concentration of government workers, lobbyists, and professionals with strong incomes creates demand that pushes retail prices well above the national average.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_dc, 5.42),(v_cid, v_nyc, 5.12),(v_cid, v_boston, 5.29),
-  (v_cid, v_charlotte, 3.89),(v_cid, v_nashville, 3.72),(v_cid, v_tulsa, 3.45);
+async function loadApp() {
+  await Promise.all([loadChallenge(), loadProfile()]);
+  hideLoading();
+  document.getElementById('mainNav').style.display = 'flex';
+  goTo('challenge');
+}
 
-  -- MAY 07 — Beef in Provo
-  insert into challenges (challenge_date, item_id, city_id, real_price, price_source, price_verified_at, why_text)
-  values ('2026-05-07', v_beef, v_provo, 5.12, 'BLS APU0400703112 Mar 2026', '2026-04-14',
-    'Provo is one of America''s fastest growing but still relatively affordable cities. Utah''s low taxes and business-friendly environment help keep costs down, though the city''s rapid growth is gradually pushing prices higher.')
-  returning id into v_cid;
-  insert into city_prices (challenge_id, city_id, price) values
-  (v_cid, v_provo, 5.12),(v_cid, v_denver, 5.89),(v_cid, v_chicago, 5.89),
-  (v_cid, v_sf, 7.42),(v_cid, v_nyc, 7.42),(v_cid, v_tulsa, 4.79);
+function hideLoading() {
+  const el = document.getElementById('loadingScreen');
+  el.style.opacity = '0';
+  el.style.transition = 'opacity 0.4s';
+  setTimeout(() => el.style.display = 'none', 400);
+}
 
-end $$;
+// ── AUTH ──────────────────────────────────────────────
+function toggleAuthMode() {
+  isAuthMode = isAuthMode === 'signup' ? 'signin' : 'signup';
+  document.getElementById('authTitle').textContent = isAuthMode === 'signup' ? 'Create account' : 'Welcome back';
+  document.getElementById('authBtn').textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
+  document.getElementById('authSwitch').innerHTML = isAuthMode === 'signup'
+    ? 'Already have an account? <span>Sign in</span>'
+    : "Don't have an account? <span>Sign up</span>";
+  document.getElementById('authError').classList.remove('show');
+}
+
+async function handleAuth() {
+  const email = document.getElementById('authEmail').value.trim();
+  const password = document.getElementById('authPassword').value;
+  const btn = document.getElementById('authBtn');
+  const errEl = document.getElementById('authError');
+  errEl.classList.remove('show');
+  if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
+  btn.disabled = true;
+  btn.textContent = 'Please wait...';
+  try {
+    let result;
+    if (isAuthMode === 'signup') {
+      result = await sb.auth.signUp({ email, password });
+      if (result.error) throw result.error;
+      if (result.data.user) {
+        await sb.from('profiles').insert({ id: result.data.user.id, username: email.split('@')[0] });
+        currentUser = result.data.user;
+      }
+    } else {
+      result = await sb.auth.signInWithPassword({ email, password });
+      if (result.error) throw result.error;
+      currentUser = result.data.user;
+    }
+    document.getElementById('loadingScreen').style.display = 'flex';
+    document.getElementById('loadingScreen').style.opacity = '1';
+    await loadApp();
+  } catch (err) {
+    showAuthError(err.message || 'Something went wrong. Please try again.');
+    btn.disabled = false;
+    btn.textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
+  }
+}
+
+function showAuthError(msg) {
+  const el = document.getElementById('authError');
+  el.textContent = msg;
+  el.classList.add('show');
+}
+
+async function signOut() {
+  await sb.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  document.getElementById('mainNav').style.display = 'none';
+  goTo('auth');
+}
+
+// ── LOAD CHALLENGE ────────────────────────────────────
+async function loadChallenge() {
+  try {
+    const today = new Date().toISOString().split('T')[0];
+    const { data, error } = await sb
+      .from('challenges')
+      .select(`
+        id, challenge_date, real_price, why_text, image_url, city_id,
+        items ( id, name, description, category, emoji ),
+        cities ( id, name, state, zip )
+      `)
+      .eq('challenge_date', today)
+      .single();
+
+    if (error || !data) {
+      const { data: recent } = await sb
+        .from('challenges')
+        .select(`
+          id, challenge_date, real_price, why_text, image_url, city_id,
+          items ( id, name, description, category, emoji ),
+          cities ( id, name, state, zip )
+        `)
+        .order('challenge_date', { ascending: false })
+        .limit(1)
+        .single();
+      todayChallenge = recent;
+    } else {
+      todayChallenge = data;
+    }
+    console.log('Challenge loaded:', todayChallenge);
+
+    if (!todayChallenge) return;
+
+    // Load city comparisons
+    const { data: cityData } = await sb
+      .from('city_prices')
+      .select(`*, cities(*)`)
+      .eq('challenge_id', todayChallenge.id)
+      .order('price', { ascending: false });
+    todayCityPrices = cityData || [];
+
+    updateChallengeUI();
+    await checkAlreadyPlayed();
+  } catch (err) {
+    console.error('Challenge load error:', err);
+  }
+}
+
+function updateChallengeUI() {
+  if (!todayChallenge) return;
+  const item = todayChallenge.items;
+  const city = todayChallenge.cities;
+  const dateStr = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  document.getElementById('challengeDateLabel').textContent = dateStr + ' · Daily Challenge';
+  document.getElementById('itemTag').textContent = item.emoji + ' ' + item.category;
+  document.getElementById('itemTitle').textContent = item.name;
+  document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0', '').replace('2026-', '');
+
+  // Draw image - retry until canvas has width
+  function tryDraw(attempts) {
+    const mc = document.getElementById('mainCanvas');
+    if (!mc) return;
+    const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
+    if (w > 50) {
+      drawItemImage('mainCanvas', item.name, item.emoji, w, 300);
+    } else if (attempts < 20) {
+      setTimeout(() => tryDraw(attempts + 1), 100);
+    }
+  }
+  setTimeout(() => tryDraw(0), 150);
+}
+
+async function checkAlreadyPlayed() {
+  if (!currentUser || !todayChallenge) return;
+  const { data } = await sb
+    .from('guesses')
+    .select('*')
+    .eq('user_id', currentUser.id)
+    .eq('challenge_id', todayChallenge.id)
+    .maybeSingle();
+
+  if (data) {
+    alreadyPlayed = true;
+    document.getElementById('guessArea').innerHTML = `
+      <div class="already-played">
+        You already played today!<br>
+        Your score: <strong>${data.accuracy}%</strong><br>
+        <small style="color:var(--text3);font-size:11px">Come back tomorrow for a new challenge</small>
+      </div>`;
+    document.getElementById('inputRow').style.opacity = '0.3';
+    document.getElementById('inputRow').style.pointerEvents = 'none';
+  }
+}
+
+// ── LOAD PROFILE ─────────────────────────────────────
+async function loadProfile() {
+  if (!currentUser) return;
+  const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
+  if (data) {
+    currentProfile = data;
+    updateProfileUI();
+  }
+}
+
+function updateProfileUI() {
+  if (!currentProfile) return;
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
+  document.getElementById('profileGreeting').textContent = greeting;
+  document.getElementById('profileIQ').textContent = currentProfile.market_iq;
+  document.getElementById('streakPill').textContent = '🔥 ' + currentProfile.streak + ' Day Streak';
+  document.getElementById('statIQ').textContent = currentProfile.market_iq;
+  document.getElementById('statPlayed').textContent = currentProfile.total_played;
+  document.getElementById('pStatPlayed').textContent = currentProfile.total_played;
+  document.getElementById('pStatStreak').textContent = '🔥 ' + currentProfile.streak;
+  document.getElementById('pStatTop50').textContent = currentProfile.total_top50;
+  document.getElementById('pStatTop10').textContent = currentProfile.total_top10;
+  document.getElementById('pStatLongest').textContent = currentProfile.longest_streak;
+  const iqPct = Math.min(99, Math.round((currentProfile.market_iq - 300) / 7));
+  document.getElementById('profileIQSub').textContent = currentProfile.total_played > 0
+    ? `Better than ${iqPct}% of players globally`
+    : 'Keep playing to build your score';
+  if (currentProfile.total_played > 0) {
+    document.getElementById('pStatAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
+    document.getElementById('statAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
+  }
+  loadHistory();
+}
+
+async function loadHistory() {
+  const { data } = await sb
+    .from('guesses')
+    .select(`*, challenges(*, items(*), cities(*))`)
+    .eq('user_id', currentUser.id)
+    .order('created_at', { ascending: false })
+    .limit(5);
+
+  if (!data || data.length === 0) return;
+  const container = document.getElementById('historyList');
+  container.innerHTML = data.map(g => {
+    const item = g.challenges?.items;
+    const city = g.challenges?.cities;
+    const cls = g.accuracy >= 60 ? 'g' : 'b';
+    return `<div class="hist-item">
+      <div class="hist-icon">${item?.emoji || '🛒'}</div>
+      <div class="hist-info">
+        <div class="hist-name">${item?.name || '—'}</div>
+        <div class="hist-city">${city?.name || '—'}, ${city?.state || ''}</div>
+      </div>
+      <div class="hist-score ${cls}">${g.accuracy}%</div>
+    </div>`;
+  }).join('');
+}
+
+// ── SUBMIT GUESS ──────────────────────────────────────
+async function submitGuess() {
+  if (alreadyPlayed) return;
+  const val = parseFloat(document.getElementById('priceIn').value);
+  if (!val || val <= 0) {
+    const row = document.getElementById('inputRow');
+    row.style.borderColor = 'var(--red)';
+    setTimeout(() => row.style.borderColor = '', 700);
+    return;
+  }
+  userGuess = val;
+  const realPrice = parseFloat(todayChallenge.real_price);
+  const diff = Math.abs(val - realPrice);
+  const accuracy = Math.max(0, Math.round((1 - diff / realPrice) * 100));
+  const crowdPct = accuracy >= 85 ? 87 : accuracy >= 70 ? 71 : accuracy >= 50 ? 48 : 24;
+
+  // Save to database
+  try {
+    const { error: insertError } = await sb.from('guesses').insert({
+      user_id: currentUser.id,
+      challenge_id: todayChallenge.id,
+      guess_amount: val,
+      accuracy: accuracy,
+      crowd_percentile: crowdPct
+    });
+    if (insertError) { console.error('Already played today'); return; }
+    alreadyPlayed = true;
+
+    // Update profile stats
+    const newPlayed = (currentProfile.total_played || 0) + 1;
+    const newStreak = (currentProfile.streak || 0) + 1;
+    const newIQ = Math.min(999, Math.max(100, Math.round(currentProfile.market_iq + (accuracy - 70) * 2)));
+    const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : currentProfile.total_top50;
+    const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : currentProfile.total_top10;
+    const newLongest = Math.max(newStreak, currentProfile.longest_streak || 0);
+
+    await sb.from('profiles').update({
+      total_played: newPlayed,
+      streak: newStreak,
+      market_iq: newIQ,
+      total_top50: newTop50,
+      total_top10: newTop10,
+      longest_streak: newLongest
+    }).eq('id', currentUser.id);
+
+    currentProfile = { ...currentProfile, total_played: newPlayed, streak: newStreak, market_iq: newIQ, total_top50: newTop50, total_top10: newTop10, longest_streak: newLongest };
+  } catch (err) {
+    console.error('Save error:', err);
+  }
+
+  showReveal(val, realPrice, accuracy, crowdPct);
+}
+
+function showReveal(guess, realPrice, accuracy, crowdPct) {
+  const item = todayChallenge.items;
+  const city = todayChallenge.cities;
+  const cls = accuracy >= 75 ? 'great' : accuracy >= 50 ? 'ok' : 'miss';
+  const label = accuracy >= 85 ? 'Sharp Eye' : accuracy >= 70 ? 'Close Call' : accuracy >= 50 ? 'Getting Warm' : 'Way Off';
+
+  document.getElementById('revealItemName').textContent = item.name;
+  document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
+  document.getElementById('yourGuessVal').textContent = '$' + guess.toFixed(2);
+  const challengeDateFormatted = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
+  const revealDateEl = document.getElementById('revealDateLabel');
+  if (revealDateEl) revealDateEl.textContent = challengeDateFormatted;
+  document.getElementById('accNum').textContent = accuracy + '%';
+  document.getElementById('accNum').className = 'acc-num ' + cls;
+  document.getElementById('trackFill').className = 'track-fill ' + cls;
+  document.getElementById('resultBadge').textContent = label;
+  document.getElementById('resultBadge').className = 'result-badge ' + cls;
+  document.getElementById('crowdVal').textContent = crowdPct + '% of players';
+
+  // City comparisons
+  const maxPrice = Math.max(...todayCityPrices.map(c => parseFloat(c.price)));
+  const cityListEl = document.getElementById('cityList');
+  cityListEl.innerHTML = todayCityPrices.map((c, i) => {
+    const isToday = c.city_id === todayChallenge.city_id;
+    const pct = Math.round((parseFloat(c.price) / maxPrice) * 100);
+    return `<div class="city-entry${isToday ? ' highlight' : ''}" id="ce${i}">
+      <div class="city-rank">${i+1}</div>
+      <div class="city-info">
+        <div class="city-entry-name">${c.cities.name}${isToday ? ' <span class="today-chip">Today</span>' : ''}</div>
+        <div class="city-entry-state">${c.cities.state}</div>
+        <div class="city-bar-bg"><div class="city-bar-inner" id="cb${i}"></div></div>
+      </div>
+      <div class="city-price-val">$${parseFloat(c.price).toFixed(2)}</div>
+    </div>`;
+  }).join('');
+
+  // Why text
+  if (todayChallenge.why_text) {
+    document.getElementById('whyBody').textContent = todayChallenge.why_text;
+    document.getElementById('whyBox').style.display = 'block';
+  }
+
+  // Draw reveal image
+  setTimeout(() => {
+    const rc = document.getElementById('revealCanvas');
+    if (rc) {
+      const wrap = document.getElementById('revealImgWrap');
+      const w = wrap?.offsetWidth || rc.offsetWidth || 380;
+      drawItemImage('revealCanvas', item.name, item.emoji, w || 380, 200);
+    }
+  }, 200);
+
+  goTo('reveal');
+
+  setTimeout(() => {
+    document.getElementById('trackFill').style.width = accuracy + '%';
+    todayCityPrices.forEach((_, i) => {
+      setTimeout(() => {
+        const ce = document.getElementById('ce' + i);
+        const cb = document.getElementById('cb' + i);
+        if (ce) ce.classList.add('visible');
+        if (cb) {
+          const pct = Math.round((parseFloat(todayCityPrices[i].price) / maxPrice) * 100);
+          cb.style.width = pct + '%';
+        }
+      }, i * 100);
+    });
+  }, 300);
+
+  updateProfileUI();
+}
+
+// ── HIGHER LOWER ──────────────────────────────────────
+async function pickHL(choice) {
+  document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
+  document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
+  const feed = document.getElementById('hlFeed');
+  feed.textContent = choice === 'higher'
+    ? '64% of players say this costs more than in their city.'
+    : 'Interesting — only 36% said this was cheaper. You might live somewhere pricey!';
+  feed.classList.add('show');
+
+  // Save to database
+  if (currentUser && todayChallenge) {
+    await sb.from('guesses').update({ higher_lower: choice })
+      .eq('user_id', currentUser.id).eq('challenge_id', todayChallenge.id);
+  }
+}
+
+// ── SHARE ─────────────────────────────────────────────
+function doShare() {
+  const acc = document.getElementById('accNum').textContent;
+  const item = todayChallenge?.items?.name || 'Daily Item';
+  const city = todayChallenge?.cities?.name || 'Unknown City';
+  const realPrice = todayChallenge?.real_price || '—';
+  const txt = `RIPOFF — ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'})}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nReal: $${parseFloat(realPrice).toFixed(2)} / My guess: $${userGuess.toFixed(2)}\nAccuracy: ${acc}\n\nripoff.game`;
+  if (navigator.share) {
+    navigator.share({ text: txt });
+  } else {
+    navigator.clipboard?.writeText(txt);
+    showToast('Result copied to clipboard!');
+  }
+}
+
+// ── CANVAS DRAWING ────────────────────────────────────
+function drawItemImage(canvasId, itemName, emoji, w, h) {
+  const c = document.getElementById(canvasId);
+  if (!c) return;
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d');
+  const cx = w/2, cy = h/2;
+
+  // Dark background
+  const bg = ctx.createLinearGradient(0, 0, w, h);
+  bg.addColorStop(0, '#1c1a14');
+  bg.addColorStop(1, '#0d0d0d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0, 0, w, h);
+
+  // Dot grid texture
+  ctx.fillStyle = 'rgba(255,255,255,0.018)';
+  for (let x = 24; x < w; x += 32)
+    for (let y = 24; y < h; y += 32) {
+      ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI*2); ctx.fill();
+    }
+
+  // Radial glow behind subject
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w,h)*0.45);
+  glow.addColorStop(0, 'rgba(232,197,71,0.1)');
+  glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, 0, w, h);
+
+  // Draw subject based on item name
+  const name = (itemName || '').toLowerCase();
+  ctx.save();
+  if (name.includes('egg')) drawEggs(ctx, cx, cy, w, h);
+  else if (name.includes('milk')) drawMilk(ctx, cx, cy, w, h);
+  else if (name.includes('bread')) drawBread(ctx, cx, cy, w, h);
+  else if (name.includes('beef') || name.includes('burger') || name.includes('big mac')) drawBurger(ctx, cx, cy, w, h);
+  else if (name.includes('chicken')) drawChicken(ctx, cx, cy, w, h);
+  else if (name.includes('latte') || name.includes('coffee')) drawCoffee(ctx, cx, cy, w, h);
+  else if (name.includes('gas') || name.includes('fuel')) drawGas(ctx, cx, cy, w, h);
+  else if (name.includes('beer') || name.includes('pint')) drawBeer(ctx, cx, cy, w, h);
+  else if (name.includes('pizza')) drawPizza(ctx, cx, cy, w, h);
+  else if (name.includes('haircut')) drawScissors(ctx, cx, cy, w, h);
+  else if (name.includes('gym')) drawGym(ctx, cx, cy, w, h);
+  else if (name.includes('movie')) drawMovie(ctx, cx, cy, w, h);
+  else if (name.includes('hotel')) drawHotel(ctx, cx, cy, w, h);
+  else if (name.includes('rent') || name.includes('apartment')) drawHouse(ctx, cx, cy, w, h);
+  else drawGenericEmoji(ctx, cx, cy, w, h, emoji);
+  ctx.restore();
+
+  // Bottom gold line
+  ctx.fillStyle = 'rgba(232,197,71,0.35)';
+  ctx.fillRect(0, h-2, w, 2);
+}
+
+function rr(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.closePath();
+}
+
+function shadow(ctx, blur, color, ox, oy) {
+  ctx.shadowBlur = blur; ctx.shadowColor = color;
+  ctx.shadowOffsetX = ox||0; ctx.shadowOffsetY = oy||0;
+}
+function noShadow(ctx) { ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0; }
+
+function drawEggs(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/320;
+  // Carton base
+  shadow(ctx, 30, 'rgba(0,0,0,0.6)', 0, 8);
+  ctx.fillStyle = '#c8a96e';
+  rr(ctx, cx-100*s, cy-40*s, 200*s, 90*s, 10*s);
+  ctx.fill();
+  noShadow(ctx);
+  // Carton lid
+  ctx.fillStyle = '#e0be85';
+  rr(ctx, cx-100*s, cy-80*s, 200*s, 48*s, 8*s);
+  ctx.fill();
+  // Dividers
+  ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5;
+  [-33,33].forEach(dx => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-40*s);
+    ctx.lineTo(cx+dx*s, cy+50*s);
+    ctx.stroke();
+  });
+  // Label text
+  ctx.fillStyle = 'rgba(80,50,10,0.55)';
+  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('GRADE A LARGE', cx, cy-60*s);
+  // Three eggs
+  [[-60,10],[0,10],[60,10]].forEach(([dx,dy]) => {
+    shadow(ctx, 10, 'rgba(0,0,0,0.4)', 0, 4);
+    ctx.beginPath();
+    ctx.ellipse(cx+dx*s, cy+dy*s, 22*s, 30*s, 0, 0, Math.PI*2);
+    const eg = ctx.createRadialGradient(cx+dx*s-6*s, cy+dy*s-10*s, 2*s, cx+dx*s, cy+dy*s, 28*s);
+    eg.addColorStop(0, '#f5f0e0'); eg.addColorStop(0.5,'#e8dcc0'); eg.addColorStop(1,'#c8b890');
+    ctx.fillStyle = eg; ctx.fill();
+    noShadow(ctx);
+    ctx.beginPath();
+    ctx.ellipse(cx+dx*s-7*s, cy+dy*s-10*s, 6*s, 4*s, -0.4, 0, Math.PI*2);
+    ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
+  });
+}
+
+function drawMilk(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Jug body
+  ctx.fillStyle = '#e8e0d0';
+  rr(ctx, cx-45*s, cy-60*s, 90*s, 130*s, 12*s);
+  ctx.fill();
+  noShadow(ctx);
+  // Handle
+  ctx.strokeStyle = '#d0c8b8'; ctx.lineWidth = 12*s; ctx.lineCap = 'round';
+  ctx.beginPath();
+  ctx.arc(cx+55*s, cy+10*s, 28*s, -Math.PI*0.5, Math.PI*0.5);
+  ctx.stroke();
+  // Label
+  ctx.fillStyle = '#1a6b3a';
+  rr(ctx, cx-38*s, cy-20*s, 76*s, 50*s, 6*s);
+  ctx.fill();
+  ctx.fillStyle = 'white';
+  ctx.font = `bold ${Math.round(14*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('MILK', cx, cy+5*s);
+  ctx.font = `${Math.round(9*s)}px sans-serif`;
+  ctx.fillText('WHOLE', cx, cy+18*s);
+  // Cap
+  ctx.fillStyle = '#c8460a';
+  rr(ctx, cx-20*s, cy-78*s, 40*s, 22*s, 8*s);
+  ctx.fill();
+}
+
+function drawBread(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Loaf body
+  ctx.fillStyle = '#c8860a';
+  ctx.beginPath();
+  ctx.ellipse(cx, cy+20*s, 85*s, 55*s, 0, 0, Math.PI*2);
+  ctx.fill();
+  noShadow(ctx);
+  // Top dome
+  const lg = ctx.createRadialGradient(cx-20*s, cy-30*s, 5*s, cx, cy, 80*s);
+  lg.addColorStop(0, '#e8a020'); lg.addColorStop(1, '#a06808');
+  ctx.fillStyle = lg;
+  ctx.beginPath();
+  ctx.ellipse(cx, cy, 80*s, 60*s, 0, 0, Math.PI*2);
+  ctx.fill();
+  // Score lines
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2*s;
+  [-30,0,30].forEach(dx => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-30*s);
+    ctx.quadraticCurveTo(cx+dx*s+10*s, cy, cx+dx*s, cy+30*s);
+    ctx.stroke();
+  });
+  // Sesame dots
+  ctx.fillStyle = 'rgba(255,220,100,0.6)';
+  [[-20,-20],[10,-30],[30,-10],[-35,-5],[0,0]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 4*s, 2*s, 0.5, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawBurger(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Bottom bun
+  ctx.fillStyle = '#c8860a';
+  ctx.beginPath(); ctx.ellipse(cx, cy+55*s, 75*s, 18*s, 0, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Patty
+  ctx.fillStyle = '#6b3010';
+  ctx.beginPath(); ctx.ellipse(cx, cy+35*s, 72*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
+  // Cheese
+  ctx.fillStyle = '#e8b820';
+  ctx.beginPath(); ctx.ellipse(cx, cy+20*s, 76*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
+  // Lettuce
+  ctx.fillStyle = '#3a8a20';
+  ctx.beginPath(); ctx.ellipse(cx, cy+8*s, 80*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+  // Tomato
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath(); ctx.ellipse(cx, cy-4*s, 70*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
+  // Top bun
+  const bg = ctx.createRadialGradient(cx-20*s, cy-45*s, 5*s, cx, cy-20*s, 65*s);
+  bg.addColorStop(0,'#e8a020'); bg.addColorStop(1,'#b07010');
+  ctx.fillStyle = bg;
+  ctx.beginPath(); ctx.ellipse(cx, cy-22*s, 72*s, 38*s, 0, 0, Math.PI*2); ctx.fill();
+  // Sesame seeds
+  ctx.fillStyle = 'rgba(255,220,100,0.7)';
+  [[-25,-48],[0,-55],[25,-48],[-12,-42],[15,-42]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 5*s, 3*s, 0.3, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawChicken(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Plate
+  ctx.fillStyle = '#2a2a2a';
+  ctx.beginPath(); ctx.ellipse(cx, cy+40*s, 90*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Chicken breast shape
+  const cg = ctx.createRadialGradient(cx-15*s, cy-15*s, 5*s, cx, cy, 70*s);
+  cg.addColorStop(0,'#f0d080'); cg.addColorStop(0.5,'#d4a040'); cg.addColorStop(1,'#a06820');
+  ctx.fillStyle = cg;
+  ctx.beginPath();
+  ctx.moveTo(cx-60*s, cy+30*s);
+  ctx.bezierCurveTo(cx-70*s, cy-20*s, cx-20*s, cy-60*s, cx+20*s, cy-50*s);
+  ctx.bezierCurveTo(cx+60*s, cy-40*s, cx+65*s, cy+10*s, cx+50*s, cy+35*s);
+  ctx.bezierCurveTo(cx+20*s, cy+50*s, cx-30*s, cy+50*s, cx-60*s, cy+30*s);
+  ctx.fill();
+  // Grill marks
+  ctx.strokeStyle = 'rgba(80,40,0,0.4)'; ctx.lineWidth = 4*s; ctx.lineCap='round';
+  [[-20,0],[0,0],[20,0]].forEach(([dx]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s-20*s, cy-20*s);
+    ctx.lineTo(cx+dx*s+10*s, cy+20*s);
+    ctx.stroke();
+  });
+}
+
+function drawCoffee(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Cup body
+  ctx.fillStyle = '#e8e0d4';
+  ctx.beginPath();
+  ctx.moveTo(cx-45*s, cy-30*s);
+  ctx.lineTo(cx-38*s, cy+60*s);
+  ctx.lineTo(cx+38*s, cy+60*s);
+  ctx.lineTo(cx+45*s, cy-30*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Green sleeve
+  ctx.fillStyle = '#1a6b3a';
+  rr(ctx, cx-46*s, cy+5*s, 92*s, 38*s, 4*s); ctx.fill();
+  // Coffee surface
+  ctx.fillStyle = '#3a1a0a';
+  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 45*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
+  // Latte art
+  ctx.strokeStyle = 'rgba(200,160,80,0.6)'; ctx.lineWidth = 2*s;
+  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 20*s, 6*s, 0, 0, Math.PI*2); ctx.stroke();
+  // Handle
+  ctx.strokeStyle = '#d0c8bc'; ctx.lineWidth = 8*s;
+  ctx.beginPath(); ctx.arc(cx+52*s, cy+20*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
+  // Steam
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3*s; ctx.lineCap='round';
+  [[-15,0],[0,0],[15,0]].forEach(([dx]) => {
+    ctx.beginPath();
+    ctx.moveTo(cx+dx*s, cy-45*s);
+    ctx.quadraticCurveTo(cx+dx*s+8*s, cy-60*s, cx+dx*s, cy-75*s);
+    ctx.stroke();
+  });
+}
+
+function drawGas(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Pump body
+  ctx.fillStyle = '#c83020';
+  rr(ctx, cx-40*s, cy-50*s, 80*s, 110*s, 10*s); ctx.fill();
+  noShadow(ctx);
+  // Screen
+  ctx.fillStyle = '#1a1a2a';
+  rr(ctx, cx-28*s, cy-38*s, 56*s, 36*s, 6*s); ctx.fill();
+  ctx.fillStyle = '#4ade80';
+  ctx.font = `bold ${Math.round(14*s)}px monospace`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('$4.89', cx, cy-20*s);
+  // Nozzle
+  ctx.fillStyle = '#888';
+  rr(ctx, cx+38*s, cy-10*s, 30*s, 12*s, 4*s); ctx.fill();
+  ctx.fillStyle = '#666';
+  rr(ctx, cx+62*s, cy-20*s, 8*s, 30*s, 3*s); ctx.fill();
+  // Price label
+  ctx.fillStyle = '#e8c547';
+  rr(ctx, cx-28*s, cy+10*s, 56*s, 28*s, 4*s); ctx.fill();
+  ctx.fillStyle = '#080808';
+  ctx.font = `bold ${Math.round(10*s)}px sans-serif`;
+  ctx.fillText('REGULAR', cx, cy+24*s);
+}
+
+function drawBeer(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
+  // Glass body
+  ctx.fillStyle = 'rgba(200,160,40,0.9)';
+  ctx.beginPath();
+  ctx.moveTo(cx-35*s, cy-50*s);
+  ctx.lineTo(cx-42*s, cy+60*s);
+  ctx.lineTo(cx+42*s, cy+60*s);
+  ctx.lineTo(cx+35*s, cy-50*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Glass shine
+  ctx.fillStyle = 'rgba(255,255,255,0.15)';
+  ctx.beginPath();
+  ctx.moveTo(cx-28*s, cy-45*s);
+  ctx.lineTo(cx-20*s, cy-45*s);
+  ctx.lineTo(cx-25*s, cy+50*s);
+  ctx.lineTo(cx-33*s, cy+50*s);
+  ctx.closePath(); ctx.fill();
+  // Foam
+  ctx.fillStyle = '#f5f0e8';
+  ctx.beginPath(); ctx.ellipse(cx, cy-50*s, 38*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
+  // Bubble details on foam
+  ctx.fillStyle = 'rgba(255,255,255,0.5)';
+  [[-15,-55],[5,-62],[20,-52],[-5,-45]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 4*s, 0, Math.PI*2); ctx.fill();
+  });
+  // Handle
+  ctx.strokeStyle = 'rgba(200,160,40,0.8)'; ctx.lineWidth = 10*s;
+  ctx.beginPath(); ctx.arc(cx+50*s, cy+10*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
+}
+
+function drawPizza(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 8);
+  // Full pie
+  ctx.fillStyle = '#c87820';
+  ctx.beginPath(); ctx.arc(cx, cy, 80*s, 0, Math.PI*2); ctx.fill();
+  noShadow(ctx);
+  // Sauce
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath(); ctx.arc(cx, cy, 68*s, 0, Math.PI*2); ctx.fill();
+  // Cheese
+  ctx.fillStyle = '#f0d060';
+  ctx.beginPath(); ctx.arc(cx, cy, 60*s, 0, Math.PI*2); ctx.fill();
+  // Slice lines
+  ctx.strokeStyle = '#c87820'; ctx.lineWidth = 3*s;
+  for(let i=0; i<6; i++) {
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + Math.cos(i*Math.PI/3)*80*s, cy + Math.sin(i*Math.PI/3)*80*s);
+    ctx.stroke();
+  }
+  // Pepperoni
+  ctx.fillStyle = '#a02818';
+  [[0,-35],[30,20],[-30,20],[0,10],[-20,-20],[20,-20]].forEach(([dx,dy]) => {
+    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 8*s, 0, Math.PI*2); ctx.fill();
+  });
+}
+
+function drawScissors(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  ctx.strokeStyle = '#c8c8d8'; ctx.lineWidth = 10*s; ctx.lineCap='round';
+  // Blade 1
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx-50*s, cy-60*s);
+  ctx.stroke();
+  // Blade 2
+  ctx.beginPath();
+  ctx.moveTo(cx, cy);
+  ctx.lineTo(cx+50*s, cy-60*s);
+  ctx.stroke();
+  noShadow(ctx);
+  // Pivot
+  ctx.fillStyle = '#e8c547';
+  ctx.beginPath(); ctx.arc(cx, cy, 10*s, 0, Math.PI*2); ctx.fill();
+  // Handles
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 14*s;
+  ctx.beginPath();
+  ctx.moveTo(cx-8*s, cy+10*s);
+  ctx.lineTo(cx-35*s, cy+60*s);
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(cx+8*s, cy+10*s);
+  ctx.lineTo(cx+35*s, cy+60*s);
+  ctx.stroke();
+  // Handle rings
+  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 8*s;
+  ctx.beginPath(); ctx.ellipse(cx-42*s, cy+65*s, 18*s, 14*s, 0.3, 0, Math.PI*2); ctx.stroke();
+  ctx.beginPath(); ctx.ellipse(cx+42*s, cy+65*s, 18*s, 14*s, -0.3, 0, Math.PI*2); ctx.stroke();
+}
+
+function drawGym(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Bar
+  ctx.fillStyle = '#888';
+  rr(ctx, cx-80*s, cy-8*s, 160*s, 16*s, 6*s); ctx.fill();
+  noShadow(ctx);
+  // Weights left
+  ctx.fillStyle = '#444';
+  rr(ctx, cx-90*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
+  rr(ctx, cx-75*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
+  // Weights right
+  rr(ctx, cx+70*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
+  rr(ctx, cx+61*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
+  // Center grip
+  ctx.fillStyle = '#666';
+  rr(ctx, cx-25*s, cy-8*s, 50*s, 16*s, 4*s); ctx.fill();
+}
+
+function drawMovie(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Ticket body
+  ctx.fillStyle = '#e8c547';
+  rr(ctx, cx-80*s, cy-35*s, 160*s, 70*s, 10*s); ctx.fill();
+  noShadow(ctx);
+  // Tear line
+  ctx.strokeStyle = '#b8950a'; ctx.lineWidth = 2*s; ctx.setLineDash([6*s, 4*s]);
+  ctx.beginPath(); ctx.moveTo(cx+30*s, cy-35*s); ctx.lineTo(cx+30*s, cy+35*s); ctx.stroke();
+  ctx.setLineDash([]);
+  // Left notch
+  ctx.fillStyle = '#0d0d0d';
+  ctx.beginPath(); ctx.arc(cx-80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx+80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
+  // Text
+  ctx.fillStyle = '#080808';
+  ctx.font = `bold ${Math.round(13*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillText('ADMIT ONE', cx-20*s, cy-8*s);
+  ctx.font = `${Math.round(10*s)}px sans-serif`;
+  ctx.fillText('CINEMA', cx-20*s, cy+8*s);
+  // Stub stars
+  ctx.fillStyle = '#b8950a';
+  ctx.font = `${Math.round(16*s)}px serif`;
+  ctx.fillText('★', cx+50*s, cy);
+}
+
+function drawHotel(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Building
+  ctx.fillStyle = '#3a3a4a';
+  rr(ctx, cx-60*s, cy-60*s, 120*s, 120*s, 6*s); ctx.fill();
+  noShadow(ctx);
+  // Windows
+  ctx.fillStyle = '#e8c547';
+  [[-30,-40],[-10,-40],[10,-40],[30,-40],
+   [-30,-15],[-10,-15],[10,-15],[30,-15],
+   [-30,10],[-10,10],[10,10],[30,10]].forEach(([dx,dy]) => {
+    rr(ctx, cx+dx*s-8*s, cy+dy*s-10*s, 16*s, 20*s, 2*s); ctx.fill();
+  });
+  // Door
+  ctx.fillStyle = '#c8860a';
+  rr(ctx, cx-12*s, cy+30*s, 24*s, 30*s, 3*s); ctx.fill();
+  // Sign
+  ctx.fillStyle = '#e8c547';
+  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle = '#080808';
+  rr(ctx, cx-35*s, cy-75*s, 70*s, 22*s, 4*s);
+  ctx.fillStyle = '#e8c547'; ctx.fill();
+  ctx.fillStyle = '#080808';
+  ctx.fillText('HOTEL', cx, cy-64*s);
+}
+
+function drawHouse(ctx, cx, cy, w, h) {
+  const s = Math.min(w,h)/300;
+  shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
+  // Roof
+  ctx.fillStyle = '#c83020';
+  ctx.beginPath();
+  ctx.moveTo(cx, cy-75*s);
+  ctx.lineTo(cx-75*s, cy-15*s);
+  ctx.lineTo(cx+75*s, cy-15*s);
+  ctx.closePath(); ctx.fill();
+  noShadow(ctx);
+  // Chimney
+  ctx.fillStyle = '#a02818';
+  rr(ctx, cx+30*s, cy-80*s, 18*s, 40*s, 2*s); ctx.fill();
+  // Walls
+  ctx.fillStyle = '#e8dcc0';
+  rr(ctx, cx-65*s, cy-15*s, 130*s, 80*s, 4*s); ctx.fill();
+  // Door
+  ctx.fillStyle = '#8a5a20';
+  rr(ctx, cx-15*s, cy+20*s, 30*s, 45*s, 4*s); ctx.fill();
+  // Doorknob
+  ctx.fillStyle = '#e8c547';
+  ctx.beginPath(); ctx.arc(cx+8*s, cy+44*s, 4*s, 0, Math.PI*2); ctx.fill();
+  // Windows
+  ctx.fillStyle = '#a8d8f0';
+  rr(ctx, cx-52*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
+  rr(ctx, cx+24*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
+  ctx.strokeStyle = '#6888a0'; ctx.lineWidth = 2*s;
+  ctx.beginPath(); ctx.moveTo(cx-38*s, cy-5*s); ctx.lineTo(cx-38*s, cy+23*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx-52*s, cy+9*s); ctx.lineTo(cx-24*s, cy+9*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+38*s, cy-5*s); ctx.lineTo(cx+38*s, cy+23*s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx+24*s, cy+9*s); ctx.lineTo(cx+52*s, cy+9*s); ctx.stroke();
+}
+
+function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
+  const fontSize = Math.round(Math.min(w,h) * 0.38);
+  ctx.font = fontSize + 'px serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)';
+  ctx.shadowBlur = 20;
+  ctx.fillText(emoji || '🛒', cx, cy);
+  ctx.shadowBlur = 0;
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+function goTo(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + name).classList.add('active');
+  ['play', 'profile'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
+  if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
+  if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
+  window.scrollTo(0, 0);
+  if (name === 'challenge' && todayChallenge) {
+    if (alreadyPlayed) {
+      // Already played — go straight to reveal
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById('s-reveal').classList.add('active');
+      document.getElementById('nt-play')?.classList.add('active');
+      return;
+    }
+    setTimeout(() => {
+      const mc = document.getElementById('mainCanvas');
+      if (mc) {
+        const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
+        drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, w || 400, 300);
+      }
+    }, 200);
+  }
+}
+
+// ── TOAST ─────────────────────────────────────────────
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+</body>
+</html>
