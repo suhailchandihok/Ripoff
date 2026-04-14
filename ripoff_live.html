@@ -414,6 +414,14 @@ body::after {
       <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
     </div>
     <button class="signout-btn a5" onclick="signOut()">Sign out</button>
+
+    <div style="padding: 1.5rem 1.5rem 0; text-align: center;">
+      <p style="font-size:10px;color:rgba(242,237,228,0.25);line-height:1.7;letter-spacing:0.3px;">
+        Prices sourced from the US Bureau of Labor Statistics (BLS.gov) — public domain government data. Regional averages updated monthly. Actual prices vary by retailer and location.<br><br>
+        Ripoff is an entertainment and educational product. Not financial advice.<br><br>
+        <span style="color:rgba(232,197,71,0.3);">© 2026 Ripoff</span>
+      </p>
+    </div>
   </div>
 </div>
 
@@ -741,6 +749,7 @@ function showReveal(guess, realPrice, accuracy, crowdPct) {
   const cls = accuracy >= 75 ? 'great' : accuracy >= 50 ? 'ok' : 'miss';
   const label = accuracy >= 85 ? 'Sharp Eye' : accuracy >= 70 ? 'Close Call' : accuracy >= 50 ? 'Getting Warm' : 'Way Off';
 
+  document.getElementById('disclaimerBanner').style.display = 'block';
   document.getElementById('revealItemName').textContent = item.name;
   document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
   document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
@@ -1111,10 +1120,11 @@ function drawGas(ctx, cx, cy, w, h) {
   // Screen
   ctx.fillStyle = '#1a1a2a';
   rr(ctx, cx-28*s, cy-38*s, 56*s, 36*s, 6*s); ctx.fill();
-  ctx.fillStyle = '#4ade80';
+  ctx.fillStyle = '#1a1a2a';
   ctx.font = `bold ${Math.round(14*s)}px monospace`;
   ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('$4.89', cx, cy-20*s);
+  ctx.fillText('? ? ?', cx, cy-20*s);
+  ctx.fillStyle = '#4ade80';
   // Nozzle
   ctx.fillStyle = '#888';
   rr(ctx, cx+38*s, cy-10*s, 30*s, 12*s, 4*s); ctx.fill();
@@ -1377,5 +1387,19 @@ function showToast(msg) {
   setTimeout(() => t.classList.remove('show'), 2500);
 }
 </script>
+
+<div id="disclaimerBanner" style="
+  background: rgba(232,197,71,0.06);
+  border-top: 0.5px solid rgba(232,197,71,0.15);
+  padding: 1rem 1.5rem;
+  max-width: 430px;
+  margin: 0 auto;
+  display: none;
+">
+  <p style="font-size:10px;color:rgba(242,237,228,0.35);line-height:1.6;letter-spacing:0.3px;">
+    <strong style="color:rgba(232,197,71,0.5);letter-spacing:1px;font-size:9px;">DISCLAIMER</strong><br>
+    Prices reflect verified regional averages sourced from the US Bureau of Labor Statistics Consumer Price Index (CPI) and represent approximate market rates at time of publication. Actual prices vary by retailer, date, and location. Ripoff is an entertainment and educational product — not financial or consumer advice. Price data is updated monthly. Source: BLS.gov, public domain government data.
+  </p>
+</div>
 </body>
 </html>
