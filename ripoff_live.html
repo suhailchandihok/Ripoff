@@ -40,12 +40,12 @@ body::after {
   pointer-events: none; z-index: 9999; opacity: 0.4;
 }
 
-/* ── SCREENS ── */
+/* SCREENS */
 .screen { display: none; max-width: 430px; margin: 0 auto; min-height: 100vh; flex-direction: column; }
 .screen.active { display: flex; }
 .scroll-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-bottom: 100px; }
 
-/* ── LOADING ── */
+/* LOADING */
 #loadingScreen {
   position: fixed; inset: 0; background: var(--bg);
   display: flex; flex-direction: column; align-items: center; justify-content: center;
@@ -57,27 +57,17 @@ body::after {
 .load-text { font-size: 12px; color: var(--text3); letter-spacing: 2px; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* ── AUTH SCREEN ── */
+/* AUTH */
 .auth-wrap { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 2rem 1.5rem; gap: 2rem; }
 .auth-logo { font-family: 'Instrument Serif', serif; font-size: 56px; font-style: italic; }
 .auth-logo span { color: var(--accent); }
 .auth-tagline { font-size: 14px; color: var(--text2); text-align: center; line-height: 1.6; max-width: 280px; }
 .auth-card { width: 100%; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.75rem; display: flex; flex-direction: column; gap: 12px; }
 .auth-title { font-size: 16px; font-weight: 700; margin-bottom: 4px; }
-.auth-input {
-  width: 100%; padding: 14px 16px; border-radius: var(--r-md);
-  border: 0.5px solid var(--border2); background: var(--s2);
-  color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; outline: none;
-  transition: border-color 0.15s;
-}
+.auth-input { width: 100%; padding: 14px 16px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s2); color: var(--text); font-family: 'Syne', sans-serif; font-size: 14px; outline: none; transition: border-color 0.15s; }
 .auth-input:focus { border-color: var(--accent); }
 .auth-input::placeholder { color: var(--text3); }
-.auth-btn {
-  width: 100%; padding: 15px; border-radius: var(--r-md); border: none;
-  background: var(--accent); color: #080808; font-family: 'Syne', sans-serif;
-  font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase;
-  cursor: pointer; transition: all 0.15s; margin-top: 4px;
-}
+.auth-btn { width: 100%; padding: 15px; border-radius: var(--r-md); border: none; background: var(--accent); color: #080808; font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; margin-top: 4px; }
 .auth-btn:active { transform: scale(0.98); }
 .auth-btn:disabled { background: var(--s3); color: var(--text3); cursor: not-allowed; }
 .auth-switch { font-size: 12px; color: var(--text3); text-align: center; cursor: pointer; }
@@ -85,14 +75,14 @@ body::after {
 .auth-error { font-size: 12px; color: var(--red); text-align: center; display: none; }
 .auth-error.show { display: block; }
 
-/* ── TOP BAR ── */
+/* TOP BAR */
 .top-bar { display: flex; align-items: center; justify-content: space-between; padding: 3.5rem 1.5rem 1rem; }
 .wordmark { font-family: 'Instrument Serif', serif; font-size: 28px; font-style: italic; color: var(--text); }
 .wordmark span { color: var(--accent); }
 .streak-pill { display: flex; align-items: center; gap: 5px; background: var(--accent-dim); border: 0.5px solid rgba(232,197,71,0.25); border-radius: 20px; padding: 6px 12px; font-size: 12px; font-weight: 700; color: var(--accent); letter-spacing: 0.5px; }
 .day-label { padding: 0 1.5rem; font-size: 10px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
 
-/* ── IMAGE CARD ── */
+/* IMAGE CARD */
 .image-card { margin: 0 1.25rem; border-radius: var(--r-xl); overflow: hidden; position: relative; background: var(--s2); border: 0.5px solid var(--border2); }
 .image-card canvas { display: block; width: 100%; height: 300px; }
 .image-overlay { position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 35%, rgba(8,8,8,0.9) 100%); }
@@ -102,9 +92,8 @@ body::after {
 .item-location-overlay { display: flex; align-items: center; gap: 6px; margin-top: 6px; font-size: 12px; color: rgba(255,255,255,0.6); font-weight: 500; }
 .loc-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; }
 .challenge-num { position: absolute; top: 14px; right: 14px; background: rgba(8,8,8,0.5); backdrop-filter: blur(8px); border: 0.5px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 5px 10px; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; color: rgba(255,255,255,0.5); }
-.img-loading { width: 100%; height: 300px; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 12px; color: var(--text3); font-size: 12px; letter-spacing: 1px; }
 
-/* ── GUESS CARD ── */
+/* GUESS CARD */
 .guess-card { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
 .guess-card-label { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 1rem; }
 .input-row { display: flex; align-items: center; gap: 2px; border-bottom: 1.5px solid var(--border3); padding-bottom: 0.75rem; margin-bottom: 1.25rem; transition: border-color 0.2s; }
@@ -118,13 +107,13 @@ body::after {
 .already-played { text-align: center; padding: 1rem; font-size: 13px; color: var(--text2); line-height: 1.6; }
 .already-played strong { color: var(--accent); }
 
-/* ── MINI STATS ── */
+/* MINI STATS */
 .mini-stats { display: flex; gap: 10px; margin: 1rem 1.25rem 0; }
 .mini-stat { flex: 1; background: var(--s1); border: 0.5px solid var(--border); border-radius: var(--r-md); padding: 0.875rem 1rem; text-align: center; }
 .mini-stat-val { font-family: 'Instrument Serif', serif; font-size: 20px; font-style: italic; color: var(--text); }
 .mini-stat-label { font-size: 10px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); margin-top: 2px; }
 
-/* ── REVEAL SCREEN ── */
+/* REVEAL */
 .reveal-top { padding: 3.5rem 1.5rem 1.5rem; display: flex; align-items: center; justify-content: space-between; }
 .reveal-wordmark { font-family: 'Instrument Serif', serif; font-size: 22px; font-style: italic; }
 .reveal-wordmark span { color: var(--accent); }
@@ -132,7 +121,6 @@ body::after {
 .result-badge.great { background: var(--green-dim); color: var(--green); border: 0.5px solid rgba(74,222,128,0.2); }
 .result-badge.ok { background: var(--accent-dim); color: var(--accent); border: 0.5px solid rgba(232,197,71,0.2); }
 .result-badge.miss { background: var(--red-dim); color: var(--red); border: 0.5px solid rgba(248,113,113,0.2); }
-
 .price-hero { margin: 0 1.25rem; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
 .price-hero-image { width: 100%; background: var(--s2); }
 .price-hero-image canvas { display: block; width: 100%; }
@@ -145,7 +133,6 @@ body::after {
 .pcol-label { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--text3); margin-bottom: 5px; }
 .pcol-value { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; line-height: 1; }
 .pcol-value.real { color: var(--green); }
-
 .accuracy-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
 .acc-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 1rem; }
 .acc-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
@@ -158,9 +145,8 @@ body::after {
 .track-fill.great { background: var(--green); }
 .track-fill.ok { background: var(--accent); }
 .track-fill.miss { background: var(--red); }
-.crowd-line { font-size: 13px; color: var(--text2); font-weight: 500; }
-.crowd-line strong { color: var(--text); }
 
+/* CITY SECTION */
 .city-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); overflow: hidden; }
 .section-header { padding: 1.25rem 1.5rem 0.875rem; border-bottom: 0.5px solid var(--border); }
 .section-title { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); }
@@ -180,6 +166,7 @@ body::after {
 .city-price-val { font-family: 'Instrument Serif', serif; font-size: 18px; font-style: italic; color: var(--text); white-space: nowrap; }
 .city-entry.highlight .city-price-val { color: var(--accent); }
 
+/* HIGHER LOWER */
 .hl-section { margin: 1rem 1.25rem 0; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
 .hl-q { font-size: 15px; font-weight: 600; color: var(--text); text-align: center; margin-bottom: 1rem; line-height: 1.4; }
 .hl-q em { font-family: 'Instrument Serif', serif; font-style: italic; color: var(--accent); }
@@ -190,17 +177,19 @@ body::after {
 .hl-feedback { margin-top: 12px; font-size: 12px; color: var(--text3); text-align: center; display: none; line-height: 1.5; }
 .hl-feedback.show { display: block; }
 
+/* WHY BOX */
 .why-box { margin: 1rem 1.25rem 0; background: var(--accent-dim2); border: 0.5px solid rgba(232,197,71,0.15); border-radius: var(--r-xl); padding: 1.5rem; }
 .why-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--accent2); margin-bottom: 8px; }
 .why-body { font-size: 14px; color: var(--text2); line-height: 1.65; }
 
+/* ACTION ROW */
 .action-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1rem 1.25rem 0; }
 .share-b { padding: 16px; border-radius: var(--r-md); border: none; background: var(--text); color: var(--bg); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
 .share-b:active { transform: scale(0.97); }
 .next-b { padding: 16px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: transparent; color: var(--text2); font-family: 'Syne', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; transition: all 0.15s; }
 .next-b:hover { border-color: var(--border3); color: var(--text); }
 
-/* ── PROFILE ── */
+/* PROFILE */
 .profile-top-bar { padding: 3.5rem 1.5rem 1.5rem; }
 .profile-greeting { font-size: 11px; font-weight: 600; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
 .profile-name-display { font-family: 'Instrument Serif', serif; font-size: 36px; font-style: italic; }
@@ -229,18 +218,18 @@ body::after {
 .signout-btn:hover { color: var(--red); border-color: rgba(248,113,113,0.3); }
 .empty-history { padding: 2rem; text-align: center; font-size: 13px; color: var(--text3); }
 
-/* ── NAV ── */
+/* NAV */
 .nav { position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); width: 100%; max-width: 430px; padding: 0.875rem 2rem 2rem; background: linear-gradient(to top, var(--bg) 70%, transparent); z-index: 100; display: flex; gap: 10px; }
-.nav-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 13px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s1); font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text3); cursor: pointer; transition: all 0.15s; }
+.nav-tab { flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 11px 6px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s1); font-size: 11px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text3); cursor: pointer; transition: all 0.15s; }
 .nav-tab.active { background: var(--s2); border-color: var(--border3); color: var(--text); }
 .nav-tab.active .nav-dot { background: var(--accent); }
-.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--s4); transition: background 0.15s; }
+.nav-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--s4); transition: background 0.15s; flex-shrink: 0; }
 
-/* ── TOAST ── */
+/* TOAST */
 .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--s2); border: 0.5px solid var(--border2); border-radius: 20px; padding: 10px 20px; font-size: 13px; color: var(--text); z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-/* ── YESTERDAY ── */
+/* YESTERDAY */
 .y-wrap { padding-bottom: 100px; overflow-y: auto; flex: 1; }
 .y-top { padding: 3.5rem 1.5rem 1.5rem; }
 .y-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
@@ -255,17 +244,22 @@ body::after {
 .y-stat-val { font-family: 'Instrument Serif', serif; font-size: 24px; font-style: italic; line-height: 1.1; }
 .y-note { margin: 1rem 1.25rem 0; border-radius: var(--r-lg); border: 0.5px solid var(--border2); background: var(--s1); padding: 1rem 1.15rem; font-size: 12px; color: var(--text2); line-height: 1.6; }
 .y-note.warn { border-color: rgba(232,197,71,0.2); background: rgba(232,197,71,0.06); color: var(--text); }
+.y-note.good { border-color: rgba(74,222,128,0.2); background: rgba(74,222,128,0.06); color: var(--text); }
+.y-note.bad { border-color: rgba(248,113,113,0.2); background: rgba(248,113,113,0.06); color: var(--text); }
 
-/* ── STREAK POPUP ── */
+/* STREAK POPUP */
 .streak-popup-wrap { position: fixed; inset: 0; background: rgba(8,8,8,0.75); backdrop-filter: blur(3px); z-index: 400; display: none; align-items: center; justify-content: center; padding: 1.25rem; }
-.streak-popup-card { width: 100%; max-width: 360px; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.streak-popup-card { width: 100%; max-width: 360px; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 2rem 1.5rem; }
 .streak-popup-card.good { border-color: rgba(74,222,128,0.28); background: linear-gradient(to bottom, rgba(74,222,128,0.08), var(--s1) 35%); }
 .streak-popup-card.bad { border-color: rgba(248,113,113,0.3); background: linear-gradient(to bottom, rgba(248,113,113,0.09), var(--s1) 35%); }
-.sp-title { font-family: 'Instrument Serif', serif; font-size: 30px; font-style: italic; line-height: 1.1; margin-bottom: 8px; }
-.sp-sub { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 1rem; }
+.sp-title { font-family: 'Instrument Serif', serif; font-size: 32px; font-style: italic; line-height: 1.1; margin-bottom: 8px; }
+.sp-rank { font-size: 13px; color: var(--text2); margin-bottom: 6px; line-height: 1.5; }
+.sp-streak { font-size: 13px; font-weight: 700; margin-bottom: 1.25rem; }
+.sp-streak.good { color: var(--green); }
+.sp-streak.bad { color: var(--red); }
 .sp-btn { width: 100%; padding: 13px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s2); color: var(--text); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
 
-/* ── ANIMATIONS ── */
+/* ANIMATIONS */
 @keyframes up-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .a1 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) both; }
 .a2 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) 0.08s both; }
@@ -286,15 +280,18 @@ body::after {
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+
+<!-- STREAK POPUP -->
 <div class="streak-popup-wrap" id="streakPopupWrap">
   <div class="streak-popup-card" id="streakPopupCard">
-    <div class="sp-title" id="streakPopupTitle">🔥 Streak survived!</div>
-    <div class="sp-sub" id="streakPopupSub">Final result from yesterday is in.</div>
-    <button class="sp-btn" onclick="dismissStreakPopup()">Continue</button>
+    <div class="sp-title" id="streakPopupTitle">Results are in</div>
+    <div class="sp-rank" id="streakPopupRank"></div>
+    <div class="sp-streak" id="streakPopupStreak"></div>
+    <button class="sp-btn" onclick="dismissStreakPopup()">Got it</button>
   </div>
 </div>
 
-<!-- AUTH SCREEN -->
+<!-- AUTH -->
 <div class="screen" id="s-auth">
   <div class="auth-wrap">
     <div class="auth-logo">Rip<span>off</span></div>
@@ -401,7 +398,6 @@ body::after {
         <div class="acc-num great" id="accNum">—%</div>
       </div>
       <div class="track"><div class="track-fill great" id="trackFill"></div></div>
-
     </div>
     <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;">
       <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0.75rem;">
@@ -418,7 +414,7 @@ body::after {
       <div style="font-size:22px;">⏳</div>
       <div>
         <div style="font-size:13px;font-weight:700;color:var(--accent);">Streak result pending</div>
-        <div style="font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5;">Top 25% of today's players keeps their streak. Check back tomorrow morning.</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5;">Top 25% of today's players keeps their streak. Check back tomorrow.</div>
       </div>
     </div>
     <div class="city-section a3">
@@ -471,8 +467,7 @@ body::after {
       <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
     </div>
     <button class="signout-btn a5" onclick="signOut()">Sign out</button>
-
-    <div style="padding: 1.5rem 1.5rem 0; text-align: center;">
+    <div style="padding:1.5rem 1.5rem 0;text-align:center;">
       <p style="font-size:10px;color:rgba(242,237,228,0.25);line-height:1.7;letter-spacing:0.3px;">
         Prices sourced from the US Bureau of Labor Statistics (BLS.gov) — public domain government data. Regional averages updated monthly. Actual prices vary by retailer and location.<br><br>
         Ripoff is an entertainment and educational product. Not financial advice.<br><br>
@@ -492,7 +487,7 @@ body::after {
     <div class="y-card" id="yesterdayCard">
       <div style="font-size:13px;color:var(--text3);">Loading yesterday's result...</div>
     </div>
-    <div class="y-note" id="yesterdayNote"></div>
+    <div class="y-note" id="yesterdayNote" style="display:none;"></div>
   </div>
 </div>
 
@@ -529,24 +524,31 @@ body::after {
   </div>
 </div>
 
+<!-- DISCLAIMER -->
+<div id="disclaimerBanner" style="background:rgba(232,197,71,0.06);border-top:0.5px solid rgba(232,197,71,0.15);padding:1rem 1.5rem;max-width:430px;margin:0 auto;display:none;">
+  <p style="font-size:10px;color:rgba(242,237,228,0.35);line-height:1.6;letter-spacing:0.3px;">
+    <strong style="color:rgba(232,197,71,0.5);letter-spacing:1px;font-size:9px;">DISCLAIMER</strong><br>
+    Prices reflect verified regional averages sourced from the US Bureau of Labor Statistics Consumer Price Index (CPI) and represent approximate market rates at time of publication. Actual prices vary by retailer, date, and location. Ripoff is an entertainment and educational product — not financial or consumer advice. Price data is updated monthly. Source: BLS.gov, public domain government data.
+  </p>
+</div>
+
 <script>
-// ── SUPABASE INIT ──────────────────────────────────────
 const SUPABASE_URL = 'https://oykmltysvbcspwvjiusq.supabase.co';
 const SUPABASE_KEY = 'sb_publishable_uIPT0OTFXf0I3FPVxkmapw_H5aw7aa6';
 const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-// ── STATE ──────────────────────────────────────────────
 let currentUser = null;
 let currentProfile = null;
 let todayChallenge = null;
 let todayCityPrices = [];
 let userGuess = 0;
-let isAuthMode = "signup";
+let currentAccuracy = 0;
+let isAuthMode = 'signup';
 let alreadyPlayed = false;
 let savedGuessData = null;
-let yesterdayChallenge = null;
 let yesterdayGuessData = null;
 let pendingStreakPopupGuess = null;
+let currentLBTab = 'daily';
 
 // ── INIT ──────────────────────────────────────────────
 window.addEventListener('load', async () => {
@@ -561,7 +563,6 @@ window.addEventListener('load', async () => {
 });
 
 async function loadApp() {
-  // Load sequentially so challenge is ready before we check guesses
   await loadChallenge();
   await loadProfile();
   await loadYesterdayTab();
@@ -570,100 +571,116 @@ async function loadApp() {
   await maybeShowDailyStreakPopup();
 
   if (alreadyPlayed && savedGuessData && todayChallenge) {
-    const g = savedGuessData.guess_amount;
-    const r = parseFloat(todayChallenge.real_price);
-    const a = savedGuessData.accuracy;
-    const c = savedGuessData.crowd_percentile;
-    userGuess = g;
-    showReveal(g, r, a, c);
+    userGuess = savedGuessData.guess_amount;
+    currentAccuracy = savedGuessData.accuracy;
+    showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy);
   } else {
     goTo('challenge');
   }
 }
 
+// ── YESTERDAY TAB ─────────────────────────────────────
 async function loadYesterdayTab() {
   const card = document.getElementById('yesterdayCard');
   const note = document.getElementById('yesterdayNote');
   const todayStr = new Date().toISOString().split('T')[0];
+
   try {
-    const { data: challenge, error: challengeErr } = await sb
+    const { data: challenge, error } = await sb
       .from('challenges')
-      .select(`
-        id, challenge_date, real_price,
-        items ( id, name, emoji ),
-        cities ( id, name, state )
-      `)
+      .select('id, challenge_date, real_price, items(id, name, emoji), cities(id, name, state)')
       .lt('challenge_date', todayStr)
       .order('challenge_date', { ascending: false })
       .limit(1)
       .maybeSingle();
 
-    if (challengeErr || !challenge) {
-      yesterdayChallenge = null;
-      yesterdayGuessData = null;
+    if (error || !challenge) {
       card.innerHTML = '<div style="font-size:13px;color:var(--text3);">No completed challenge found yet.</div>';
-      note.className = 'y-note';
-      note.textContent = 'Come back after more rounds are completed.';
+      note.style.display = 'none';
       return;
     }
 
-    yesterdayChallenge = challenge;
+    const itemName = challenge.items?.name || '—';
+    const cityName = challenge.cities?.name || '—';
+    const cityState = challenge.cities?.state || '';
+    const realPrice = '$' + parseFloat(challenge.real_price || 0).toFixed(2);
+    const dateLabel = new Date(challenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
     const { data: guess } = await sb
       .from('guesses')
       .select('guess_amount, accuracy, rank_at_close, total_players_that_day, streak_survived, challenge_id')
       .eq('user_id', currentUser.id)
       .eq('challenge_id', challenge.id)
       .maybeSingle();
-    yesterdayGuessData = guess || null;
 
-    const itemName = challenge.items?.name || '—';
-    const cityName = challenge.cities?.name || '—';
-    const cityState = challenge.cities?.state || '';
-    const realPrice = '$' + parseFloat(challenge.real_price || 0).toFixed(2);
+    yesterdayGuessData = guess ? { ...guess, challenge_id: challenge.id } : null;
 
     if (!guess) {
       card.innerHTML = `
+        <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">${dateLabel}</div>
         <div class="y-item">${itemName}</div>
         <div class="y-city"><div class="loc-dot"></div>${cityName}${cityState ? ', ' + cityState : ''}</div>
         <div class="y-price">${realPrice}</div>
       `;
       note.className = 'y-note warn';
       note.textContent = "You didn't play this day.";
+      note.style.display = 'block';
       return;
     }
 
-    const totalPlayers = parseInt(guess.total_players_that_day || 0);
     const rank = parseInt(guess.rank_at_close || 0);
+    const totalPlayers = parseInt(guess.total_players_that_day || 0);
     const beat = rank > 0 && totalPlayers > 0 ? Math.max(0, totalPlayers - rank) : 0;
-    const survivedLabel = guess.streak_survived ? 'Streak survived' : 'Streak reset';
+    const rankPending = rank === 0 || totalPlayers === 0;
 
     card.innerHTML = `
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">${dateLabel}</div>
       <div class="y-item">${itemName}</div>
       <div class="y-city"><div class="loc-dot"></div>${cityName}${cityState ? ', ' + cityState : ''}</div>
       <div class="y-price">${realPrice}</div>
       <div class="y-grid">
-        <div class="y-stat"><div class="y-stat-label">Your Guess</div><div class="y-stat-val">$${parseFloat(guess.guess_amount || 0).toFixed(2)}</div></div>
-        <div class="y-stat"><div class="y-stat-label">Accuracy</div><div class="y-stat-val">${parseInt(guess.accuracy || 0)}%</div></div>
-        <div class="y-stat"><div class="y-stat-label">Final Rank</div><div class="y-stat-val">${rank > 0 ? '#' + rank : '—'}${totalPlayers > 0 ? ' / ' + totalPlayers : ''}</div></div>
-        <div class="y-stat"><div class="y-stat-label">Players Beat</div><div class="y-stat-val">${beat}</div></div>
+        <div class="y-stat">
+          <div class="y-stat-label">Your Guess</div>
+          <div class="y-stat-val">$${parseFloat(guess.guess_amount || 0).toFixed(2)}</div>
+        </div>
+        <div class="y-stat">
+          <div class="y-stat-label">Accuracy</div>
+          <div class="y-stat-val">${parseInt(guess.accuracy || 0)}%</div>
+        </div>
+        <div class="y-stat">
+          <div class="y-stat-label">Final Rank</div>
+          <div class="y-stat-val">${rankPending ? '—' : '#' + rank + ' / ' + totalPlayers}</div>
+        </div>
+        <div class="y-stat">
+          <div class="y-stat-label">Players Beat</div>
+          <div class="y-stat-val">${rankPending ? '—' : beat}</div>
+        </div>
       </div>
     `;
 
-    const rankText = rank > 0 && totalPlayers > 0
-      ? `#${rank} out of ${totalPlayers} players`
-      : 'Final rank still pending';
-    note.className = 'y-note';
-    note.innerHTML = `Final rank: <strong style="color:var(--text)">${rankText}</strong> · ${survivedLabel}.`;
+    if (rankPending) {
+      note.className = 'y-note warn';
+      note.innerHTML = '⏳ Final rank calculates at midnight. Check back tomorrow.';
+    } else if (guess.streak_survived) {
+      note.className = 'y-note good';
+      note.innerHTML = `🔥 <strong>Streak survived!</strong> You finished #${rank} out of ${totalPlayers} players.`;
+    } else {
+      note.className = 'y-note bad';
+      note.innerHTML = `Streak reset. You finished #${rank} out of ${totalPlayers} players.`;
+    }
+    note.style.display = 'block';
+
   } catch (err) {
-    console.error('Yesterday tab load error:', err);
+    console.error('Yesterday tab error:', err);
     card.innerHTML = '<div style="font-size:13px;color:var(--text3);">Could not load yesterday data.</div>';
-    note.className = 'y-note';
-    note.textContent = 'Try again in a moment.';
+    note.style.display = 'none';
   }
 }
 
+// ── STREAK POPUP ──────────────────────────────────────
 async function maybeShowDailyStreakPopup() {
   if (!yesterdayGuessData || yesterdayGuessData.rank_at_close == null) return;
+
   const meta = currentUser?.user_metadata || {};
   const lastShownAt = meta.last_streak_popup_shown_at ? new Date(meta.last_streak_popup_shown_at) : null;
   const isRecent = lastShownAt && (Date.now() - lastShownAt.getTime()) < 24 * 60 * 60 * 1000;
@@ -674,15 +691,20 @@ async function maybeShowDailyStreakPopup() {
   const wrap = document.getElementById('streakPopupWrap');
   const card = document.getElementById('streakPopupCard');
   const title = document.getElementById('streakPopupTitle');
-  const sub = document.getElementById('streakPopupSub');
+  const rankEl = document.getElementById('streakPopupRank');
+  const streakEl = document.getElementById('streakPopupStreak');
+
   const survived = !!yesterdayGuessData.streak_survived;
-  card.className = 'streak-popup-card ' + (survived ? 'good' : 'bad');
-  title.textContent = survived ? '🔥 Streak survived!' : 'Streak reset';
   const rank = parseInt(yesterdayGuessData.rank_at_close || 0);
   const total = parseInt(yesterdayGuessData.total_players_that_day || 0);
-  sub.textContent = rank > 0 && total > 0
-    ? `Yesterday you finished #${rank} out of ${total} players.`
-    : 'Yesterday result is ready.';
+  const liveStreak = Number(currentProfile?.streak || 0);
+
+  card.className = 'streak-popup-card ' + (survived ? 'good' : 'bad');
+  title.textContent = survived ? '🔥 Streak survived!' : 'Streak reset';
+  rankEl.textContent = rank > 0 && total > 0 ? 'Yesterday you finished #' + rank + ' out of ' + total + ' players.' : '';
+  streakEl.textContent = survived ? 'Current streak: ' + liveStreak + ' days' : 'Your streak has reset to 0.';
+  streakEl.className = 'sp-streak ' + (survived ? 'good' : 'bad');
+
   wrap.style.display = 'flex';
 }
 
@@ -691,18 +713,17 @@ async function dismissStreakPopup() {
   if (!pendingStreakPopupGuess || !currentUser) return;
   try {
     const currentMeta = currentUser.user_metadata || {};
-    const updatedMeta = {
-      ...currentMeta,
-      last_streak_popup_shown_at: new Date().toISOString(),
-      last_streak_popup_challenge_id: pendingStreakPopupGuess.challenge_id
-    };
-    const { data, error } = await sb.auth.updateUser({ data: updatedMeta });
-    if (!error && data?.user) currentUser = data.user;
+    await sb.auth.updateUser({
+      data: {
+        ...currentMeta,
+        last_streak_popup_shown_at: new Date().toISOString(),
+        last_streak_popup_challenge_id: pendingStreakPopupGuess.challenge_id
+      }
+    });
   } catch (err) {
-    console.error('Failed to persist streak popup state:', err);
-  } finally {
-    pendingStreakPopupGuess = null;
+    console.error('Failed to persist popup state:', err);
   }
+  pendingStreakPopupGuess = null;
 }
 
 function hideLoading() {
@@ -727,8 +748,7 @@ async function handleAuth() {
   const email = document.getElementById('authEmail').value.trim();
   const password = document.getElementById('authPassword').value;
   const btn = document.getElementById('authBtn');
-  const errEl = document.getElementById('authError');
-  errEl.classList.remove('show');
+  document.getElementById('authError').classList.remove('show');
   if (!email || !password) { showAuthError('Please fill in all fields.'); return; }
   btn.disabled = true;
   btn.textContent = 'Please wait...';
@@ -764,8 +784,7 @@ function showAuthError(msg) {
 
 async function signOut() {
   await sb.auth.signOut();
-  currentUser = null;
-  currentProfile = null;
+  currentUser = null; currentProfile = null;
   document.getElementById('mainNav').style.display = 'none';
   goTo('auth');
 }
@@ -774,24 +793,16 @@ async function signOut() {
 async function loadChallenge() {
   try {
     const today = new Date().toISOString().split('T')[0];
-    const { data, error } = await sb
+    let { data, error } = await sb
       .from('challenges')
-      .select(`
-        id, challenge_date, real_price, why_text, image_url, city_id,
-        items ( id, name, description, category, emoji ),
-        cities ( id, name, state, zip )
-      `)
+      .select('id, challenge_date, real_price, why_text, image_url, city_id, items(id, name, description, category, emoji), cities(id, name, state, zip)')
       .eq('challenge_date', today)
       .single();
 
     if (error || !data) {
       const { data: recent } = await sb
         .from('challenges')
-        .select(`
-          id, challenge_date, real_price, why_text, image_url, city_id,
-          items ( id, name, description, category, emoji ),
-          cities ( id, name, state, zip )
-        `)
+        .select('id, challenge_date, real_price, why_text, image_url, city_id, items(id, name, description, category, emoji), cities(id, name, state, zip)')
         .order('challenge_date', { ascending: false })
         .limit(1)
         .single();
@@ -799,21 +810,18 @@ async function loadChallenge() {
     } else {
       todayChallenge = data;
     }
-    console.log('Challenge loaded:', todayChallenge);
 
     if (!todayChallenge) return;
 
-    // Load city comparisons
     const { data: cityData } = await sb
       .from('city_prices')
-      .select(`*, cities(*)`)
+      .select('*, cities(*)')
       .eq('challenge_id', todayChallenge.id)
       .order('price', { ascending: false });
     todayCityPrices = cityData || [];
 
     updateChallengeUI();
     await checkAlreadyPlayed();
-    console.log('Challenge ready. alreadyPlayed:', alreadyPlayed, 'savedGuessData:', savedGuessData);
   } catch (err) {
     console.error('Challenge load error:', err);
   }
@@ -824,23 +832,17 @@ function updateChallengeUI() {
   const item = todayChallenge.items;
   const city = todayChallenge.cities;
   const dateStr = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-
   document.getElementById('challengeDateLabel').textContent = dateStr + ' · Daily Challenge';
   document.getElementById('itemTag').textContent = item.emoji + ' ' + item.category;
   document.getElementById('itemTitle').textContent = item.name;
   document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
-  document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0', '').replace('2026-', '');
-
-  // Draw image - retry until canvas has width
+  document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0','').replace('2026-','');
   function tryDraw(attempts) {
     const mc = document.getElementById('mainCanvas');
     if (!mc) return;
     const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
-    if (w > 50) {
-      drawItemImage('mainCanvas', item.name, item.emoji, w, 300);
-    } else if (attempts < 20) {
-      setTimeout(() => tryDraw(attempts + 1), 100);
-    }
+    if (w > 50) { drawItemImage('mainCanvas', item.name, item.emoji, w, 300); }
+    else if (attempts < 20) { setTimeout(() => tryDraw(attempts + 1), 100); }
   }
   setTimeout(() => tryDraw(0), 150);
 }
@@ -857,8 +859,7 @@ async function checkAlreadyPlayed() {
     alreadyPlayed = true;
     savedGuessData = {
       guess_amount: parseFloat(data.guess_amount),
-      accuracy: parseInt(data.accuracy),
-      crowd_percentile: parseInt(data.crowd_percentile) || 50
+      accuracy: parseInt(data.accuracy)
     };
   }
 }
@@ -867,10 +868,7 @@ async function checkAlreadyPlayed() {
 async function loadProfile() {
   if (!currentUser) return;
   const { data } = await sb.from('profiles').select('*').eq('id', currentUser.id).single();
-  if (data) {
-    currentProfile = data;
-    updateProfileUI();
-  }
+  if (data) { currentProfile = data; updateProfileUI(); }
 }
 
 function updateProfileUI() {
@@ -879,22 +877,23 @@ function updateProfileUI() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
   document.getElementById('profileGreeting').textContent = greeting;
-  document.getElementById('profileIQ').textContent = currentProfile.market_iq;
+  document.getElementById('profileIQ').textContent = currentProfile.market_iq || 500;
   document.getElementById('streakPill').textContent = '🔥 ' + liveStreak + ' Day Streak';
-  document.getElementById('statIQ').textContent = currentProfile.market_iq;
-  document.getElementById('statPlayed').textContent = currentProfile.total_played;
-  document.getElementById('pStatPlayed').textContent = currentProfile.total_played;
+  document.getElementById('statIQ').textContent = currentProfile.market_iq || 500;
+  document.getElementById('statPlayed').textContent = currentProfile.total_played || 0;
+  document.getElementById('pStatPlayed').textContent = currentProfile.total_played || 0;
   document.getElementById('pStatStreak').textContent = '🔥 ' + liveStreak;
-  document.getElementById('pStatTop50').textContent = currentProfile.total_top50;
-  document.getElementById('pStatTop10').textContent = currentProfile.total_top10;
-  document.getElementById('pStatLongest').textContent = currentProfile.longest_streak;
-  const iqPct = Math.min(99, Math.round((currentProfile.market_iq - 300) / 7));
-  document.getElementById('profileIQSub').textContent = currentProfile.total_played > 0
-    ? `Better than ${iqPct}% of players globally`
+  document.getElementById('pStatTop50').textContent = currentProfile.total_top50 || 0;
+  document.getElementById('pStatTop10').textContent = currentProfile.total_top10 || 0;
+  document.getElementById('pStatLongest').textContent = currentProfile.longest_streak || 0;
+  const iqPct = Math.min(99, Math.round(((currentProfile.market_iq || 500) - 300) / 7));
+  document.getElementById('profileIQSub').textContent = (currentProfile.total_played || 0) > 0
+    ? 'Better than ' + iqPct + '% of players globally'
     : 'Keep playing to build your score';
-  if (currentProfile.total_played > 0) {
-    document.getElementById('pStatAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
-    document.getElementById('statAvg').textContent = Math.round(currentProfile.market_iq * 0.1) + '%';
+  if ((currentProfile.total_played || 0) > 0) {
+    const avg = Math.round((currentProfile.market_iq || 500) * 0.1) + '%';
+    document.getElementById('pStatAvg').textContent = avg;
+    document.getElementById('statAvg').textContent = avg;
   }
   loadHistory();
 }
@@ -902,11 +901,10 @@ function updateProfileUI() {
 async function loadHistory() {
   const { data } = await sb
     .from('guesses')
-    .select(`*, challenges(*, items(*), cities(*))`)
+    .select('*, challenges(*, items(*), cities(*))')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
     .limit(5);
-
   if (!data || data.length === 0) return;
   const container = document.getElementById('historyList');
   container.innerHTML = data.map(g => {
@@ -938,34 +936,30 @@ async function submitGuess() {
   const realPrice = parseFloat(todayChallenge.real_price);
   const diff = Math.abs(val - realPrice);
   const accuracy = Math.max(0, Math.round((1 - diff / realPrice) * 100));
-  const crowdPct = accuracy >= 85 ? 87 : accuracy >= 70 ? 71 : accuracy >= 50 ? 48 : 24;
+  currentAccuracy = accuracy;
 
-  // Save to database
   try {
     const { error: insertError } = await sb.from('guesses').insert({
       user_id: currentUser.id,
       challenge_id: todayChallenge.id,
       guess_amount: val,
-      accuracy: accuracy,
-      crowd_percentile: crowdPct
+      accuracy: accuracy
     });
-    if (insertError) { console.error('Already played today'); return; }
+    if (insertError) { console.error('Insert error:', insertError); return; }
     alreadyPlayed = true;
+    savedGuessData = { guess_amount: val, accuracy: accuracy };
 
-    // Update profile stats
+    // Update profile stats (NOT streak — streak is set by midnight function)
     const newPlayed = (currentProfile.total_played || 0) + 1;
-    const liveStreak = Number(currentProfile.streak || 0);
-    const newIQ = Math.min(999, Math.max(100, Math.round(currentProfile.market_iq + (accuracy - 70) * 2)));
-    const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : currentProfile.total_top50;
-    const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : currentProfile.total_top10;
-    const newLongest = Math.max(liveStreak, currentProfile.longest_streak || 0);
+    const newIQ = Math.min(999, Math.max(100, Math.round((currentProfile.market_iq || 500) + (accuracy - 70) * 2)));
+    const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : (currentProfile.total_top50 || 0);
+    const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : (currentProfile.total_top10 || 0);
 
     await sb.from('profiles').update({
       total_played: newPlayed,
       market_iq: newIQ,
       total_top50: newTop50,
-      total_top10: newTop10,
-      longest_streak: newLongest
+      total_top10: newTop10
     }).eq('id', currentUser.id);
 
     await loadProfile();
@@ -973,24 +967,21 @@ async function submitGuess() {
     console.error('Save error:', err);
   }
 
-  // Calculate live rank
+  // Get live rank
   try {
-    const { count: tot } = await sb.from('guesses').select('*',{count:'exact',head:true}).eq('challenge_id',todayChallenge.id);
-    const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id',todayChallenge.id).gt('accuracy',accuracy);
-    const liveRank = (better?.length||0) + 1;
-    const totalPlayers = tot || 1;
-    showReveal(val, realPrice, accuracy, crowdPct, liveRank, totalPlayers);
-  } catch(e) {
-    showReveal(val, realPrice, accuracy, crowdPct, null, null);
+    const { count: tot } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
+    const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id', todayChallenge.id).gt('accuracy', accuracy);
+    const liveRank = (better?.length || 0) + 1;
+    showReveal(val, realPrice, accuracy, liveRank, tot || 1);
+  } catch (e) {
+    showReveal(val, realPrice, accuracy, null, null);
   }
 }
 
-function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers) {
-  // Force all values to correct types regardless of source
+function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   guess = parseFloat(guess) || 0;
   realPrice = parseFloat(realPrice) || 0;
   accuracy = parseInt(accuracy) || 0;
-  crowdPct = parseInt(crowdPct) || 50;
 
   const item = todayChallenge.items;
   const city = todayChallenge.cities;
@@ -1002,22 +993,18 @@ function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers
   document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
   document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
   document.getElementById('yourGuessVal').textContent = guess > 0 ? '$' + guess.toFixed(2) : '—';
-  const challengeDateFormatted = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
   const revealDateEl = document.getElementById('revealDateLabel');
-  if (revealDateEl) revealDateEl.textContent = challengeDateFormatted;
+  if (revealDateEl) revealDateEl.textContent = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
   document.getElementById('accNum').textContent = accuracy + '%';
   document.getElementById('accNum').className = 'acc-num ' + cls;
   document.getElementById('trackFill').className = 'track-fill ' + cls;
   document.getElementById('resultBadge').textContent = label;
   document.getElementById('resultBadge').className = 'result-badge ' + cls;
-  document.getElementById('crowdVal').textContent = crowdPct + '% of players';
 
   // City comparisons
   const maxPrice = Math.max(...todayCityPrices.map(c => parseFloat(c.price)));
-  const cityListEl = document.getElementById('cityList');
-  cityListEl.innerHTML = todayCityPrices.map((c, i) => {
+  document.getElementById('cityList').innerHTML = todayCityPrices.map((c, i) => {
     const isToday = c.city_id === todayChallenge.city_id;
-    const pct = Math.round((parseFloat(c.price) / maxPrice) * 100);
     return `<div class="city-entry${isToday ? ' highlight' : ''}" id="ce${i}">
       <div class="city-rank">${i+1}</div>
       <div class="city-info">
@@ -1029,19 +1016,16 @@ function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers
     </div>`;
   }).join('');
 
-  // Why text
   if (todayChallenge.why_text) {
     document.getElementById('whyBody').textContent = todayChallenge.why_text;
     document.getElementById('whyBox').style.display = 'block';
   }
 
-  // Draw reveal image
   setTimeout(() => {
     const rc = document.getElementById('revealCanvas');
     if (rc) {
-      const wrap = document.getElementById('revealImgWrap');
-      const w = wrap?.offsetWidth || rc.offsetWidth || 380;
-      drawItemImage('revealCanvas', item.name, item.emoji, w || 380, 200);
+      const w = document.getElementById('revealImgWrap')?.offsetWidth || 380;
+      drawItemImage('revealCanvas', item.name, item.emoji, w, 200);
     }
   }, 200);
 
@@ -1049,22 +1033,23 @@ function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers
 
   // Show rank
   if (liveRank && totalPlayers) {
-    const rn = document.getElementById('rankNum'); if(rn) rn.textContent = '#'+liveRank;
-    const rt = document.getElementById('rankTotal'); if(rt) rt.textContent = 'of '+totalPlayers+' players so far today';
-    const pct = Math.round((1 - liveRank/totalPlayers)*100);
-    setTimeout(()=>{ const rb=document.getElementById('rankBarFill'); if(rb) rb.style.width=Math.max(5,pct)+'%'; },400);
-    if (liveRank===1) { const rno=document.getElementById('rankNote'); if(rno) rno.innerHTML='🏆 <strong>You\'re in 1st place!</strong> Final standings at midnight.'; }
+    const rn = document.getElementById('rankNum'); if (rn) rn.textContent = '#' + liveRank;
+    const rt = document.getElementById('rankTotal'); if (rt) rt.textContent = 'of ' + totalPlayers + ' players so far today';
+    const pct = Math.round((1 - liveRank / totalPlayers) * 100);
+    setTimeout(() => { const rb = document.getElementById('rankBarFill'); if (rb) rb.style.width = Math.max(5, pct) + '%'; }, 400);
+    if (liveRank === 1) { const rno = document.getElementById('rankNote'); if (rno) rno.innerHTML = '🏆 <strong>You\'re in 1st place!</strong> Final standings at midnight.'; }
   } else {
-    setTimeout(async()=>{
+    setTimeout(async () => {
       if (!todayChallenge) return;
-      const { count: tot } = await sb.from('guesses').select('*',{count:'exact',head:true}).eq('challenge_id',todayChallenge.id);
-      const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id',todayChallenge.id).gt('accuracy',accuracy);
-      const r=(better?.length||0)+1; const t=tot||1;
-      const rn=document.getElementById('rankNum'); if(rn) rn.textContent='#'+r;
-      const rt=document.getElementById('rankTotal'); if(rt) rt.textContent='of '+t+' players so far today';
-      const rb=document.getElementById('rankBarFill'); if(rb) rb.style.width=Math.max(5,Math.round((1-r/t)*100))+'%';
-    },600);
+      const { count: tot } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
+      const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id', todayChallenge.id).gt('accuracy', accuracy);
+      const r = (better?.length || 0) + 1; const t = tot || 1;
+      const rn = document.getElementById('rankNum'); if (rn) rn.textContent = '#' + r;
+      const rt = document.getElementById('rankTotal'); if (rt) rt.textContent = 'of ' + t + ' players so far today';
+      setTimeout(() => { const rb = document.getElementById('rankBarFill'); if (rb) rb.style.width = Math.max(5, Math.round((1 - r / t) * 100)) + '%'; }, 200);
+    }, 600);
   }
+
   setTimeout(() => {
     document.getElementById('trackFill').style.width = accuracy + '%';
     todayCityPrices.forEach((_, i) => {
@@ -1072,10 +1057,7 @@ function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers
         const ce = document.getElementById('ce' + i);
         const cb = document.getElementById('cb' + i);
         if (ce) ce.classList.add('visible');
-        if (cb) {
-          const pct = Math.round((parseFloat(todayCityPrices[i].price) / maxPrice) * 100);
-          cb.style.width = pct + '%';
-        }
+        if (cb) cb.style.width = Math.round((parseFloat(todayCityPrices[i].price) / maxPrice) * 100) + '%';
       }, i * 100);
     });
   }, 300);
@@ -1088,13 +1070,10 @@ async function pickHL(choice) {
   document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
   document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
   const feed = document.getElementById('hlFeed');
-  feed.textContent = choice === 'higher' ? 'Got it — noted for your location.' : 'Got it — noted for your location.';
+  feed.textContent = 'Got it — noted for your location.';
   feed.classList.add('show');
-
-  // Save to database
   if (currentUser && todayChallenge) {
-    await sb.from('guesses').update({ higher_lower: choice })
-      .eq('user_id', currentUser.id).eq('challenge_id', todayChallenge.id);
+    await sb.from('guesses').update({ higher_lower: choice }).eq('user_id', currentUser.id).eq('challenge_id', todayChallenge.id);
   }
 }
 
@@ -1103,17 +1082,116 @@ function doShare() {
   const acc = document.getElementById('accNum').textContent;
   const item = todayChallenge?.items?.name || 'Daily Item';
   const city = todayChallenge?.cities?.name || 'Unknown City';
-  const realPrice = todayChallenge?.real_price || '—';
   const rank = document.getElementById('rankNum')?.textContent || '—';
   const streak = currentProfile?.streak || 0;
-  const challengeDate = todayChallenge?.challenge_date ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const challengeDate = todayChallenge?.challenge_date
+    ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
   const txt = `RIPOFF — ${challengeDate}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nAccuracy: ${acc} · Rank: ${rank}\n🔥 ${streak} Day Streak\n\nCan you beat me? ripoff.game`;
-  if (navigator.share) {
-    navigator.share({ text: txt });
-  } else {
-    navigator.clipboard?.writeText(txt);
-    showToast('Result copied to clipboard!');
+  if (navigator.share) { navigator.share({ text: txt }); }
+  else { navigator.clipboard?.writeText(txt); showToast('Result copied to clipboard!'); }
+}
+
+// ── NAVIGATION ────────────────────────────────────────
+async function switchLB(tab) {
+  currentLBTab = tab;
+  ['daily', 'weekly', 'alltime'].forEach(t => {
+    const el = document.getElementById('lt-' + t);
+    if (!el) return;
+    if (t === tab) { el.style.background = 'var(--s2)'; el.style.borderColor = 'var(--border3)'; el.style.color = 'var(--text)'; }
+    else { el.style.background = 'var(--s1)'; el.style.borderColor = 'var(--border2)'; el.style.color = 'var(--text3)'; }
+  });
+  await loadLeaderboard(tab);
+}
+
+async function loadLeaderboard(tab) {
+  const list = document.getElementById('lbList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>';
+  try {
+    if (tab === 'daily') {
+      if (!todayChallenge) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No challenge today.</div>'; return; }
+      const { data } = await sb.from('guesses')
+        .select('accuracy, guess_amount, user_id, profiles(username)')
+        .eq('challenge_id', todayChallenge.id)
+        .order('accuracy', { ascending: false }).limit(20);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No players yet today. Be the first!</div>'; return; }
+      const medals = ['🥇', '🥈', '🥉'];
+      list.innerHTML = data.map((g, i) => {
+        const isYou = g.user_id === currentUser?.id;
+        return '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
+          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (medals[i] || i + 1) + '</div>'
+          + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (g.profiles?.username || 'Player') + (isYou ? ' (you)' : '') + '</div>'
+          + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">Guessed $' + parseFloat(g.guess_amount).toFixed(2) + '</div></div>'
+          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + g.accuracy + '%</div></div>';
+      }).join('');
+    } else if (tab === 'weekly') {
+      const { data } = await sb.from('guesses')
+        .select('accuracy, user_id, profiles(username)')
+        .gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString())
+        .order('accuracy', { ascending: false }).limit(200);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No data this week yet.</div>'; return; }
+      const byUser = {};
+      data.forEach(g => {
+        if (!byUser[g.user_id]) byUser[g.user_id] = { username: g.profiles?.username, total: 0, count: 0, isYou: g.user_id === currentUser?.id };
+        byUser[g.user_id].total += g.accuracy; byUser[g.user_id].count++;
+      });
+      const sorted = Object.values(byUser).map(v => ({ ...v, avg: Math.round(v.total / v.count) })).sort((a, b) => b.avg - a.avg);
+      list.innerHTML = sorted.map((u, i) => '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (u.isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
+        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (i + 1) + '</div>'
+        + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (u.username || 'Player') + (u.isYou ? ' (you)' : '') + '</div>'
+        + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + u.count + ' games this week</div></div>'
+        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + u.avg + '%</div></div>').join('');
+    } else {
+      const { data } = await sb.from('guesses')
+        .select('accuracy, guess_amount, user_id, profiles(username), challenges(challenge_date, items(name,emoji), cities(name))')
+        .order('accuracy', { ascending: false }).limit(10);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No records yet.</div>'; return; }
+      list.innerHTML = data.map((g, i) => '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (g.user_id === currentUser?.id ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
+        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (i + 1) + '</div>'
+        + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (g.profiles?.username || 'Player') + (g.user_id === currentUser?.id ? ' (you)' : '') + '</div>'
+        + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + (g.challenges?.items?.emoji || '') + ' ' + (g.challenges?.items?.name || '') + ' · ' + (g.challenges?.cities?.name || '') + '</div></div>'
+        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + g.accuracy + '%</div></div>').join('');
+    }
+  } catch (err) {
+    list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Could not load.</div>';
   }
+}
+
+function goTo(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + name)?.classList.add('active');
+  ['play', 'leaderboard', 'profile', 'yesterday'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
+  if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
+  if (name === 'leaderboard') { document.getElementById('nt-leaderboard')?.classList.add('active'); loadLeaderboard(currentLBTab); }
+  if (name === 'profile') { document.getElementById('nt-profile')?.classList.add('active'); loadProfile(); }
+  if (name === 'yesterday') document.getElementById('nt-yesterday')?.classList.add('active');
+  window.scrollTo(0, 0);
+
+  if (name === 'challenge' && todayChallenge && alreadyPlayed) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById('s-reveal')?.classList.add('active');
+    document.getElementById('nt-play')?.classList.add('active');
+    showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy, null, null);
+    return;
+  }
+
+  if (name === 'challenge' && todayChallenge) {
+    setTimeout(() => {
+      const mc = document.getElementById('mainCanvas');
+      if (mc) {
+        const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
+        drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, w, 300);
+      }
+    }, 200);
+  }
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
 }
 
 // ── CANVAS DRAWING ────────────────────────────────────
@@ -1122,30 +1200,16 @@ function drawItemImage(canvasId, itemName, emoji, w, h) {
   if (!c) return;
   c.width = w; c.height = h;
   const ctx = c.getContext('2d');
-  const cx = w/2, cy = h/2;
-
-  // Dark background
+  const cx = w / 2, cy = h / 2;
   const bg = ctx.createLinearGradient(0, 0, w, h);
-  bg.addColorStop(0, '#1c1a14');
-  bg.addColorStop(1, '#0d0d0d');
-  ctx.fillStyle = bg;
-  ctx.fillRect(0, 0, w, h);
-
-  // Dot grid texture
+  bg.addColorStop(0, '#1c1a14'); bg.addColorStop(1, '#0d0d0d');
+  ctx.fillStyle = bg; ctx.fillRect(0, 0, w, h);
   ctx.fillStyle = 'rgba(255,255,255,0.018)';
   for (let x = 24; x < w; x += 32)
-    for (let y = 24; y < h; y += 32) {
-      ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI*2); ctx.fill();
-    }
-
-  // Radial glow behind subject
-  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w,h)*0.45);
-  glow.addColorStop(0, 'rgba(232,197,71,0.1)');
-  glow.addColorStop(1, 'transparent');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, 0, w, h);
-
-  // Draw subject based on item name
+    for (let y = 24; y < h; y += 32) { ctx.beginPath(); ctx.arc(x, y, 1.2, 0, Math.PI * 2); ctx.fill(); }
+  const glow = ctx.createRadialGradient(cx, cy, 0, cx, cy, Math.min(w, h) * 0.45);
+  glow.addColorStop(0, 'rgba(232,197,71,0.1)'); glow.addColorStop(1, 'transparent');
+  ctx.fillStyle = glow; ctx.fillRect(0, 0, w, h);
   const name = (itemName || '').toLowerCase();
   ctx.save();
   if (name.includes('egg')) drawEggs(ctx, cx, cy, w, h);
@@ -1164,576 +1228,197 @@ function drawItemImage(canvasId, itemName, emoji, w, h) {
   else if (name.includes('rent') || name.includes('apartment')) drawHouse(ctx, cx, cy, w, h);
   else drawGenericEmoji(ctx, cx, cy, w, h, emoji);
   ctx.restore();
-
-  // Bottom gold line
   ctx.fillStyle = 'rgba(232,197,71,0.35)';
-  ctx.fillRect(0, h-2, w, 2);
+  ctx.fillRect(0, h - 2, w, 2);
 }
 
 function rr(ctx, x, y, w, h, r) {
   ctx.beginPath();
-  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
-  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
-  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
-  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y);
+  ctx.moveTo(x + r, y); ctx.lineTo(x + w - r, y); ctx.quadraticCurveTo(x + w, y, x + w, y + r);
+  ctx.lineTo(x + w, y + h - r); ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  ctx.lineTo(x + r, y + h); ctx.quadraticCurveTo(x, y + h, x, y + h - r);
+  ctx.lineTo(x, y + r); ctx.quadraticCurveTo(x, y, x + r, y);
   ctx.closePath();
 }
-
-function shadow(ctx, blur, color, ox, oy) {
-  ctx.shadowBlur = blur; ctx.shadowColor = color;
-  ctx.shadowOffsetX = ox||0; ctx.shadowOffsetY = oy||0;
-}
-function noShadow(ctx) { ctx.shadowBlur=0; ctx.shadowColor='transparent'; ctx.shadowOffsetX=0; ctx.shadowOffsetY=0; }
+function shadow(ctx, blur, color, ox, oy) { ctx.shadowBlur = blur; ctx.shadowColor = color; ctx.shadowOffsetX = ox || 0; ctx.shadowOffsetY = oy || 0; }
+function noShadow(ctx) { ctx.shadowBlur = 0; ctx.shadowColor = 'transparent'; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; }
 
 function drawEggs(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/320;
-  // Carton base
+  const s = Math.min(w, h) / 320;
   shadow(ctx, 30, 'rgba(0,0,0,0.6)', 0, 8);
-  ctx.fillStyle = '#c8a96e';
-  rr(ctx, cx-100*s, cy-40*s, 200*s, 90*s, 10*s);
-  ctx.fill();
+  ctx.fillStyle = '#c8a96e'; rr(ctx, cx - 100 * s, cy - 40 * s, 200 * s, 90 * s, 10 * s); ctx.fill();
   noShadow(ctx);
-  // Carton lid
-  ctx.fillStyle = '#e0be85';
-  rr(ctx, cx-100*s, cy-80*s, 200*s, 48*s, 8*s);
-  ctx.fill();
-  // Dividers
+  ctx.fillStyle = '#e0be85'; rr(ctx, cx - 100 * s, cy - 80 * s, 200 * s, 48 * s, 8 * s); ctx.fill();
   ctx.strokeStyle = 'rgba(0,0,0,0.15)'; ctx.lineWidth = 1.5;
-  [-33,33].forEach(dx => {
-    ctx.beginPath();
-    ctx.moveTo(cx+dx*s, cy-40*s);
-    ctx.lineTo(cx+dx*s, cy+50*s);
-    ctx.stroke();
-  });
-  // Label text
-  ctx.fillStyle = 'rgba(80,50,10,0.55)';
-  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
-  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  ctx.fillText('GRADE A LARGE', cx, cy-60*s);
-  // Three eggs
-  [[-60,10],[0,10],[60,10]].forEach(([dx,dy]) => {
+  [-33, 33].forEach(dx => { ctx.beginPath(); ctx.moveTo(cx + dx * s, cy - 40 * s); ctx.lineTo(cx + dx * s, cy + 50 * s); ctx.stroke(); });
+  ctx.fillStyle = 'rgba(80,50,10,0.55)'; ctx.font = 'bold ' + Math.round(11 * s) + 'px sans-serif';
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('GRADE A LARGE', cx, cy - 60 * s);
+  [[-60, 10], [0, 10], [60, 10]].forEach(([dx, dy]) => {
     shadow(ctx, 10, 'rgba(0,0,0,0.4)', 0, 4);
-    ctx.beginPath();
-    ctx.ellipse(cx+dx*s, cy+dy*s, 22*s, 30*s, 0, 0, Math.PI*2);
-    const eg = ctx.createRadialGradient(cx+dx*s-6*s, cy+dy*s-10*s, 2*s, cx+dx*s, cy+dy*s, 28*s);
-    eg.addColorStop(0, '#f5f0e0'); eg.addColorStop(0.5,'#e8dcc0'); eg.addColorStop(1,'#c8b890');
-    ctx.fillStyle = eg; ctx.fill();
-    noShadow(ctx);
-    ctx.beginPath();
-    ctx.ellipse(cx+dx*s-7*s, cy+dy*s-10*s, 6*s, 4*s, -0.4, 0, Math.PI*2);
+    ctx.beginPath(); ctx.ellipse(cx + dx * s, cy + dy * s, 22 * s, 30 * s, 0, 0, Math.PI * 2);
+    const eg = ctx.createRadialGradient(cx + dx * s - 6 * s, cy + dy * s - 10 * s, 2 * s, cx + dx * s, cy + dy * s, 28 * s);
+    eg.addColorStop(0, '#f5f0e0'); eg.addColorStop(0.5, '#e8dcc0'); eg.addColorStop(1, '#c8b890');
+    ctx.fillStyle = eg; ctx.fill(); noShadow(ctx);
+    ctx.beginPath(); ctx.ellipse(cx + dx * s - 7 * s, cy + dy * s - 10 * s, 6 * s, 4 * s, -0.4, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(255,255,255,0.5)'; ctx.fill();
   });
 }
 
 function drawMilk(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Jug body
-  ctx.fillStyle = '#e8e0d0';
-  rr(ctx, cx-45*s, cy-60*s, 90*s, 130*s, 12*s);
-  ctx.fill();
-  noShadow(ctx);
-  // Handle
-  ctx.strokeStyle = '#d0c8b8'; ctx.lineWidth = 12*s; ctx.lineCap = 'round';
-  ctx.beginPath();
-  ctx.arc(cx+55*s, cy+10*s, 28*s, -Math.PI*0.5, Math.PI*0.5);
-  ctx.stroke();
-  // Label
-  ctx.fillStyle = '#1a6b3a';
-  rr(ctx, cx-38*s, cy-20*s, 76*s, 50*s, 6*s);
-  ctx.fill();
-  ctx.fillStyle = 'white';
-  ctx.font = `bold ${Math.round(14*s)}px sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('MILK', cx, cy+5*s);
-  ctx.font = `${Math.round(9*s)}px sans-serif`;
-  ctx.fillText('WHOLE', cx, cy+18*s);
-  // Cap
-  ctx.fillStyle = '#c8460a';
-  rr(ctx, cx-20*s, cy-78*s, 40*s, 22*s, 8*s);
-  ctx.fill();
+  ctx.fillStyle = '#e8e0d0'; rr(ctx, cx - 45 * s, cy - 60 * s, 90 * s, 130 * s, 12 * s); ctx.fill(); noShadow(ctx);
+  ctx.strokeStyle = '#d0c8b8'; ctx.lineWidth = 12 * s; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.arc(cx + 55 * s, cy + 10 * s, 28 * s, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke();
+  ctx.fillStyle = '#1a6b3a'; rr(ctx, cx - 38 * s, cy - 20 * s, 76 * s, 50 * s, 6 * s); ctx.fill();
+  ctx.fillStyle = 'white'; ctx.font = 'bold ' + Math.round(14 * s) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('MILK', cx, cy + 5 * s); ctx.font = Math.round(9 * s) + 'px sans-serif'; ctx.fillText('WHOLE', cx, cy + 18 * s);
+  ctx.fillStyle = '#c8460a'; rr(ctx, cx - 20 * s, cy - 78 * s, 40 * s, 22 * s, 8 * s); ctx.fill();
 }
 
 function drawBread(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Loaf body
-  ctx.fillStyle = '#c8860a';
-  ctx.beginPath();
-  ctx.ellipse(cx, cy+20*s, 85*s, 55*s, 0, 0, Math.PI*2);
-  ctx.fill();
-  noShadow(ctx);
-  // Top dome
-  const lg = ctx.createRadialGradient(cx-20*s, cy-30*s, 5*s, cx, cy, 80*s);
+  ctx.fillStyle = '#c8860a'; ctx.beginPath(); ctx.ellipse(cx, cy + 20 * s, 85 * s, 55 * s, 0, 0, Math.PI * 2); ctx.fill(); noShadow(ctx);
+  const lg = ctx.createRadialGradient(cx - 20 * s, cy - 30 * s, 5 * s, cx, cy, 80 * s);
   lg.addColorStop(0, '#e8a020'); lg.addColorStop(1, '#a06808');
-  ctx.fillStyle = lg;
-  ctx.beginPath();
-  ctx.ellipse(cx, cy, 80*s, 60*s, 0, 0, Math.PI*2);
-  ctx.fill();
-  // Score lines
-  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2*s;
-  [-30,0,30].forEach(dx => {
-    ctx.beginPath();
-    ctx.moveTo(cx+dx*s, cy-30*s);
-    ctx.quadraticCurveTo(cx+dx*s+10*s, cy, cx+dx*s, cy+30*s);
-    ctx.stroke();
-  });
-  // Sesame dots
-  ctx.fillStyle = 'rgba(255,220,100,0.6)';
-  [[-20,-20],[10,-30],[30,-10],[-35,-5],[0,0]].forEach(([dx,dy]) => {
-    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 4*s, 2*s, 0.5, 0, Math.PI*2); ctx.fill();
-  });
+  ctx.fillStyle = lg; ctx.beginPath(); ctx.ellipse(cx, cy, 80 * s, 60 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(0,0,0,0.2)'; ctx.lineWidth = 2 * s;
+  [-30, 0, 30].forEach(dx => { ctx.beginPath(); ctx.moveTo(cx + dx * s, cy - 30 * s); ctx.quadraticCurveTo(cx + dx * s + 10 * s, cy, cx + dx * s, cy + 30 * s); ctx.stroke(); });
 }
 
 function drawBurger(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  // Bottom bun
-  ctx.fillStyle = '#c8860a';
-  ctx.beginPath(); ctx.ellipse(cx, cy+55*s, 75*s, 18*s, 0, 0, Math.PI*2); ctx.fill();
-  noShadow(ctx);
-  // Patty
-  ctx.fillStyle = '#6b3010';
-  ctx.beginPath(); ctx.ellipse(cx, cy+35*s, 72*s, 16*s, 0, 0, Math.PI*2); ctx.fill();
-  // Cheese
-  ctx.fillStyle = '#e8b820';
-  ctx.beginPath(); ctx.ellipse(cx, cy+20*s, 76*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
-  // Lettuce
-  ctx.fillStyle = '#3a8a20';
-  ctx.beginPath(); ctx.ellipse(cx, cy+8*s, 80*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
-  // Tomato
-  ctx.fillStyle = '#c83020';
-  ctx.beginPath(); ctx.ellipse(cx, cy-4*s, 70*s, 10*s, 0, 0, Math.PI*2); ctx.fill();
-  // Top bun
-  const bg = ctx.createRadialGradient(cx-20*s, cy-45*s, 5*s, cx, cy-20*s, 65*s);
-  bg.addColorStop(0,'#e8a020'); bg.addColorStop(1,'#b07010');
-  ctx.fillStyle = bg;
-  ctx.beginPath(); ctx.ellipse(cx, cy-22*s, 72*s, 38*s, 0, 0, Math.PI*2); ctx.fill();
-  // Sesame seeds
-  ctx.fillStyle = 'rgba(255,220,100,0.7)';
-  [[-25,-48],[0,-55],[25,-48],[-12,-42],[15,-42]].forEach(([dx,dy]) => {
-    ctx.beginPath(); ctx.ellipse(cx+dx*s, cy+dy*s, 5*s, 3*s, 0.3, 0, Math.PI*2); ctx.fill();
-  });
+  ctx.fillStyle = '#c8860a'; ctx.beginPath(); ctx.ellipse(cx, cy + 55 * s, 75 * s, 18 * s, 0, 0, Math.PI * 2); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#6b3010'; ctx.beginPath(); ctx.ellipse(cx, cy + 35 * s, 72 * s, 16 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#e8b820'; ctx.beginPath(); ctx.ellipse(cx, cy + 20 * s, 76 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#3a8a20'; ctx.beginPath(); ctx.ellipse(cx, cy + 8 * s, 80 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#c83020'; ctx.beginPath(); ctx.ellipse(cx, cy - 4 * s, 70 * s, 10 * s, 0, 0, Math.PI * 2); ctx.fill();
+  const bg = ctx.createRadialGradient(cx - 20 * s, cy - 45 * s, 5 * s, cx, cy - 20 * s, 65 * s);
+  bg.addColorStop(0, '#e8a020'); bg.addColorStop(1, '#b07010');
+  ctx.fillStyle = bg; ctx.beginPath(); ctx.ellipse(cx, cy - 22 * s, 72 * s, 38 * s, 0, 0, Math.PI * 2); ctx.fill();
 }
 
 function drawChicken(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Plate
-  ctx.fillStyle = '#2a2a2a';
-  ctx.beginPath(); ctx.ellipse(cx, cy+40*s, 90*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
-  noShadow(ctx);
-  // Chicken breast shape
-  const cg = ctx.createRadialGradient(cx-15*s, cy-15*s, 5*s, cx, cy, 70*s);
-  cg.addColorStop(0,'#f0d080'); cg.addColorStop(0.5,'#d4a040'); cg.addColorStop(1,'#a06820');
-  ctx.fillStyle = cg;
-  ctx.beginPath();
-  ctx.moveTo(cx-60*s, cy+30*s);
-  ctx.bezierCurveTo(cx-70*s, cy-20*s, cx-20*s, cy-60*s, cx+20*s, cy-50*s);
-  ctx.bezierCurveTo(cx+60*s, cy-40*s, cx+65*s, cy+10*s, cx+50*s, cy+35*s);
-  ctx.bezierCurveTo(cx+20*s, cy+50*s, cx-30*s, cy+50*s, cx-60*s, cy+30*s);
-  ctx.fill();
-  // Grill marks
-  ctx.strokeStyle = 'rgba(80,40,0,0.4)'; ctx.lineWidth = 4*s; ctx.lineCap='round';
-  [[-20,0],[0,0],[20,0]].forEach(([dx]) => {
-    ctx.beginPath();
-    ctx.moveTo(cx+dx*s-20*s, cy-20*s);
-    ctx.lineTo(cx+dx*s+10*s, cy+20*s);
-    ctx.stroke();
-  });
+  ctx.fillStyle = '#2a2a2a'; ctx.beginPath(); ctx.ellipse(cx, cy + 40 * s, 90 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill(); noShadow(ctx);
+  const cg = ctx.createRadialGradient(cx - 15 * s, cy - 15 * s, 5 * s, cx, cy, 70 * s);
+  cg.addColorStop(0, '#f0d080'); cg.addColorStop(0.5, '#d4a040'); cg.addColorStop(1, '#a06820');
+  ctx.fillStyle = cg; ctx.beginPath();
+  ctx.moveTo(cx - 60 * s, cy + 30 * s); ctx.bezierCurveTo(cx - 70 * s, cy - 20 * s, cx - 20 * s, cy - 60 * s, cx + 20 * s, cy - 50 * s);
+  ctx.bezierCurveTo(cx + 60 * s, cy - 40 * s, cx + 65 * s, cy + 10 * s, cx + 50 * s, cy + 35 * s);
+  ctx.bezierCurveTo(cx + 20 * s, cy + 50 * s, cx - 30 * s, cy + 50 * s, cx - 60 * s, cy + 30 * s); ctx.fill();
 }
 
 function drawCoffee(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Cup body
-  ctx.fillStyle = '#e8e0d4';
-  ctx.beginPath();
-  ctx.moveTo(cx-45*s, cy-30*s);
-  ctx.lineTo(cx-38*s, cy+60*s);
-  ctx.lineTo(cx+38*s, cy+60*s);
-  ctx.lineTo(cx+45*s, cy-30*s);
-  ctx.closePath(); ctx.fill();
-  noShadow(ctx);
-  // Green sleeve
-  ctx.fillStyle = '#1a6b3a';
-  rr(ctx, cx-46*s, cy+5*s, 92*s, 38*s, 4*s); ctx.fill();
-  // Coffee surface
-  ctx.fillStyle = '#3a1a0a';
-  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 45*s, 12*s, 0, 0, Math.PI*2); ctx.fill();
-  // Latte art
-  ctx.strokeStyle = 'rgba(200,160,80,0.6)'; ctx.lineWidth = 2*s;
-  ctx.beginPath(); ctx.ellipse(cx, cy-30*s, 20*s, 6*s, 0, 0, Math.PI*2); ctx.stroke();
-  // Handle
-  ctx.strokeStyle = '#d0c8bc'; ctx.lineWidth = 8*s;
-  ctx.beginPath(); ctx.arc(cx+52*s, cy+20*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
-  // Steam
-  ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 3*s; ctx.lineCap='round';
-  [[-15,0],[0,0],[15,0]].forEach(([dx]) => {
-    ctx.beginPath();
-    ctx.moveTo(cx+dx*s, cy-45*s);
-    ctx.quadraticCurveTo(cx+dx*s+8*s, cy-60*s, cx+dx*s, cy-75*s);
-    ctx.stroke();
-  });
+  ctx.fillStyle = '#e8e0d4'; ctx.beginPath();
+  ctx.moveTo(cx - 45 * s, cy - 30 * s); ctx.lineTo(cx - 38 * s, cy + 60 * s); ctx.lineTo(cx + 38 * s, cy + 60 * s); ctx.lineTo(cx + 45 * s, cy - 30 * s);
+  ctx.closePath(); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#1a6b3a'; rr(ctx, cx - 46 * s, cy + 5 * s, 92 * s, 38 * s, 4 * s); ctx.fill();
+  ctx.fillStyle = '#3a1a0a'; ctx.beginPath(); ctx.ellipse(cx, cy - 30 * s, 45 * s, 12 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 8 * s;
+  ctx.beginPath(); ctx.arc(cx + 52 * s, cy + 20 * s, 20 * s, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke();
 }
 
 function drawGas(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Pump body
-  ctx.fillStyle = '#c83020';
-  rr(ctx, cx-40*s, cy-50*s, 80*s, 110*s, 10*s); ctx.fill();
-  noShadow(ctx);
-  // Screen
-  ctx.fillStyle = '#1a1a2a';
-  rr(ctx, cx-28*s, cy-38*s, 56*s, 36*s, 6*s); ctx.fill();
-  ctx.fillStyle = '#1a1a2a';
-  ctx.font = `bold ${Math.round(14*s)}px monospace`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('? ? ?', cx, cy-20*s);
-  ctx.fillStyle = '#4ade80';
-  // Nozzle
-  ctx.fillStyle = '#888';
-  rr(ctx, cx+38*s, cy-10*s, 30*s, 12*s, 4*s); ctx.fill();
-  ctx.fillStyle = '#666';
-  rr(ctx, cx+62*s, cy-20*s, 8*s, 30*s, 3*s); ctx.fill();
-  // Price label
-  ctx.fillStyle = '#e8c547';
-  rr(ctx, cx-28*s, cy+10*s, 56*s, 28*s, 4*s); ctx.fill();
-  ctx.fillStyle = '#080808';
-  ctx.font = `bold ${Math.round(10*s)}px sans-serif`;
-  ctx.fillText('REGULAR', cx, cy+24*s);
+  ctx.fillStyle = '#c83020'; rr(ctx, cx - 40 * s, cy - 50 * s, 80 * s, 110 * s, 10 * s); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#1a1a2a'; rr(ctx, cx - 28 * s, cy - 38 * s, 56 * s, 36 * s, 6 * s); ctx.fill();
+  ctx.fillStyle = '#e8c547'; rr(ctx, cx - 28 * s, cy + 10 * s, 56 * s, 28 * s, 4 * s); ctx.fill();
+  ctx.fillStyle = '#080808'; ctx.font = 'bold ' + Math.round(10 * s) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('REGULAR', cx, cy + 24 * s);
 }
 
 function drawBeer(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 25, 'rgba(0,0,0,0.5)', 0, 8);
-  // Glass body
-  ctx.fillStyle = 'rgba(200,160,40,0.9)';
-  ctx.beginPath();
-  ctx.moveTo(cx-35*s, cy-50*s);
-  ctx.lineTo(cx-42*s, cy+60*s);
-  ctx.lineTo(cx+42*s, cy+60*s);
-  ctx.lineTo(cx+35*s, cy-50*s);
-  ctx.closePath(); ctx.fill();
-  noShadow(ctx);
-  // Glass shine
-  ctx.fillStyle = 'rgba(255,255,255,0.15)';
-  ctx.beginPath();
-  ctx.moveTo(cx-28*s, cy-45*s);
-  ctx.lineTo(cx-20*s, cy-45*s);
-  ctx.lineTo(cx-25*s, cy+50*s);
-  ctx.lineTo(cx-33*s, cy+50*s);
-  ctx.closePath(); ctx.fill();
-  // Foam
-  ctx.fillStyle = '#f5f0e8';
-  ctx.beginPath(); ctx.ellipse(cx, cy-50*s, 38*s, 20*s, 0, 0, Math.PI*2); ctx.fill();
-  // Bubble details on foam
-  ctx.fillStyle = 'rgba(255,255,255,0.5)';
-  [[-15,-55],[5,-62],[20,-52],[-5,-45]].forEach(([dx,dy]) => {
-    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 4*s, 0, Math.PI*2); ctx.fill();
-  });
-  // Handle
-  ctx.strokeStyle = 'rgba(200,160,40,0.8)'; ctx.lineWidth = 10*s;
-  ctx.beginPath(); ctx.arc(cx+50*s, cy+10*s, 20*s, -Math.PI*0.5, Math.PI*0.5); ctx.stroke();
+  ctx.fillStyle = 'rgba(200,160,40,0.9)'; ctx.beginPath();
+  ctx.moveTo(cx - 35 * s, cy - 50 * s); ctx.lineTo(cx - 42 * s, cy + 60 * s); ctx.lineTo(cx + 42 * s, cy + 60 * s); ctx.lineTo(cx + 35 * s, cy - 50 * s);
+  ctx.closePath(); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#f5f0e8'; ctx.beginPath(); ctx.ellipse(cx, cy - 50 * s, 38 * s, 20 * s, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = 'rgba(200,160,40,0.8)'; ctx.lineWidth = 10 * s;
+  ctx.beginPath(); ctx.arc(cx + 50 * s, cy + 10 * s, 20 * s, -Math.PI * 0.5, Math.PI * 0.5); ctx.stroke();
 }
 
 function drawPizza(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 8);
-  // Full pie
-  ctx.fillStyle = '#c87820';
-  ctx.beginPath(); ctx.arc(cx, cy, 80*s, 0, Math.PI*2); ctx.fill();
-  noShadow(ctx);
-  // Sauce
-  ctx.fillStyle = '#c83020';
-  ctx.beginPath(); ctx.arc(cx, cy, 68*s, 0, Math.PI*2); ctx.fill();
-  // Cheese
-  ctx.fillStyle = '#f0d060';
-  ctx.beginPath(); ctx.arc(cx, cy, 60*s, 0, Math.PI*2); ctx.fill();
-  // Slice lines
-  ctx.strokeStyle = '#c87820'; ctx.lineWidth = 3*s;
-  for(let i=0; i<6; i++) {
-    ctx.beginPath();
-    ctx.moveTo(cx, cy);
-    ctx.lineTo(cx + Math.cos(i*Math.PI/3)*80*s, cy + Math.sin(i*Math.PI/3)*80*s);
-    ctx.stroke();
-  }
-  // Pepperoni
+  ctx.fillStyle = '#c87820'; ctx.beginPath(); ctx.arc(cx, cy, 80 * s, 0, Math.PI * 2); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#c83020'; ctx.beginPath(); ctx.arc(cx, cy, 68 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#f0d060'; ctx.beginPath(); ctx.arc(cx, cy, 60 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#c87820'; ctx.lineWidth = 3 * s;
+  for (let i = 0; i < 6; i++) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + Math.cos(i * Math.PI / 3) * 80 * s, cy + Math.sin(i * Math.PI / 3) * 80 * s); ctx.stroke(); }
   ctx.fillStyle = '#a02818';
-  [[0,-35],[30,20],[-30,20],[0,10],[-20,-20],[20,-20]].forEach(([dx,dy]) => {
-    ctx.beginPath(); ctx.arc(cx+dx*s, cy+dy*s, 8*s, 0, Math.PI*2); ctx.fill();
-  });
+  [[0, -35], [30, 20], [-30, 20], [0, 10], [-20, -20], [20, -20]].forEach(([dx, dy]) => { ctx.beginPath(); ctx.arc(cx + dx * s, cy + dy * s, 8 * s, 0, Math.PI * 2); ctx.fill(); });
 }
 
 function drawScissors(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  ctx.strokeStyle = '#c8c8d8'; ctx.lineWidth = 10*s; ctx.lineCap='round';
-  // Blade 1
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx-50*s, cy-60*s);
-  ctx.stroke();
-  // Blade 2
-  ctx.beginPath();
-  ctx.moveTo(cx, cy);
-  ctx.lineTo(cx+50*s, cy-60*s);
-  ctx.stroke();
-  noShadow(ctx);
-  // Pivot
-  ctx.fillStyle = '#e8c547';
-  ctx.beginPath(); ctx.arc(cx, cy, 10*s, 0, Math.PI*2); ctx.fill();
-  // Handles
-  ctx.strokeStyle = '#888'; ctx.lineWidth = 14*s;
-  ctx.beginPath();
-  ctx.moveTo(cx-8*s, cy+10*s);
-  ctx.lineTo(cx-35*s, cy+60*s);
-  ctx.stroke();
-  ctx.beginPath();
-  ctx.moveTo(cx+8*s, cy+10*s);
-  ctx.lineTo(cx+35*s, cy+60*s);
-  ctx.stroke();
-  // Handle rings
-  ctx.strokeStyle = '#aaa'; ctx.lineWidth = 8*s;
-  ctx.beginPath(); ctx.ellipse(cx-42*s, cy+65*s, 18*s, 14*s, 0.3, 0, Math.PI*2); ctx.stroke();
-  ctx.beginPath(); ctx.ellipse(cx+42*s, cy+65*s, 18*s, 14*s, -0.3, 0, Math.PI*2); ctx.stroke();
+  ctx.strokeStyle = '#c8c8d8'; ctx.lineWidth = 10 * s; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx - 50 * s, cy - 60 * s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + 50 * s, cy - 60 * s); ctx.stroke(); noShadow(ctx);
+  ctx.fillStyle = '#e8c547'; ctx.beginPath(); ctx.arc(cx, cy, 10 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#888'; ctx.lineWidth = 14 * s;
+  ctx.beginPath(); ctx.moveTo(cx - 8 * s, cy + 10 * s); ctx.lineTo(cx - 35 * s, cy + 60 * s); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(cx + 8 * s, cy + 10 * s); ctx.lineTo(cx + 35 * s, cy + 60 * s); ctx.stroke();
 }
 
 function drawGym(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  // Bar
-  ctx.fillStyle = '#888';
-  rr(ctx, cx-80*s, cy-8*s, 160*s, 16*s, 6*s); ctx.fill();
-  noShadow(ctx);
-  // Weights left
+  ctx.fillStyle = '#888'; rr(ctx, cx - 80 * s, cy - 8 * s, 160 * s, 16 * s, 6 * s); ctx.fill(); noShadow(ctx);
   ctx.fillStyle = '#444';
-  rr(ctx, cx-90*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
-  rr(ctx, cx-75*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
-  // Weights right
-  rr(ctx, cx+70*s, cy-35*s, 20*s, 70*s, 5*s); ctx.fill();
-  rr(ctx, cx+61*s, cy-28*s, 14*s, 56*s, 4*s); ctx.fill();
-  // Center grip
-  ctx.fillStyle = '#666';
-  rr(ctx, cx-25*s, cy-8*s, 50*s, 16*s, 4*s); ctx.fill();
+  rr(ctx, cx - 90 * s, cy - 35 * s, 20 * s, 70 * s, 5 * s); ctx.fill();
+  rr(ctx, cx - 75 * s, cy - 28 * s, 14 * s, 56 * s, 4 * s); ctx.fill();
+  rr(ctx, cx + 70 * s, cy - 35 * s, 20 * s, 70 * s, 5 * s); ctx.fill();
+  rr(ctx, cx + 61 * s, cy - 28 * s, 14 * s, 56 * s, 4 * s); ctx.fill();
 }
 
 function drawMovie(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  // Ticket body
-  ctx.fillStyle = '#e8c547';
-  rr(ctx, cx-80*s, cy-35*s, 160*s, 70*s, 10*s); ctx.fill();
-  noShadow(ctx);
-  // Tear line
-  ctx.strokeStyle = '#b8950a'; ctx.lineWidth = 2*s; ctx.setLineDash([6*s, 4*s]);
-  ctx.beginPath(); ctx.moveTo(cx+30*s, cy-35*s); ctx.lineTo(cx+30*s, cy+35*s); ctx.stroke();
-  ctx.setLineDash([]);
-  // Left notch
-  ctx.fillStyle = '#0d0d0d';
-  ctx.beginPath(); ctx.arc(cx-80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
-  ctx.beginPath(); ctx.arc(cx+80*s, cy, 8*s, 0, Math.PI*2); ctx.fill();
-  // Text
-  ctx.fillStyle = '#080808';
-  ctx.font = `bold ${Math.round(13*s)}px sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillText('ADMIT ONE', cx-20*s, cy-8*s);
-  ctx.font = `${Math.round(10*s)}px sans-serif`;
-  ctx.fillText('CINEMA', cx-20*s, cy+8*s);
-  // Stub stars
-  ctx.fillStyle = '#b8950a';
-  ctx.font = `${Math.round(16*s)}px serif`;
-  ctx.fillText('★', cx+50*s, cy);
+  ctx.fillStyle = '#e8c547'; rr(ctx, cx - 80 * s, cy - 35 * s, 160 * s, 70 * s, 10 * s); ctx.fill(); noShadow(ctx);
+  ctx.strokeStyle = '#b8950a'; ctx.lineWidth = 2 * s; ctx.setLineDash([6 * s, 4 * s]);
+  ctx.beginPath(); ctx.moveTo(cx + 30 * s, cy - 35 * s); ctx.lineTo(cx + 30 * s, cy + 35 * s); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillStyle = '#0d0d0d'; ctx.beginPath(); ctx.arc(cx - 80 * s, cy, 8 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.arc(cx + 80 * s, cy, 8 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#080808'; ctx.font = 'bold ' + Math.round(13 * s) + 'px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('ADMIT ONE', cx - 20 * s, cy - 8 * s);
 }
 
 function drawHotel(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  // Building
-  ctx.fillStyle = '#3a3a4a';
-  rr(ctx, cx-60*s, cy-60*s, 120*s, 120*s, 6*s); ctx.fill();
-  noShadow(ctx);
-  // Windows
+  ctx.fillStyle = '#3a3a4a'; rr(ctx, cx - 60 * s, cy - 60 * s, 120 * s, 120 * s, 6 * s); ctx.fill(); noShadow(ctx);
   ctx.fillStyle = '#e8c547';
-  [[-30,-40],[-10,-40],[10,-40],[30,-40],
-   [-30,-15],[-10,-15],[10,-15],[30,-15],
-   [-30,10],[-10,10],[10,10],[30,10]].forEach(([dx,dy]) => {
-    rr(ctx, cx+dx*s-8*s, cy+dy*s-10*s, 16*s, 20*s, 2*s); ctx.fill();
-  });
-  // Door
-  ctx.fillStyle = '#c8860a';
-  rr(ctx, cx-12*s, cy+30*s, 24*s, 30*s, 3*s); ctx.fill();
-  // Sign
-  ctx.fillStyle = '#e8c547';
-  ctx.font = `bold ${Math.round(11*s)}px sans-serif`;
-  ctx.textAlign='center'; ctx.textBaseline='middle';
-  ctx.fillStyle = '#080808';
-  rr(ctx, cx-35*s, cy-75*s, 70*s, 22*s, 4*s);
-  ctx.fillStyle = '#e8c547'; ctx.fill();
-  ctx.fillStyle = '#080808';
-  ctx.fillText('HOTEL', cx, cy-64*s);
+  [[-30, -40], [-10, -40], [10, -40], [30, -40], [-30, -15], [-10, -15], [10, -15], [30, -15], [-30, 10], [-10, 10], [10, 10], [30, 10]].forEach(([dx, dy]) => { rr(ctx, cx + dx * s - 8 * s, cy + dy * s - 10 * s, 16 * s, 20 * s, 2 * s); ctx.fill(); });
+  ctx.fillStyle = '#c8860a'; rr(ctx, cx - 12 * s, cy + 30 * s, 24 * s, 30 * s, 3 * s); ctx.fill();
 }
 
 function drawHouse(ctx, cx, cy, w, h) {
-  const s = Math.min(w,h)/300;
+  const s = Math.min(w, h) / 300;
   shadow(ctx, 20, 'rgba(0,0,0,0.5)', 0, 6);
-  // Roof
-  ctx.fillStyle = '#c83020';
-  ctx.beginPath();
-  ctx.moveTo(cx, cy-75*s);
-  ctx.lineTo(cx-75*s, cy-15*s);
-  ctx.lineTo(cx+75*s, cy-15*s);
-  ctx.closePath(); ctx.fill();
-  noShadow(ctx);
-  // Chimney
-  ctx.fillStyle = '#a02818';
-  rr(ctx, cx+30*s, cy-80*s, 18*s, 40*s, 2*s); ctx.fill();
-  // Walls
-  ctx.fillStyle = '#e8dcc0';
-  rr(ctx, cx-65*s, cy-15*s, 130*s, 80*s, 4*s); ctx.fill();
-  // Door
-  ctx.fillStyle = '#8a5a20';
-  rr(ctx, cx-15*s, cy+20*s, 30*s, 45*s, 4*s); ctx.fill();
-  // Doorknob
-  ctx.fillStyle = '#e8c547';
-  ctx.beginPath(); ctx.arc(cx+8*s, cy+44*s, 4*s, 0, Math.PI*2); ctx.fill();
-  // Windows
-  ctx.fillStyle = '#a8d8f0';
-  rr(ctx, cx-52*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
-  rr(ctx, cx+24*s, cy-5*s, 28*s, 28*s, 3*s); ctx.fill();
-  ctx.strokeStyle = '#6888a0'; ctx.lineWidth = 2*s;
-  ctx.beginPath(); ctx.moveTo(cx-38*s, cy-5*s); ctx.lineTo(cx-38*s, cy+23*s); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx-52*s, cy+9*s); ctx.lineTo(cx-24*s, cy+9*s); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx+38*s, cy-5*s); ctx.lineTo(cx+38*s, cy+23*s); ctx.stroke();
-  ctx.beginPath(); ctx.moveTo(cx+24*s, cy+9*s); ctx.lineTo(cx+52*s, cy+9*s); ctx.stroke();
+  ctx.fillStyle = '#c83020'; ctx.beginPath(); ctx.moveTo(cx, cy - 75 * s); ctx.lineTo(cx - 75 * s, cy - 15 * s); ctx.lineTo(cx + 75 * s, cy - 15 * s); ctx.closePath(); ctx.fill(); noShadow(ctx);
+  ctx.fillStyle = '#a02818'; rr(ctx, cx + 30 * s, cy - 80 * s, 18 * s, 40 * s, 2 * s); ctx.fill();
+  ctx.fillStyle = '#e8dcc0'; rr(ctx, cx - 65 * s, cy - 15 * s, 130 * s, 80 * s, 4 * s); ctx.fill();
+  ctx.fillStyle = '#8a5a20'; rr(ctx, cx - 15 * s, cy + 20 * s, 30 * s, 45 * s, 4 * s); ctx.fill();
+  ctx.fillStyle = '#e8c547'; ctx.beginPath(); ctx.arc(cx + 8 * s, cy + 44 * s, 4 * s, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#a8d8f0'; rr(ctx, cx - 52 * s, cy - 5 * s, 28 * s, 28 * s, 3 * s); ctx.fill();
+  rr(ctx, cx + 24 * s, cy - 5 * s, 28 * s, 28 * s, 3 * s); ctx.fill();
 }
 
 function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
-  const fontSize = Math.round(Math.min(w,h) * 0.38);
-  ctx.font = fontSize + 'px serif';
-  ctx.textAlign = 'center';
-  ctx.textBaseline = 'middle';
-  ctx.shadowColor = 'rgba(0,0,0,0.5)';
-  ctx.shadowBlur = 20;
-  ctx.fillText(emoji || '🛒', cx, cy);
-  ctx.shadowBlur = 0;
-}
-
-// ── NAVIGATION ────────────────────────────────────────
-
-let currentLBTab = 'daily';
-
-async function switchLB(tab) {
-  currentLBTab = tab;
-  ['daily','weekly','alltime'].forEach(t => {
-    const el = document.getElementById('lt-'+t);
-    if (!el) return;
-    if (t===tab) { el.style.background='var(--s2)'; el.style.borderColor='var(--border3)'; el.style.color='var(--text)'; }
-    else { el.style.background='var(--s1)'; el.style.borderColor='var(--border2)'; el.style.color='var(--text3)'; }
-  });
-  await loadLeaderboard(tab);
-}
-
-async function loadLeaderboard(tab) {
-  const list = document.getElementById('lbList');
-  if (!list) return;
-  list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>';
-  try {
-    if (tab === 'daily') {
-      if (!todayChallenge) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No challenge today.</div>'; return; }
-      const { data } = await sb.from('guesses')
-        .select('accuracy, guess_amount, user_id, profiles(username)')
-        .eq('challenge_id', todayChallenge.id)
-        .order('accuracy', { ascending: false }).limit(20);
-      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No players yet today. Be the first!</div>'; return; }
-      list.innerHTML = data.map((g,i) => {
-        const isYou = g.user_id === currentUser?.id;
-        const medals = ['🥇','🥈','🥉'];
-        return '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (isYou?'rgba(232,197,71,0.06)':'transparent') + '">'
-          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)') + ';width:28px;">' + (medals[i]||i+1) + '</div>'
-          + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (g.profiles?.username||'Player') + (isYou?' (you)':'') + '</div>'
-          + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">Guessed $' + parseFloat(g.guess_amount).toFixed(2) + '</div></div>'
-          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + g.accuracy + '%</div></div>';
-      }).join('');
-    } else if (tab === 'weekly') {
-      const { data } = await sb.from('guesses')
-        .select('accuracy, user_id, profiles(username)')
-        .gte('created_at', new Date(Date.now()-7*24*60*60*1000).toISOString())
-        .order('accuracy', { ascending: false }).limit(200);
-      if (!data||data.length===0) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No data this week yet.</div>'; return; }
-      const byUser={};
-      data.forEach(g=>{ if(!byUser[g.user_id]) byUser[g.user_id]={username:g.profiles?.username,total:0,count:0,isYou:g.user_id===currentUser?.id}; byUser[g.user_id].total+=g.accuracy; byUser[g.user_id].count++; });
-      const sorted=Object.values(byUser).map(v=>({...v,avg:Math.round(v.total/v.count)})).sort((a,b)=>b.avg-a.avg);
-      list.innerHTML=sorted.map((u,i)=>'<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:'+(u.isYou?'rgba(232,197,71,0.06)':'transparent')+'">'
-        +'<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:'+(i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)')+';width:28px;">'+(i+1)+'</div>'
-        +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;">'+(u.username||'Player')+(u.isYou?' (you)':'')+'</div>'
-        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+u.count+' games this week</div></div>'
-        +'<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">'+u.avg+'%</div></div>').join('');
-    } else {
-      const { data } = await sb.from('guesses')
-        .select('accuracy, guess_amount, user_id, profiles(username), challenges(challenge_date, items(name,emoji), cities(name))')
-        .order('accuracy', { ascending: false }).limit(10);
-      if (!data||data.length===0) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No records yet.</div>'; return; }
-      list.innerHTML=data.map((g,i)=>'<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:'+(g.user_id===currentUser?.id?'rgba(232,197,71,0.06)':'transparent')+'">'
-        +'<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:'+(i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)')+';width:28px;">'+(i+1)+'</div>'
-        +'<div style="flex:1;"><div style="font-size:14px;font-weight:600;">'+(g.profiles?.username||'Player')+(g.user_id===currentUser?.id?' (you)':'')+'</div>'
-        +'<div style="font-size:11px;color:var(--text3);margin-top:2px;">'+(g.challenges?.items?.emoji||'')+' '+(g.challenges?.items?.name||'')+' · '+(g.challenges?.cities?.name||'')+'</div></div>'
-        +'<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">'+g.accuracy+'%</div></div>').join('');
-    }
-  } catch(err) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Could not load.</div>'; }
-}
-
-function goTo(name) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById('s-' + name).classList.add('active');
-  ['play', 'leaderboard', 'profile', 'yesterday'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
-  if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
-  if (name === 'leaderboard') { document.getElementById('nt-leaderboard')?.classList.add('active'); loadLeaderboard(currentLBTab); }
-  if (name === 'profile') { document.getElementById('nt-profile')?.classList.add('active'); loadProfile(); }
-  if (name === 'yesterday') document.getElementById('nt-yesterday')?.classList.add('active');
-  window.scrollTo(0, 0);
-  if (name === 'challenge' && todayChallenge) {
-    if (alreadyPlayed && todayChallenge.items && todayChallenge.cities) {
-      // Already played — go straight to reveal
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById('s-reveal').classList.add('active');
-      document.getElementById('nt-play')?.classList.add('active');
-      showReveal(userGuess, parseFloat(todayChallenge.real_price), 
-        parseInt(document.getElementById('accNum')?.textContent) || 0, 50);
-      return;
-    }
-    setTimeout(() => {
-      const mc = document.getElementById('mainCanvas');
-      if (mc) {
-        const w = mc.offsetWidth || mc.parentElement?.offsetWidth || 400;
-        drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, w || 400, 300);
-      }
-    }, 200);
-  }
-}
-
-// ── TOAST ─────────────────────────────────────────────
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  const fontSize = Math.round(Math.min(w, h) * 0.38);
+  ctx.font = fontSize + 'px serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.shadowColor = 'rgba(0,0,0,0.5)'; ctx.shadowBlur = 20;
+  ctx.fillText(emoji || '🛒', cx, cy); ctx.shadowBlur = 0;
 }
 </script>
-
-<div id="disclaimerBanner" style="
-  background: rgba(232,197,71,0.06);
-  border-top: 0.5px solid rgba(232,197,71,0.15);
-  padding: 1rem 1.5rem;
-  max-width: 430px;
-  margin: 0 auto;
-  display: none;
-">
-  <p style="font-size:10px;color:rgba(242,237,228,0.35);line-height:1.6;letter-spacing:0.3px;">
-    <strong style="color:rgba(232,197,71,0.5);letter-spacing:1px;font-size:9px;">DISCLAIMER</strong><br>
-    Prices reflect verified regional averages sourced from the US Bureau of Labor Statistics Consumer Price Index (CPI) and represent approximate market rates at time of publication. Actual prices vary by retailer, date, and location. Ripoff is an entertainment and educational product — not financial or consumer advice. Price data is updated monthly. Source: BLS.gov, public domain government data.
-  </p>
-</div>
 </body>
 </html>
