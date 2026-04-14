@@ -515,6 +515,28 @@ async function loadApp() {
   hideLoading();
   document.getElementById('mainNav').style.display = 'flex';
   // Now all data is ready — decide which screen to show
+  // Check if yesterday's streak result needs to be shown
+  const lastStreakCheck = localStorage.getItem('lastStreakCheck');
+  const todayStr = new Date().toISOString().split('T')[0];
+  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+
+  if (lastStreakCheck !== todayStr) {
+    // Check yesterday's guess for streak result
+    const { data: yesterdayGuess } = await sb.from('guesses')
+      .select('*, challenges(challenge_date, items(name,emoji), cities(name,state))')
+      .eq('user_id', currentUser.id)
+      .not('rank_at_close', 'is', null)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (yesterdayGuess && yesterdayGuess.rank_at_close) {
+      localStorage.setItem('lastStreakCheck', todayStr);
+      showStreakResult(yesterdayGuess);
+      return;
+    }
+  }
+
   if (alreadyPlayed && savedGuessData && todayChallenge) {
     const g = savedGuessData.guess_amount;
     const r = parseFloat(todayChallenge.real_price);
@@ -929,7 +951,7 @@ function doShare() {
   const rank = document.getElementById('rankNum')?.textContent || '—';
   const streak = currentProfile?.streak || 0;
   const challengeDate = todayChallenge?.challenge_date ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
-  const txt = `RIPOFF — ${challengeDate}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nReal: $${parseFloat(realPrice).toFixed(2)} / My guess: $${userGuess.toFixed(2)}\nAccuracy: ${acc} · Rank: ${rank}\n🔥 ${streak} Day Streak\n\nCan you beat me? ripoff.game`;
+  const txt = `RIPOFF — ${challengeDate}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nAccuracy: ${acc} · Rank: ${rank}\n🔥 ${streak} Day Streak\n\nCan you beat me? ripoff.game`;
   if (navigator.share) {
     navigator.share({ text: txt });
   } else {
@@ -1443,6 +1465,37 @@ function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
 }
 
 // ── NAVIGATION ────────────────────────────────────────
+function showStreakResult(guess) {
+  const survived = guess.streak_survived;
+  const rank = guess.rank_at_close;
+  const total = guess.total_players_that_day;
+  const item = guess.challenges?.items;
+  const city = guess.challenges?.cities;
+  const streak = currentProfile?.streak || 0;
+
+  // Insert streak result card at top of reveal screen
+  const revealBody = document.querySelector('#s-reveal .scroll-body');
+  if (!revealBody) { goTo('challenge'); return; }
+
+  const card = document.createElement('div');
+  card.style.cssText = 'margin:0 1.25rem 1rem;border-radius:var(--r-xl);padding:1.5rem;border:0.5px solid ' + (survived ? 'rgba(74,222,128,0.25)' : 'rgba(248,113,113,0.25)') + ';background:' + (survived ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)') + ';';
+  card.innerHTML = '<div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Yesterday's Result</div>'
+    + '<div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:' + (survived ? 'var(--green)' : 'var(--red)') + ';margin-bottom:6px;">' + (survived ? '🔥 Streak survived!' : '💔 Streak broken') + '</div>'
+    + '<div style="font-size:13px;color:var(--text2);line-height:1.6;">Final rank: <strong style="color:var(--text)">#' + rank + ' of ' + total + ' players</strong><br>'
+    + (item ? (item.emoji || '') + ' ' + item.name + ' · ' + (city?.name || '') : '') + '<br>'
+    + (survived ? 'You're in the top 25% — streak continues at <strong style="color:var(--accent)">' + streak + ' days</strong>' : 'You finished outside the top 25%. Start a new streak today!') + '</div>';
+
+  revealBody.insertBefore(card, revealBody.firstChild);
+  document.getElementById('mainNav').style.display = 'flex';
+
+  if (alreadyPlayed && savedGuessData && todayChallenge) {
+    userGuess = savedGuessData.guess_amount;
+    showReveal(savedGuessData.guess_amount, parseFloat(todayChallenge.real_price), savedGuessData.accuracy, savedGuessData.crowd_percentile);
+  } else {
+    goTo('reveal');
+  }
+}
+
 let currentLBTab = 'daily';
 
 async function switchLB(tab) {
