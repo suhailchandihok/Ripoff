@@ -449,6 +449,7 @@ let todayCityPrices = [];
 let userGuess = 0;
 let isAuthMode = "signup";
 let alreadyPlayed = false;
+let savedGuessData = null;
 
 // ── INIT ──────────────────────────────────────────────
 window.addEventListener('load', async () => {
@@ -466,7 +467,14 @@ async function loadApp() {
   await Promise.all([loadChallenge(), loadProfile()]);
   hideLoading();
   document.getElementById('mainNav').style.display = 'flex';
-  goTo('challenge');
+  // If already played show full reveal, otherwise show challenge
+  if (alreadyPlayed && savedGuessData && todayChallenge) {
+    userGuess = parseFloat(savedGuessData.guess_amount);
+    const realPrice = parseFloat(todayChallenge.real_price);
+    showReveal(userGuess, realPrice, savedGuessData.accuracy, savedGuessData.crowd_percentile || 50);
+  } else {
+    goTo('challenge');
+  }
 }
 
 function hideLoading() {
@@ -1362,11 +1370,13 @@ function goTo(name) {
   if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'challenge' && todayChallenge) {
-    if (alreadyPlayed) {
+    if (alreadyPlayed && todayChallenge.items && todayChallenge.cities) {
       // Already played — go straight to reveal
       document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
       document.getElementById('s-reveal').classList.add('active');
       document.getElementById('nt-play')?.classList.add('active');
+      showReveal(userGuess, parseFloat(todayChallenge.real_price), 
+        parseInt(document.getElementById('accNum')?.textContent) || 0, 50);
       return;
     }
     setTimeout(() => {
