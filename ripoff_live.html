@@ -299,14 +299,32 @@ body::after {
       </div>
       <div class="challenge-num" id="challengeNum">#—</div>
     </div>
+
+    <div style="margin:1rem 1.25rem 0;background:rgba(232,197,71,0.06);border:0.5px solid rgba(232,197,71,0.2);border-radius:var(--r-lg);padding:1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;">
+      <div>
+        <div style="font-size:10px;font-weight:700;letter-spacing:2.5px;text-transform:uppercase;color:var(--accent);margin-bottom:3px;">Daily Battle</div>
+        <div style="font-size:12px;color:var(--text2);">Closest guess wins today</div>
+      </div>
+      <div style="text-align:right">
+        <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:var(--accent);" id="playerCount">—</div>
+        <div style="font-size:9px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">players today</div>
+      </div>
+    </div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid rgba(232,197,71,0.2);border-radius:var(--r-lg);padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:22px">⚔️</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">Daily Battle</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4;">One guess. Closest price wins the day. Results at midnight.</div>
+      </div>
+    </div>
     <div class="guess-card a3">
-      <div class="guess-card-label">What does this cost here?</div>
+      <div class="guess-card-label">Your price guess — make it count</div>
       <div class="input-row" id="inputRow">
         <div class="dollar">$</div>
         <input class="price-field" type="number" id="priceIn" placeholder="0.00" step="0.01" min="0" inputmode="decimal">
       </div>
       <div id="guessArea">
-        <button class="cta-btn" id="submitBtn" onclick="submitGuess()">Submit Guess</button>
+        <button class="cta-btn" id="submitBtn" onclick="submitGuess()">Lock In My Guess</button>
       </div>
     </div>
     <div class="mini-stats a4">
@@ -364,6 +382,37 @@ body::after {
       <div class="track"><div class="track-fill great" id="trackFill"></div></div>
       <div class="crowd-line">You beat <strong id="crowdVal">—</strong> of players today</div>
     </div>
+
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;" class="a3">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);">Your Rank</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:44px;font-style:italic;line-height:1;color:var(--accent);" id="rankNum">—</div>
+      </div>
+      <div style="font-size:12px;color:var(--text3);margin-bottom:10px;" id="rankTotal">of — players so far</div>
+      <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:10px;"><div id="rankBar" style="height:100%;border-radius:3px;background:var(--accent);transition:width 1.2s cubic-bezier(0.16,1,0.3,1);width:0%;"></div></div>
+      <div style="font-size:13px;color:var(--text2);" id="rankSub">Rankings update throughout the day</div>
+      <div style="margin-top:10px;font-size:11px;color:var(--text3);line-height:1.5;padding-top:10px;border-top:0.5px solid var(--border);" id="streakStatusLine">⏳ Streak result pending — updates at midnight when the day closes</div>
+    </div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0.75rem;">
+        <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);">Your rank today</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:44px;font-style:italic;line-height:1;color:var(--accent);" id="rankNum">—</div>
+      </div>
+      <div style="font-size:13px;color:var(--text3);margin-bottom:8px;" id="rankTotal">of — players so far</div>
+      <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:10px;">
+        <div style="height:100%;border-radius:3px;background:var(--accent);transition:width 1.2s cubic-bezier(0.16,1,0.3,1);width:0%;" id="rankBarFill"></div>
+      </div>
+      <div style="font-size:12px;color:var(--text2);line-height:1.5;" id="rankNote">Rankings update as more players submit. Final standings at midnight.</div>
+    </div>
+
+    <div style="margin:1rem 1.25rem 0;background:rgba(232,197,71,0.06);border:0.5px solid rgba(232,197,71,0.15);border-radius:var(--r-xl);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:12px;">
+      <div style="font-size:22px;">⏳</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--accent);">Streak result pending</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:3px;line-height:1.5;">Top 25% of today's players keeps their streak. Check back tomorrow morning.</div>
+      </div>
+    </div>
+
     <div class="city-section a3">
       <div class="section-header"><div class="section-title">Same item · Different cities</div></div>
       <div id="cityList"></div>
@@ -382,7 +431,26 @@ body::after {
     </div>
     <div class="action-row a6">
       <button class="share-b" onclick="doShare()">Share Result</button>
-      <button class="next-b" onclick="goTo('profile')">My Profile →</button>
+      <button class="next-b" onclick="goTo('leaderboard')">Leaderboard →</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- LEADERBOARD SCREEN -->
+<div class="screen" id="s-leaderboard">
+  <div class="scroll-body">
+    <div style="padding:3.5rem 1.5rem 1rem;">
+      <div style="font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;">Leaderboard</div>
+      <div style="font-size:12px;color:var(--text3);margin-top:4px;">One winner per day. Who knows prices best?</div>
+    </div>
+    <div style="display:flex;gap:8px;margin:0 1.25rem 1rem;">
+      <button class="next-b" id="lt-today" onclick="switchLB('today')" style="flex:1;padding:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;background:var(--s2);border-color:var(--border3);color:var(--text);">Today</button>
+      <button class="next-b" id="lt-weekly" onclick="switchLB('weekly')" style="flex:1;padding:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;">Week</button>
+      <button class="next-b" id="lt-alltime" onclick="switchLB('alltime')" style="flex:1;padding:10px;font-size:11px;letter-spacing:1px;text-transform:uppercase;">All Time</button>
+    </div>
+    <div style="margin:0 1.25rem;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;" id="lbList">
+      <div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>
     </div>
   </div>
 </div>
@@ -425,12 +493,32 @@ body::after {
   </div>
 </div>
 
+<!-- LEADERBOARD SCREEN -->
+<div class="screen" id="s-leaderboard">
+  <div style="overflow-y:auto;flex:1;padding-bottom:100px;">
+    <div style="padding:3.5rem 1.5rem 1.5rem;">
+      <div style="font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;color:var(--text);">Leaderboard</div>
+    </div>
+    <div style="display:flex;gap:8px;margin:0 1.25rem 1rem;">
+      <button onclick="switchLB('daily')" id="lt-daily" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border3);background:var(--s2);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;">Today</button>
+      <button onclick="switchLB('weekly')" id="lt-weekly" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">This Week</button>
+      <button onclick="switchLB('alltime')" id="lt-alltime" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">All Time</button>
+    </div>
+    <div style="margin:0 1.25rem;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;" id="lbList">
+      <div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>
+    </div>
+  </div>
+</div>
+
 <!-- NAV -->
 <div class="nav" id="mainNav" style="display:none">
   <div class="nav-tab active" id="nt-play" onclick="goTo('challenge')">
     <div class="nav-dot"></div>Play
   </div>
-  <div class="nav-tab" id="nt-profile" onclick="goTo('profile')">
+  <div class="nav-tab" id="nt-leaderboard" onclick="goTo('leaderboard')">
+    <div class="nav-dot"></div>Ranks
+  </div>
+  <div class="nav-tab" id="nt-profile" onclick="goTo('leaderboard')">
     <div class="nav-dot"></div>Profile
   </div>
 </div>
@@ -467,6 +555,7 @@ async function loadApp() {
   // Load sequentially so challenge is ready before we check guesses
   await loadChallenge();
   await loadProfile();
+  await updatePlayerCount();
   hideLoading();
   document.getElementById('mainNav').style.display = 'flex';
   // Now all data is ready — decide which screen to show
@@ -537,6 +626,15 @@ function showAuthError(msg) {
   const el = document.getElementById('authError');
   el.textContent = msg;
   el.classList.add('show');
+}
+
+async function updatePlayerCount() {
+  if (!todayChallenge) return;
+  try {
+    const { count } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
+    const el = document.getElementById('playerCount');
+    if (el) el.textContent = count || 0;
+  } catch(e) {}
 }
 
 async function signOut() {
@@ -718,15 +816,30 @@ async function submitGuess() {
 
   // Save to database
   try {
+    // Get live rank before saving
+    const { count: betterCount } = await sb.from('guesses')
+      .select('*', { count: 'exact', head: true })
+      .eq('challenge_id', todayChallenge.id)
+      .gt('accuracy', accuracy);
+    const { count: totalCount } = await sb.from('guesses')
+      .select('*', { count: 'exact', head: true })
+      .eq('challenge_id', todayChallenge.id);
+    const myRank = (betterCount||0) + 1;
+    const totalPlayers = (totalCount||0) + 1;
+    const crowdPctCalc = Math.round(((totalPlayers - myRank) / totalPlayers) * 100);
+
     const { error: insertError } = await sb.from('guesses').insert({
       user_id: currentUser.id,
       challenge_id: todayChallenge.id,
       guess_amount: val,
       accuracy: accuracy,
-      crowd_percentile: crowdPct
+      crowd_percentile: crowdPctCalc
     });
     if (insertError) { console.error('Already played today'); return; }
     alreadyPlayed = true;
+    savedGuessData = { guess_amount: val, accuracy, crowd_percentile: crowdPctCalc };
+    // Update player count display
+    document.getElementById('playerCount') && (document.getElementById('playerCount').textContent = totalPlayers);
 
     // Update profile stats
     const newPlayed = (currentProfile.total_played || 0) + 1;
@@ -750,10 +863,19 @@ async function submitGuess() {
     console.error('Save error:', err);
   }
 
-  showReveal(val, realPrice, accuracy, crowdPct);
+  // Calculate live rank
+  try {
+    const { count: tot } = await sb.from('guesses').select('*',{count:'exact',head:true}).eq('challenge_id',todayChallenge.id);
+    const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id',todayChallenge.id).gt('accuracy',accuracy);
+    const liveRank = (better?.length||0)+1;
+    const totalPlayers = tot||1;
+    showReveal(val, realPrice, accuracy, crowdPct, liveRank, totalPlayers);
+  } catch(e) {
+    showReveal(val, realPrice, accuracy, crowdPct, null, null);
+  }
 }
 
-function showReveal(guess, realPrice, accuracy, crowdPct) {
+function showReveal(guess, realPrice, accuracy, crowdPct, liveRank, totalPlayers) {
   // Force all values to correct types regardless of source
   guess = parseFloat(guess) || 0;
   realPrice = parseFloat(realPrice) || 0;
@@ -815,6 +937,24 @@ function showReveal(guess, realPrice, accuracy, crowdPct) {
 
   goTo('reveal');
 
+  // Update rank display
+  if (liveRank && totalPlayers) {
+    const rn = document.getElementById('rankNum'); if(rn) rn.textContent = '#'+liveRank;
+    const rt = document.getElementById('rankTotal'); if(rt) rt.textContent = 'of '+totalPlayers+' players so far today';
+    const pct = Math.round((1 - liveRank/totalPlayers)*100);
+    setTimeout(() => { const rb=document.getElementById('rankBarFill'); if(rb) rb.style.width=Math.max(5,pct)+'%'; }, 400);
+    if (liveRank===1) { const rno=document.getElementById('rankNote'); if(rno) rno.innerHTML='🏆 <strong>You're in 1st place!</strong> Final standings at midnight.'; }
+  } else if (!liveRank) {
+    setTimeout(async () => {
+      if (!todayChallenge) return;
+      const { count: tot } = await sb.from('guesses').select('*',{count:'exact',head:true}).eq('challenge_id',todayChallenge.id);
+      const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id',todayChallenge.id).gt('accuracy',accuracy);
+      const r=(better?.length||0)+1; const t=tot||1;
+      const rn=document.getElementById('rankNum'); if(rn) rn.textContent='#'+r;
+      const rt=document.getElementById('rankTotal'); if(rt) rt.textContent='of '+t+' players so far today';
+      const rb=document.getElementById('rankBarFill'); if(rb) rb.style.width=Math.max(5,Math.round((1-r/t)*100))+'%';
+    }, 600);
+  }
   setTimeout(() => {
     document.getElementById('trackFill').style.width = accuracy + '%';
     todayCityPrices.forEach((_, i) => {
@@ -856,7 +996,10 @@ function doShare() {
   const item = todayChallenge?.items?.name || 'Daily Item';
   const city = todayChallenge?.cities?.name || 'Unknown City';
   const realPrice = todayChallenge?.real_price || '—';
-  const txt = `RIPOFF — ${new Date().toLocaleDateString('en-US', {month:'short', day:'numeric'})}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nReal: $${parseFloat(realPrice).toFixed(2)} / My guess: $${userGuess.toFixed(2)}\nAccuracy: ${acc}\n\nripoff.game`;
+  const rank = document.getElementById('rankNum')?.textContent || '—';
+  const streak = currentProfile?.streak || 0;
+  const challengeDate = todayChallenge?.challenge_date ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : new Date().toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'});
+  const txt = `RIPOFF — ${challengeDate}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nReal: $${parseFloat(realPrice).toFixed(2)} / My guess: $${userGuess.toFixed(2)}\nAccuracy: ${acc} · Rank: ${rank}\n🔥 ${streak} Day Streak\n\nCan you beat me? ripoff.game`;
   if (navigator.share) {
     navigator.share({ text: txt });
   } else {
@@ -1370,11 +1513,80 @@ function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
 }
 
 // ── NAVIGATION ────────────────────────────────────────
+let currentLBTab = 'daily';
+
+async function switchLB(tab) {
+  currentLBTab = tab;
+  ['daily','weekly','alltime'].forEach(t => {
+    const el = document.getElementById('lt-'+t);
+    if (!el) return;
+    if (t === tab) { el.style.background='var(--s2)'; el.style.borderColor='var(--border3)'; el.style.color='var(--text)'; }
+    else { el.style.background='var(--s1)'; el.style.borderColor='var(--border2)'; el.style.color='var(--text3)'; }
+  });
+  await loadLeaderboard(tab);
+}
+
+async function loadLeaderboard(tab) {
+  const list = document.getElementById('lbList');
+  if (!list) return;
+  list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>';
+  try {
+    if (tab === 'daily') {
+      if (!todayChallenge) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No challenge today.</div>'; return; }
+      const { data } = await sb.from('guesses')
+        .select('accuracy, guess_amount, user_id, profiles(username)')
+        .eq('challenge_id', todayChallenge.id)
+        .order('accuracy', { ascending: false }).limit(20);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No players yet. Be the first!</div>'; return; }
+      list.innerHTML = data.map((g,i) => {
+        const isYou = g.user_id === currentUser?.id;
+        const medals = ['🥇','🥈','🥉'];
+        return `<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:${isYou?'rgba(232,197,71,0.06)':'transparent'}">
+          <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)'};width:28px;">${medals[i]||i+1}</div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${g.profiles?.username||'Player'}${isYou?' (you)':''}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">Guessed $${parseFloat(g.guess_amount).toFixed(2)}</div></div>
+          <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:var(--accent);">${g.accuracy}%</div>
+        </div>`;
+      }).join('');
+    } else if (tab === 'weekly') {
+      const { data } = await sb.from('guesses')
+        .select('accuracy, user_id, profiles(username)')
+        .gte('created_at', new Date(Date.now()-7*24*60*60*1000).toISOString())
+        .order('accuracy', { ascending: false }).limit(200);
+      if (!data||data.length===0) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No data this week yet.</div>'; return; }
+      const byUser={};
+      data.forEach(g=>{ if(!byUser[g.user_id]) byUser[g.user_id]={username:g.profiles?.username,total:0,count:0,isYou:g.user_id===currentUser?.id}; byUser[g.user_id].total+=g.accuracy; byUser[g.user_id].count++; });
+      const sorted=Object.values(byUser).map(v=>({...v,avg:Math.round(v.total/v.count)})).sort((a,b)=>b.avg-a.avg);
+      list.innerHTML=sorted.map((u,i)=>`<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:${u.isYou?'rgba(232,197,71,0.06)':'transparent'}">
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)'};width:28px;">${i+1}</div>
+        <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${u.username||'Player'}${u.isYou?' (you)':''}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px;">${u.count} games this week</div></div>
+        <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:var(--accent);">${u.avg}%</div>
+      </div>`).join('');
+    } else {
+      const { data } = await sb.from('guesses')
+        .select('accuracy, guess_amount, user_id, profiles(username), challenges(challenge_date, items(name,emoji), cities(name))')
+        .order('accuracy', { ascending: false }).limit(10);
+      if (!data||data.length===0) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No records yet.</div>'; return; }
+      list.innerHTML=data.map((g,i)=>{
+        const isYou=g.user_id===currentUser?.id;
+        return `<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:${isYou?'rgba(232,197,71,0.06)':'transparent'}">
+          <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)'};width:28px;">${i+1}</div>
+          <div style="flex:1;"><div style="font-size:14px;font-weight:600;">${g.profiles?.username||'Player'}${isYou?' (you)':''}</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:2px;">${g.challenges?.items?.emoji||''} ${g.challenges?.items?.name||''} · ${g.challenges?.cities?.name||''}</div></div>
+          <div style="font-family:'Instrument Serif',serif;font-size:18px;font-style:italic;color:var(--accent);">${g.accuracy}%</div>
+        </div>`;
+      }).join('');
+    }
+  } catch(err) { list.innerHTML='<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Could not load.</div>'; }
+}
+
 function goTo(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s-' + name).classList.add('active');
-  ['play', 'profile'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
+  ['play', 'leaderboard', 'profile'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
   if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
+  if (name === 'leaderboard') { document.getElementById('nt-leaderboard')?.classList.add('active'); loadLeaderboard(currentLBTab); }
   if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'challenge' && todayChallenge) {
