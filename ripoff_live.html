@@ -471,9 +471,12 @@ async function loadApp() {
   document.getElementById('mainNav').style.display = 'flex';
   // Now all data is ready — decide which screen to show
   if (alreadyPlayed && savedGuessData && todayChallenge) {
-    userGuess = parseFloat(savedGuessData.guess_amount);
-    const realPrice = parseFloat(todayChallenge.real_price);
-    showReveal(userGuess, realPrice, savedGuessData.accuracy, savedGuessData.crowd_percentile || 50);
+    const g = savedGuessData.guess_amount;
+    const r = parseFloat(todayChallenge.real_price);
+    const a = savedGuessData.accuracy;
+    const c = savedGuessData.crowd_percentile;
+    userGuess = g;
+    showReveal(g, r, a, c);
   } else {
     goTo('challenge');
   }
@@ -755,6 +758,12 @@ async function submitGuess() {
 }
 
 function showReveal(guess, realPrice, accuracy, crowdPct) {
+  // Force all values to correct types regardless of source
+  guess = parseFloat(guess) || 0;
+  realPrice = parseFloat(realPrice) || 0;
+  accuracy = parseInt(accuracy) || 0;
+  crowdPct = parseInt(crowdPct) || 50;
+
   const item = todayChallenge.items;
   const city = todayChallenge.cities;
   const cls = accuracy >= 75 ? 'great' : accuracy >= 50 ? 'ok' : 'miss';
@@ -764,7 +773,7 @@ function showReveal(guess, realPrice, accuracy, crowdPct) {
   document.getElementById('revealItemName').textContent = item.name;
   document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
   document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
-  document.getElementById('yourGuessVal').textContent = '$' + guess.toFixed(2);
+  document.getElementById('yourGuessVal').textContent = guess > 0 ? '$' + guess.toFixed(2) : '—';
   const challengeDateFormatted = new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', {weekday:'long', month:'long', day:'numeric', year:'numeric'});
   const revealDateEl = document.getElementById('revealDateLabel');
   if (revealDateEl) revealDateEl.textContent = challengeDateFormatted;
