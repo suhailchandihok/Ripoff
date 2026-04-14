@@ -240,6 +240,31 @@ body::after {
 .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%) translateY(20px); background: var(--s2); border: 0.5px solid var(--border2); border-radius: 20px; padding: 10px 20px; font-size: 13px; color: var(--text); z-index: 200; opacity: 0; transition: all 0.3s; pointer-events: none; white-space: nowrap; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
+/* ── YESTERDAY ── */
+.y-wrap { padding-bottom: 100px; overflow-y: auto; flex: 1; }
+.y-top { padding: 3.5rem 1.5rem 1.5rem; }
+.y-eyebrow { font-size: 10px; font-weight: 700; letter-spacing: 3px; text-transform: uppercase; color: var(--text3); margin-bottom: 6px; }
+.y-title { font-family: 'Instrument Serif', serif; font-size: 36px; font-style: italic; }
+.y-card { margin: 0 1.25rem; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.y-item { font-family: 'Instrument Serif', serif; font-size: 24px; margin-bottom: 4px; }
+.y-city { font-size: 12px; color: var(--text3); display: flex; align-items: center; gap: 6px; margin-bottom: 1rem; }
+.y-price { font-family: 'Instrument Serif', serif; font-size: 48px; font-style: italic; color: var(--green); line-height: 1; margin-bottom: 1.25rem; }
+.y-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.y-stat { background: var(--s2); border: 0.5px solid var(--border); border-radius: var(--r-md); padding: 0.85rem 0.9rem; }
+.y-stat-label { font-size: 9px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); margin-bottom: 4px; }
+.y-stat-val { font-family: 'Instrument Serif', serif; font-size: 24px; font-style: italic; line-height: 1.1; }
+.y-note { margin: 1rem 1.25rem 0; border-radius: var(--r-lg); border: 0.5px solid var(--border2); background: var(--s1); padding: 1rem 1.15rem; font-size: 12px; color: var(--text2); line-height: 1.6; }
+.y-note.warn { border-color: rgba(232,197,71,0.2); background: rgba(232,197,71,0.06); color: var(--text); }
+
+/* ── STREAK POPUP ── */
+.streak-popup-wrap { position: fixed; inset: 0; background: rgba(8,8,8,0.75); backdrop-filter: blur(3px); z-index: 400; display: none; align-items: center; justify-content: center; padding: 1.25rem; }
+.streak-popup-card { width: 100%; max-width: 360px; background: var(--s1); border: 0.5px solid var(--border2); border-radius: var(--r-xl); padding: 1.5rem; }
+.streak-popup-card.good { border-color: rgba(74,222,128,0.28); background: linear-gradient(to bottom, rgba(74,222,128,0.08), var(--s1) 35%); }
+.streak-popup-card.bad { border-color: rgba(248,113,113,0.3); background: linear-gradient(to bottom, rgba(248,113,113,0.09), var(--s1) 35%); }
+.sp-title { font-family: 'Instrument Serif', serif; font-size: 30px; font-style: italic; line-height: 1.1; margin-bottom: 8px; }
+.sp-sub { font-size: 12px; color: var(--text2); line-height: 1.6; margin-bottom: 1rem; }
+.sp-btn { width: 100%; padding: 13px; border-radius: var(--r-md); border: 0.5px solid var(--border2); background: var(--s2); color: var(--text); font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; cursor: pointer; }
+
 /* ── ANIMATIONS ── */
 @keyframes up-in { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 .a1 { animation: up-in 0.5s cubic-bezier(0.16,1,0.3,1) both; }
@@ -261,6 +286,13 @@ body::after {
 
 <!-- TOAST -->
 <div class="toast" id="toast"></div>
+<div class="streak-popup-wrap" id="streakPopupWrap">
+  <div class="streak-popup-card" id="streakPopupCard">
+    <div class="sp-title" id="streakPopupTitle">🔥 Streak survived!</div>
+    <div class="sp-sub" id="streakPopupSub">Final result from yesterday is in.</div>
+    <button class="sp-btn" onclick="dismissStreakPopup()">Continue</button>
+  </div>
+</div>
 
 <!-- AUTH SCREEN -->
 <div class="screen" id="s-auth">
@@ -450,6 +482,20 @@ body::after {
   </div>
 </div>
 
+<!-- YESTERDAY SCREEN -->
+<div class="screen" id="s-yesterday">
+  <div class="y-wrap">
+    <div class="y-top">
+      <div class="y-eyebrow">Completed challenge</div>
+      <div class="y-title">Yesterday</div>
+    </div>
+    <div class="y-card" id="yesterdayCard">
+      <div style="font-size:13px;color:var(--text3);">Loading yesterday's result...</div>
+    </div>
+    <div class="y-note" id="yesterdayNote"></div>
+  </div>
+</div>
+
 <!-- LEADERBOARD SCREEN -->
 <div class="screen" id="s-leaderboard">
   <div style="overflow-y:auto;flex:1;padding-bottom:100px;">
@@ -478,6 +524,9 @@ body::after {
   <div class="nav-tab" id="nt-profile" onclick="goTo('profile')">
     <div class="nav-dot"></div>Profile
   </div>
+  <div class="nav-tab" id="nt-yesterday" onclick="goTo('yesterday')">
+    <div class="nav-dot"></div>Yesterday
+  </div>
 </div>
 
 <script>
@@ -495,6 +544,9 @@ let userGuess = 0;
 let isAuthMode = "signup";
 let alreadyPlayed = false;
 let savedGuessData = null;
+let yesterdayChallenge = null;
+let yesterdayGuessData = null;
+let pendingStreakPopupGuess = null;
 
 // ── INIT ──────────────────────────────────────────────
 window.addEventListener('load', async () => {
@@ -512,30 +564,10 @@ async function loadApp() {
   // Load sequentially so challenge is ready before we check guesses
   await loadChallenge();
   await loadProfile();
+  await loadYesterdayTab();
   hideLoading();
   document.getElementById('mainNav').style.display = 'flex';
-  // Now all data is ready — decide which screen to show
-  // Check if yesterday's streak result needs to be shown
-  const lastStreakCheck = localStorage.getItem('lastStreakCheck');
-  const todayStr = new Date().toISOString().split('T')[0];
-  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
-
-  if (lastStreakCheck !== todayStr) {
-    // Check yesterday's guess for streak result
-    const { data: yesterdayGuess } = await sb.from('guesses')
-      .select('*, challenges(challenge_date, items(name,emoji), cities(name,state))')
-      .eq('user_id', currentUser.id)
-      .not('rank_at_close', 'is', null)
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (yesterdayGuess && yesterdayGuess.rank_at_close) {
-      localStorage.setItem('lastStreakCheck', todayStr);
-      showStreakResult(yesterdayGuess);
-      return;
-    }
-  }
+  await maybeShowDailyStreakPopup();
 
   if (alreadyPlayed && savedGuessData && todayChallenge) {
     const g = savedGuessData.guess_amount;
@@ -546,6 +578,130 @@ async function loadApp() {
     showReveal(g, r, a, c);
   } else {
     goTo('challenge');
+  }
+}
+
+async function loadYesterdayTab() {
+  const card = document.getElementById('yesterdayCard');
+  const note = document.getElementById('yesterdayNote');
+  const todayStr = new Date().toISOString().split('T')[0];
+  try {
+    const { data: challenge, error: challengeErr } = await sb
+      .from('challenges')
+      .select(`
+        id, challenge_date, real_price,
+        items ( id, name, emoji ),
+        cities ( id, name, state )
+      `)
+      .lt('challenge_date', todayStr)
+      .order('challenge_date', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+
+    if (challengeErr || !challenge) {
+      yesterdayChallenge = null;
+      yesterdayGuessData = null;
+      card.innerHTML = '<div style="font-size:13px;color:var(--text3);">No completed challenge found yet.</div>';
+      note.className = 'y-note';
+      note.textContent = 'Come back after more rounds are completed.';
+      return;
+    }
+
+    yesterdayChallenge = challenge;
+    const { data: guess } = await sb
+      .from('guesses')
+      .select('guess_amount, accuracy, rank_at_close, total_players_that_day, streak_survived, challenge_id')
+      .eq('user_id', currentUser.id)
+      .eq('challenge_id', challenge.id)
+      .maybeSingle();
+    yesterdayGuessData = guess || null;
+
+    const itemName = challenge.items?.name || '—';
+    const cityName = challenge.cities?.name || '—';
+    const cityState = challenge.cities?.state || '';
+    const realPrice = '$' + parseFloat(challenge.real_price || 0).toFixed(2);
+
+    if (!guess) {
+      card.innerHTML = `
+        <div class="y-item">${itemName}</div>
+        <div class="y-city"><div class="loc-dot"></div>${cityName}${cityState ? ', ' + cityState : ''}</div>
+        <div class="y-price">${realPrice}</div>
+      `;
+      note.className = 'y-note warn';
+      note.textContent = "You didn't play this day.";
+      return;
+    }
+
+    const totalPlayers = parseInt(guess.total_players_that_day || 0);
+    const rank = parseInt(guess.rank_at_close || 0);
+    const beat = rank > 0 && totalPlayers > 0 ? Math.max(0, totalPlayers - rank) : 0;
+    const survivedLabel = guess.streak_survived ? 'Streak survived' : 'Streak reset';
+
+    card.innerHTML = `
+      <div class="y-item">${itemName}</div>
+      <div class="y-city"><div class="loc-dot"></div>${cityName}${cityState ? ', ' + cityState : ''}</div>
+      <div class="y-price">${realPrice}</div>
+      <div class="y-grid">
+        <div class="y-stat"><div class="y-stat-label">Your Guess</div><div class="y-stat-val">$${parseFloat(guess.guess_amount || 0).toFixed(2)}</div></div>
+        <div class="y-stat"><div class="y-stat-label">Accuracy</div><div class="y-stat-val">${parseInt(guess.accuracy || 0)}%</div></div>
+        <div class="y-stat"><div class="y-stat-label">Final Rank</div><div class="y-stat-val">${rank > 0 ? '#' + rank : '—'}${totalPlayers > 0 ? ' / ' + totalPlayers : ''}</div></div>
+        <div class="y-stat"><div class="y-stat-label">Players Beat</div><div class="y-stat-val">${beat}</div></div>
+      </div>
+    `;
+
+    const rankText = rank > 0 && totalPlayers > 0
+      ? `#${rank} out of ${totalPlayers} players`
+      : 'Final rank still pending';
+    note.className = 'y-note';
+    note.innerHTML = `Final rank: <strong style="color:var(--text)">${rankText}</strong> · ${survivedLabel}.`;
+  } catch (err) {
+    console.error('Yesterday tab load error:', err);
+    card.innerHTML = '<div style="font-size:13px;color:var(--text3);">Could not load yesterday data.</div>';
+    note.className = 'y-note';
+    note.textContent = 'Try again in a moment.';
+  }
+}
+
+async function maybeShowDailyStreakPopup() {
+  if (!yesterdayGuessData || yesterdayGuessData.rank_at_close == null) return;
+  const meta = currentUser?.user_metadata || {};
+  const lastShownAt = meta.last_streak_popup_shown_at ? new Date(meta.last_streak_popup_shown_at) : null;
+  const isRecent = lastShownAt && (Date.now() - lastShownAt.getTime()) < 24 * 60 * 60 * 1000;
+  const sameChallenge = String(meta.last_streak_popup_challenge_id || '') === String(yesterdayGuessData.challenge_id || '');
+  if (isRecent && sameChallenge) return;
+
+  pendingStreakPopupGuess = yesterdayGuessData;
+  const wrap = document.getElementById('streakPopupWrap');
+  const card = document.getElementById('streakPopupCard');
+  const title = document.getElementById('streakPopupTitle');
+  const sub = document.getElementById('streakPopupSub');
+  const survived = !!yesterdayGuessData.streak_survived;
+  card.className = 'streak-popup-card ' + (survived ? 'good' : 'bad');
+  title.textContent = survived ? '🔥 Streak survived!' : 'Streak reset';
+  const rank = parseInt(yesterdayGuessData.rank_at_close || 0);
+  const total = parseInt(yesterdayGuessData.total_players_that_day || 0);
+  sub.textContent = rank > 0 && total > 0
+    ? `Yesterday you finished #${rank} out of ${total} players.`
+    : 'Yesterday result is ready.';
+  wrap.style.display = 'flex';
+}
+
+async function dismissStreakPopup() {
+  document.getElementById('streakPopupWrap').style.display = 'none';
+  if (!pendingStreakPopupGuess || !currentUser) return;
+  try {
+    const currentMeta = currentUser.user_metadata || {};
+    const updatedMeta = {
+      ...currentMeta,
+      last_streak_popup_shown_at: new Date().toISOString(),
+      last_streak_popup_challenge_id: pendingStreakPopupGuess.challenge_id
+    };
+    const { data, error } = await sb.auth.updateUser({ data: updatedMeta });
+    if (!error && data?.user) currentUser = data.user;
+  } catch (err) {
+    console.error('Failed to persist streak popup state:', err);
+  } finally {
+    pendingStreakPopupGuess = null;
   }
 }
 
@@ -719,15 +875,16 @@ async function loadProfile() {
 
 function updateProfileUI() {
   if (!currentProfile) return;
+  const liveStreak = Number(currentProfile.streak || 0);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
   document.getElementById('profileGreeting').textContent = greeting;
   document.getElementById('profileIQ').textContent = currentProfile.market_iq;
-  document.getElementById('streakPill').textContent = '🔥 ' + currentProfile.streak + ' Day Streak';
+  document.getElementById('streakPill').textContent = '🔥 ' + liveStreak + ' Day Streak';
   document.getElementById('statIQ').textContent = currentProfile.market_iq;
   document.getElementById('statPlayed').textContent = currentProfile.total_played;
   document.getElementById('pStatPlayed').textContent = currentProfile.total_played;
-  document.getElementById('pStatStreak').textContent = '🔥 ' + currentProfile.streak;
+  document.getElementById('pStatStreak').textContent = '🔥 ' + liveStreak;
   document.getElementById('pStatTop50').textContent = currentProfile.total_top50;
   document.getElementById('pStatTop10').textContent = currentProfile.total_top10;
   document.getElementById('pStatLongest').textContent = currentProfile.longest_streak;
@@ -797,22 +954,21 @@ async function submitGuess() {
 
     // Update profile stats
     const newPlayed = (currentProfile.total_played || 0) + 1;
-    const newStreak = (currentProfile.streak || 0) + 1;
+    const liveStreak = Number(currentProfile.streak || 0);
     const newIQ = Math.min(999, Math.max(100, Math.round(currentProfile.market_iq + (accuracy - 70) * 2)));
     const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : currentProfile.total_top50;
     const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : currentProfile.total_top10;
-    const newLongest = Math.max(newStreak, currentProfile.longest_streak || 0);
+    const newLongest = Math.max(liveStreak, currentProfile.longest_streak || 0);
 
     await sb.from('profiles').update({
       total_played: newPlayed,
-      streak: newStreak,
       market_iq: newIQ,
       total_top50: newTop50,
       total_top10: newTop10,
       longest_streak: newLongest
     }).eq('id', currentUser.id);
 
-    currentProfile = { ...currentProfile, total_played: newPlayed, streak: newStreak, market_iq: newIQ, total_top50: newTop50, total_top10: newTop10, longest_streak: newLongest };
+    await loadProfile();
   } catch (err) {
     console.error('Save error:', err);
   }
@@ -1465,36 +1621,6 @@ function drawGenericEmoji(ctx, cx, cy, w, h, emoji) {
 }
 
 // ── NAVIGATION ────────────────────────────────────────
-function showStreakResult(guess) {
-  const survived = guess.streak_survived;
-  const rank = guess.rank_at_close;
-  const total = guess.total_players_that_day;
-  const item = guess.challenges?.items;
-  const city = guess.challenges?.cities;
-  const streak = currentProfile?.streak || 0;
-
-  // Insert streak result card at top of reveal screen
-  const revealBody = document.querySelector('#s-reveal .scroll-body');
-  if (!revealBody) { goTo('challenge'); return; }
-
-  const card = document.createElement('div');
-  card.style.cssText = 'margin:0 1.25rem 1rem;border-radius:var(--r-xl);padding:1.5rem;border:0.5px solid ' + (survived ? 'rgba(74,222,128,0.25)' : 'rgba(248,113,113,0.25)') + ';background:' + (survived ? 'rgba(74,222,128,0.08)' : 'rgba(248,113,113,0.08)') + ';';
-  card.innerHTML = '<div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Yesterday's Result</div>'
-    + '<div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:' + (survived ? 'var(--green)' : 'var(--red)') + ';margin-bottom:6px;">' + (survived ? '🔥 Streak survived!' : '💔 Streak broken') + '</div>'
-    + '<div style="font-size:13px;color:var(--text2);line-height:1.6;">Final rank: <strong style="color:var(--text)">#' + rank + ' of ' + total + ' players</strong><br>'
-    + (item ? (item.emoji || '') + ' ' + item.name + ' · ' + (city?.name || '') : '') + '<br>'
-    + (survived ? 'You're in the top 25% — streak continues at <strong style="color:var(--accent)">' + streak + ' days</strong>' : 'You finished outside the top 25%. Start a new streak today!') + '</div>';
-
-  revealBody.insertBefore(card, revealBody.firstChild);
-  document.getElementById('mainNav').style.display = 'flex';
-
-  if (alreadyPlayed && savedGuessData && todayChallenge) {
-    userGuess = savedGuessData.guess_amount;
-    showReveal(savedGuessData.guess_amount, parseFloat(todayChallenge.real_price), savedGuessData.accuracy, savedGuessData.crowd_percentile);
-  } else {
-    goTo('reveal');
-  }
-}
 
 let currentLBTab = 'daily';
 
@@ -1561,10 +1687,11 @@ async function loadLeaderboard(tab) {
 function goTo(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s-' + name).classList.add('active');
-  ['play', 'leaderboard', 'profile'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
+  ['play', 'leaderboard', 'profile', 'yesterday'].forEach(t => document.getElementById('nt-' + t)?.classList.remove('active'));
   if (name === 'challenge' || name === 'reveal') document.getElementById('nt-play')?.classList.add('active');
   if (name === 'leaderboard') { document.getElementById('nt-leaderboard')?.classList.add('active'); loadLeaderboard(currentLBTab); }
-  if (name === 'profile') document.getElementById('nt-profile')?.classList.add('active');
+  if (name === 'profile') { document.getElementById('nt-profile')?.classList.add('active'); loadProfile(); }
+  if (name === 'yesterday') document.getElementById('nt-yesterday')?.classList.add('active');
   window.scrollTo(0, 0);
   if (name === 'challenge' && todayChallenge) {
     if (alreadyPlayed && todayChallenge.items && todayChallenge.cities) {
