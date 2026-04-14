@@ -464,10 +464,12 @@ window.addEventListener('load', async () => {
 });
 
 async function loadApp() {
-  await Promise.all([loadChallenge(), loadProfile()]);
+  // Load sequentially so challenge is ready before we check guesses
+  await loadChallenge();
+  await loadProfile();
   hideLoading();
   document.getElementById('mainNav').style.display = 'flex';
-  // If already played show full reveal, otherwise show challenge
+  // Now all data is ready — decide which screen to show
   if (alreadyPlayed && savedGuessData && todayChallenge) {
     userGuess = parseFloat(savedGuessData.guess_amount);
     const realPrice = parseFloat(todayChallenge.real_price);
@@ -585,6 +587,7 @@ async function loadChallenge() {
 
     updateChallengeUI();
     await checkAlreadyPlayed();
+    console.log('Challenge ready. alreadyPlayed:', alreadyPlayed, 'savedGuessData:', savedGuessData);
   } catch (err) {
     console.error('Challenge load error:', err);
   }
