@@ -1498,29 +1498,29 @@ async function pickHL(choice) {
       .eq('challenge_id', todayChallenge.id);
   }
 
-  // Fetch real crowd data from all guesses for today
+  // Fetch real crowd data using secure database function
   try {
-    const { data: allGuesses } = await sb
-      .from('guesses')
-      .select('higher_lower')
-      .eq('challenge_id', todayChallenge.id)
-      .not('higher_lower', 'is', null)
-      .in('higher_lower', ['higher', 'lower']);
+    const { data: counts } = await sb.rpc('get_hl_counts', { p_challenge_id: todayChallenge.id });
 
-    if (allGuesses && allGuesses.length > 0) {
-      const total = allGuesses.length;
-      const higherCount = allGuesses.filter(g => g.higher_lower === 'higher').length;
-      const lowerCount = total - higherCount;
-      const higherPct = Math.round((higherCount / total) * 100);
-      const lowerPct = 100 - higherPct;
-      const chosenPct = choice === 'higher' ? higherPct : lowerPct;
-      const otherPct = choice === 'higher' ? lowerPct : higherPct;
-      const chosenLabel = choice === 'higher' ? '↑ higher' : '↓ lower';
-      const otherLabel = choice === 'higher' ? '↓ lower' : '↑ higher';
+    if (counts && counts.length > 0) {
+      const higherCount = parseInt(counts[0].higher_count || 0);
+      const lowerCount = parseInt(counts[0].lower_count || 0);
+      const total = higherCount + lowerCount;
 
-      feed.innerHTML = '<strong style="color:var(--text);">' + chosenPct + '% of players</strong> said ' + chosenLabel
-        + ' &nbsp;·&nbsp; ' + otherPct + '% said ' + otherLabel
-        + '<br><span style="font-size:11px;color:var(--text3);">Based on ' + total + ' response' + (total !== 1 ? 's' : '') + ' so far</span>';
+      if (total > 0) {
+        const higherPct = Math.round((higherCount / total) * 100);
+        const lowerPct = 100 - higherPct;
+        const chosenPct = choice === 'higher' ? higherPct : lowerPct;
+        const otherPct = choice === 'higher' ? lowerPct : higherPct;
+        const chosenLabel = choice === 'higher' ? '↑ higher' : '↓ lower';
+        const otherLabel = choice === 'higher' ? '↓ lower' : '↑ higher';
+
+        feed.innerHTML = '<strong style="color:var(--text);">' + chosenPct + '% of players</strong> said ' + chosenLabel
+          + ' &nbsp;·&nbsp; ' + otherPct + '% said ' + otherLabel
+          + '<br><span style="font-size:11px;color:var(--text3);">Based on ' + total + ' response' + (total !== 1 ? 's' : '') + ' so far</span>';
+      } else {
+        feed.innerHTML = 'You\'re the first to answer! Check back later to see the crowd result.';
+      }
     } else {
       feed.innerHTML = 'You\'re the first to answer! Check back later to see the crowd result.';
     }
