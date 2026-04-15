@@ -497,7 +497,7 @@ body::after {
     <div class="stats-row a3">
       <div class="stat-tile"><div class="st-val" id="pStatPlayed">0</div><div class="st-label">Days</div></div>
       <div class="stat-tile"><div class="st-val streak" id="pStatStreak">🔥 0</div><div class="st-label">Streak</div></div>
-      <div class="stat-tile"><div class="st-val" id="pStatAvg">—</div><div class="st-label">Avg Score</div></div>
+      <div class="stat-tile"><div class="st-val" id="pStatAvg" style="color:var(--accent);">—</div><div class="st-label">Best Rank</div></div>
       <div class="stat-tile"><div class="st-val" id="pStatTop50">0</div><div class="st-label">Top 50%</div></div>
       <div class="stat-tile"><div class="st-val" id="pStatTop10" style="color:var(--green)">0</div><div class="st-label">Top 10%</div></div>
       <div class="stat-tile"><div class="st-val" id="pStatLongest">0</div><div class="st-label">Best Streak</div></div>
@@ -1164,7 +1164,7 @@ async function loadRealStats() {
     // Update UI with real data
     const avgStr = myAvg + '%';
     document.getElementById('profileIQ').textContent = avgStr;
-    document.getElementById('pStatAvg').textContent = avgStr;
+    document.getElementById('pStatAvg').textContent = currentProfile.best_rank ? '#' + currentProfile.best_rank : '—';
     document.getElementById('statAvg').textContent = avgStr;
     document.getElementById('statIQ').textContent = 'Top ' + (100 - realPercentile) + '%';
 
