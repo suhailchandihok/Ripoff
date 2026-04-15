@@ -454,6 +454,11 @@ body::after {
       <button class="share-b" onclick="doShare()">Share Result</button>
       <button class="next-b" onclick="goTo('leaderboard')">Leaderboard →</button>
     </div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.25rem 1.5rem;text-align:center;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Next challenge in</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;color:var(--accent);" id="countdownTimer">—</div>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px;">Come back tomorrow for a new item</div>
+    </div>
   </div>
 </div>
 
@@ -481,7 +486,10 @@ body::after {
       <div class="stat-tile"><div class="st-val" id="pStatLongest">0</div><div class="st-label">Best Streak</div></div>
     </div>
     <div class="history-wrap a4">
-      <div class="section-header"><div class="section-title">Recent Results</div></div>
+      <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
+        <div class="section-title">Recent Results</div>
+        <div onclick="toggleFullHistory()" id="historyToggle" style="font-size:11px;color:var(--accent);cursor:pointer;font-weight:700;letter-spacing:0.5px;">View all</div>
+      </div>
       <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
     </div>
     <button class="signout-btn a5" onclick="signOut()">Sign out</button>
@@ -604,6 +612,17 @@ body::after {
   </div>
 </div>
 
+<!-- USERNAME PROMPT MODAL -->
+<div id="usernamePromptWrap" style="display:none;position:fixed;inset:0;background:rgba(8,8,8,0.85);backdrop-filter:blur(4px);z-index:500;align-items:center;justify-content:center;padding:1.5rem;">
+  <div style="width:100%;max-width:360px;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:2rem;">
+    <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;margin-bottom:6px;">Pick a username</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:1.25rem;line-height:1.6;">This is how you'll appear on the leaderboard. You can change it anytime in your profile.</div>
+    <input id="usernamePromptInput" class="auth-input" placeholder="Enter a username" style="margin-bottom:10px;" oninput="this.style.borderColor='var(--accent)'">
+    <button onclick="saveUsernameFromPrompt()" style="width:100%;padding:15px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:8px;">Save Username</button>
+    <div onclick="skipUsernamePrompt()" style="text-align:center;font-size:12px;color:var(--text3);cursor:pointer;padding:4px;">Skip for now</div>
+  </div>
+</div>
+
 <!-- NAV -->
 <div class="nav" id="mainNav" style="display:none">
   <div class="nav-tab active" id="nt-play" onclick="goTo('challenge')">
@@ -673,11 +692,18 @@ async function loadApp() {
     if (uInput) uInput.value = currentProfile.username;
   }
 
-  // Check onboarding
-  const onboarded = localStorage.getItem('ripoff_onboarded');
+  // Check onboarding — stored in Supabase user metadata
+  const meta = currentUser?.user_metadata || {};
+  const onboarded = meta.ripoff_onboarded;
   if (!onboarded) {
     document.getElementById('mainNav').style.display = 'none';
     goTo('onboarding');
+    return;
+  }
+
+  // Prompt for username if not set
+  if (!currentProfile?.username) {
+    showUsernamePrompt();
     return;
   }
 
@@ -869,10 +895,14 @@ async function handleAuth() {
   try {
     let result;
     if (isAuthMode === 'signup') {
-      result = await sb.auth.signUp({ email, password });
+      result = await sb.auth.signUp({ email, password, options: { emailRedirectTo: null } });
       if (result.error) throw result.error;
       if (result.data.user) {
-        await sb.from('profiles').insert({ id: result.data.user.id, username: email.split('@')[0] });
+        // Check if profile already exists before inserting
+        const { data: existing } = await sb.from('profiles').select('id').eq('id', result.data.user.id).maybeSingle();
+        if (!existing) {
+          await sb.from('profiles').insert({ id: result.data.user.id, username: '' });
+        }
         currentUser = result.data.user;
       }
     } else {
@@ -884,7 +914,12 @@ async function handleAuth() {
     document.getElementById('loadingScreen').style.opacity = '1';
     await loadApp();
   } catch (err) {
-    showAuthError(err.message || 'Something went wrong. Please try again.');
+    // Handle email not confirmed gracefully
+    if (err.message?.includes('Email not confirmed')) {
+      showAuthError('Please check your email and confirm your account, or use the reset password link.');
+    } else {
+      showAuthError(err.message || 'Something went wrong. Please try again.');
+    }
     btn.disabled = false;
     btn.textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
   }
@@ -1010,31 +1045,42 @@ function updateProfileUI() {
     document.getElementById('pStatAvg').textContent = avg;
     document.getElementById('statAvg').textContent = avg;
   }
-  loadHistory();
+  loadHistory(showingFullHistory);
 }
 
-async function loadHistory() {
+let showingFullHistory = false;
+
+async function loadHistory(full) {
+  const limit = full ? 100 : 5;
   const { data } = await sb
     .from('guesses')
     .select('*, challenges(*, items(*), cities(*))')
     .eq('user_id', currentUser.id)
     .order('created_at', { ascending: false })
-    .limit(5);
+    .limit(limit);
   if (!data || data.length === 0) return;
   const container = document.getElementById('historyList');
   container.innerHTML = data.map(g => {
     const item = g.challenges?.items;
     const city = g.challenges?.cities;
     const cls = g.accuracy >= 60 ? 'g' : 'b';
+    const rankStr = g.rank_at_close ? '#' + g.rank_at_close + (g.total_players_that_day ? ' / ' + g.total_players_that_day : '') : '';
     return `<div class="hist-item">
       <div class="hist-icon">${item?.emoji || '🛒'}</div>
       <div class="hist-info">
         <div class="hist-name">${item?.name || '—'}</div>
-        <div class="hist-city">${city?.name || '—'}, ${city?.state || ''}</div>
+        <div class="hist-city">${city?.name || '—'}, ${city?.state || ''}${rankStr ? ' · ' + rankStr : ''}</div>
       </div>
       <div class="hist-score ${cls}">${g.accuracy}%</div>
     </div>`;
   }).join('');
+  const toggle = document.getElementById('historyToggle');
+  if (toggle) toggle.textContent = full ? 'Show less' : 'View all';
+}
+
+async function toggleFullHistory() {
+  showingFullHistory = !showingFullHistory;
+  await loadHistory(showingFullHistory);
 }
 
 // ── SUBMIT GUESS ──────────────────────────────────────
@@ -1158,6 +1204,7 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   }, 200);
 
   goTo('reveal');
+  startCountdown();
 
   // Show rank
   if (liveRank && totalPlayers) {
@@ -1398,14 +1445,77 @@ function obNext() {
     finishOnboarding();
   }
 }
-function finishOnboarding() {
-  localStorage.setItem('ripoff_onboarded', '1');
+async function finishOnboarding() {
+  // Save to Supabase user metadata
+  try {
+    const currentMeta = currentUser?.user_metadata || {};
+    const { data } = await sb.auth.updateUser({ data: { ...currentMeta, ripoff_onboarded: true } });
+    if (data?.user) currentUser = data.user;
+  } catch (err) { console.error('Onboarding save error:', err); }
+
+  // Show username prompt if not set
+  if (!currentProfile?.username) {
+    showUsernamePrompt();
+    return;
+  }
+
   document.getElementById('mainNav').style.display = 'flex';
   if (alreadyPlayed && savedGuessData && todayChallenge) {
     showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy, null, null);
   } else {
     goTo('challenge');
   }
+}
+
+// ── USERNAME PROMPT ───────────────────────────────────
+function showUsernamePrompt() {
+  const wrap = document.getElementById('usernamePromptWrap');
+  if (wrap) wrap.style.display = 'flex';
+}
+
+async function saveUsernameFromPrompt() {
+  const val = document.getElementById('usernamePromptInput').value.trim();
+  if (!val) return;
+  await sb.from('profiles').update({ username: val }).eq('id', currentUser.id);
+  if (currentProfile) currentProfile.username = val;
+  const uInput = document.getElementById('usernameInput');
+  if (uInput) uInput.value = val;
+  document.getElementById('usernamePromptWrap').style.display = 'none';
+  document.getElementById('mainNav').style.display = 'flex';
+  updateProfileUI();
+  if (alreadyPlayed && savedGuessData && todayChallenge) {
+    showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy, null, null);
+  } else {
+    goTo('challenge');
+  }
+}
+
+function skipUsernamePrompt() {
+  document.getElementById('usernamePromptWrap').style.display = 'none';
+  document.getElementById('mainNav').style.display = 'flex';
+  if (alreadyPlayed && savedGuessData && todayChallenge) {
+    showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy, null, null);
+  } else {
+    goTo('challenge');
+  }
+}
+
+// ── COUNTDOWN TIMER ───────────────────────────────────
+function startCountdown() {
+  function update() {
+    const el = document.getElementById('countdownTimer');
+    if (!el) return;
+    const now = new Date();
+    const midnight = new Date();
+    midnight.setHours(24, 0, 0, 0);
+    const diff = midnight - now;
+    const h = Math.floor(diff / 3600000);
+    const m = Math.floor((diff % 3600000) / 60000);
+    const s = Math.floor((diff % 60000) / 1000);
+    el.textContent = String(h).padStart(2,'0') + ':' + String(m).padStart(2,'0') + ':' + String(s).padStart(2,'0');
+  }
+  update();
+  setInterval(update, 1000);
 }
 
 function showToast(msg) {
