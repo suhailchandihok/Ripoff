@@ -316,21 +316,22 @@ body::after {
     <div class="auth-logo">Rip<span>off</span></div>
     <div class="auth-tagline">One item. One city. One guess.<br>How well do you know real prices?</div>
     <div class="auth-card">
-      <div class="auth-title" id="authTitle">Create account</div>
+      <div class="auth-title" id="authTitle">Welcome back</div>
       <input class="auth-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
-      <input class="auth-input" type="password" id="authPassword" placeholder="Password (min 6 characters)" autocomplete="current-password">
-      <div id="signupCityWrap" style="display:block;">
+      <input class="auth-input" type="password" id="authPassword" placeholder="Password" autocomplete="current-password">
+      <div id="signupFields" style="display:none;">
+        <input class="auth-input" type="text" id="authUsername" placeholder="Pick a username" maxlength="20" oninput="this.value=this.value.replace(/[^a-zA-Z0-9_]/g,'')">
         <div style="position:relative;">
           <input class="auth-input" type="text" id="authZip" placeholder="Your zip code (optional)" maxlength="5" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipSignup(this.value)">
           <div id="authZipResult" style="font-size:12px;color:var(--green);margin-top:4px;padding:0 2px;min-height:16px;"></div>
         </div>
       </div>
       <div class="auth-error" id="authError"></div>
-      <button class="auth-btn" id="authBtn" onclick="handleAuth()">Get Started</button>
-      <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">Already have an account? <span>Sign in</span></div>
-      <div id="forgotWrap" style="display:none;text-align:center;">
+      <button class="auth-btn" id="authBtn" onclick="handleAuth()">Sign In</button>
+      <div id="forgotWrap" style="text-align:center;">
         <div onclick="handleForgotPassword()" style="font-size:12px;color:var(--text3);cursor:pointer;margin-top:4px;">Forgot password? <span style="color:var(--accent);">Reset it</span></div>
       </div>
+      <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">New here? <span>Create account</span></div>
     </div>
   </div>
 </div>
@@ -521,19 +522,28 @@ body::after {
     </div>
     <button class="signout-btn a5" onclick="signOut()">Sign out</button>
     <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;">
-      <div class="section-header"><div class="section-title">Your username</div></div>
-      <div style="padding:1rem 1.5rem;display:flex;gap:10px;align-items:center;">
-        <input id="usernameInput" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" placeholder="Enter a username" oninput="this.style.borderColor='var(--accent)'">
-        <button onclick="saveUsername()" style="padding:10px 16px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Save</button>
+      <div class="section-header" onclick="toggleSettings()" style="cursor:pointer;display:flex;align-items:center;justify-content:space-between;padding-right:1.5rem;">
+        <div class="section-title">⚙️ Account Settings</div>
+        <div id="settingsChevron" style="font-size:11px;color:var(--text3);transition:transform 0.2s;">▼</div>
       </div>
-      <div style="padding:0 1.5rem 1rem;">
-        <div style="display:flex;gap:10px;align-items:center;">
-          <input id="profileZipInput" type="text" maxlength="5" inputmode="numeric" pattern="[0-9]*" placeholder="Your zip code" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipProfile(this.value)">
-          <div id="profileZipSpinner" style="display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+      <div id="settingsBody" style="display:none;">
+        <div style="padding:1rem 1.5rem;border-top:0.5px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Username</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="usernameInput" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" placeholder="Enter a username" oninput="this.style.borderColor='var(--accent)'">
+            <button onclick="saveUsername()" style="padding:10px 16px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Save</button>
+          </div>
         </div>
-        <div id="profileZipConfirm" style="font-size:12px;color:var(--green);margin-top:4px;"></div>
+        <div style="padding:1rem 1.5rem;border-top:0.5px solid var(--border);">
+          <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Your Location</div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input id="profileZipInput" type="text" maxlength="5" inputmode="numeric" pattern="[0-9]*" placeholder="Your zip code" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipProfile(this.value)">
+            <div id="profileZipSpinner" style="display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+          </div>
+          <div id="profileZipConfirm" style="font-size:12px;color:var(--green);margin-top:4px;"></div>
+        </div>
+        <div id="usernameMsg" style="padding:0 1.5rem 1rem;font-size:12px;color:var(--green);display:none;">Saved!</div>
       </div>
-      <div id="usernameMsg" style="padding:0 1.5rem 1rem;font-size:12px;color:var(--green);display:none;">Saved!</div>
     </div>
     <div id="winnerCard" style="display:none;margin:1rem 1.25rem 0;background:linear-gradient(135deg,rgba(232,197,71,0.15),rgba(232,197,71,0.05));border:0.5px solid rgba(232,197,71,0.3);border-radius:var(--r-xl);padding:1.5rem;">
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;">Yesterday</div>
@@ -693,7 +703,7 @@ let todayChallenge = null;
 let todayCityPrices = [];
 let userGuess = 0;
 let currentAccuracy = 0;
-let isAuthMode = 'signup';
+let isAuthMode = 'signin';
 let alreadyPlayed = false;
 let savedGuessData = null;
 let yesterdayGuessData = null;
@@ -958,9 +968,10 @@ function toggleAuthMode() {
   document.getElementById('authBtn').textContent = isAuthMode === 'signup' ? 'Get Started' : 'Sign In';
   document.getElementById('authSwitch').innerHTML = isAuthMode === 'signup'
     ? 'Already have an account? <span>Sign in</span>'
-    : "Don't have an account? <span>Sign up</span>";
+    : 'New here? <span>Create account</span>';
   document.getElementById('forgotWrap').style.display = isAuthMode === 'signin' ? 'block' : 'none';
-  document.getElementById('signupCityWrap').style.display = isAuthMode === 'signup' ? 'block' : 'none';
+  document.getElementById('signupFields').style.display = isAuthMode === 'signup' ? 'block' : 'none';
+  document.getElementById('authPassword').placeholder = isAuthMode === 'signup' ? 'Password (min 6 characters)' : 'Password';
   document.getElementById('authError').classList.remove('show');
 }
 
@@ -978,13 +989,13 @@ async function handleAuth() {
       result = await sb.auth.signUp({ email, password, options: { emailRedirectTo: null } });
       if (result.error) throw result.error;
       if (result.data.user) {
-        // Check if profile already exists before inserting
         const { data: existing } = await sb.from('profiles').select('id').eq('id', result.data.user.id).maybeSingle();
         if (!existing) {
           const zipResultEl = document.getElementById('authZipResult');
           const homeZip = zipResultEl?.dataset?.zip || '';
           const homeCity = zipResultEl?.dataset?.city || '';
-          await sb.from('profiles').insert({ id: result.data.user.id, username: '', home_zip: homeZip, home_city: homeCity });
+          const username = (document.getElementById('authUsername')?.value || '').trim();
+          await sb.from('profiles').insert({ id: result.data.user.id, username, home_zip: homeZip, home_city: homeCity });
         }
         currentUser = result.data.user;
       }
@@ -1100,7 +1111,8 @@ async function checkAlreadyPlayed() {
     alreadyPlayed = true;
     savedGuessData = {
       guess_amount: parseFloat(data.guess_amount),
-      accuracy: parseInt(data.accuracy)
+      accuracy: parseInt(data.accuracy),
+      higher_lower: data.higher_lower || null
     };
   }
 }
@@ -1301,7 +1313,7 @@ async function submitGuess() {
   }
 }
 
-function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
+async function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   guess = parseFloat(guess) || 0;
   realPrice = parseFloat(realPrice) || 0;
   accuracy = parseInt(accuracy) || 0;
@@ -1355,13 +1367,37 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   goTo('reveal');
   startCountdown();
 
-  // Prefill zip from profile
-  // Prefill zip from profile
-  if (currentProfile?.home_zip) {
-    const zipEl = document.getElementById('hlZipInput');
-    if (zipEl) zipEl.value = currentProfile.home_zip;
-    const confirm = document.getElementById('hlZipConfirm');
-    if (confirm && currentProfile.home_city) { confirm.textContent = '📍 ' + currentProfile.home_city; confirm.style.color = 'var(--text3)'; }
+  // Restore higher/lower state if already answered — lock buttons
+  const hlH = document.getElementById('hlH');
+  const hlL = document.getElementById('hlL');
+  const hlFeed = document.getElementById('hlFeed');
+  const savedHL = savedGuessData?.higher_lower;
+  if (savedHL === 'higher' || savedHL === 'lower') {
+    hlH.className = 'hl-b' + (savedHL === 'higher' ? ' picked-h' : '');
+    hlL.className = 'hl-b' + (savedHL === 'lower' ? ' picked-l' : '');
+    hlH.onclick = null; hlL.onclick = null;
+    hlH.style.cursor = 'default'; hlL.style.cursor = 'default';
+    // Show real crowd counts for saved answer
+    try {
+      const { data: counts } = await sb.rpc('get_hl_counts', { p_challenge_id: todayChallenge.id });
+      if (counts && counts.length > 0) {
+        const hc = parseInt(counts[0].higher_count || 0);
+        const lc = parseInt(counts[0].lower_count || 0);
+        const tot = hc + lc;
+        if (tot > 0) {
+          const hp = Math.round((hc / tot) * 100);
+          const lp = 100 - hp;
+          const cp = savedHL === 'higher' ? hp : lp;
+          const op = savedHL === 'higher' ? lp : hp;
+          const cl = savedHL === 'higher' ? '↑ higher' : '↓ lower';
+          const ol = savedHL === 'higher' ? '↓ lower' : '↑ higher';
+          hlFeed.innerHTML = '<strong style="color:var(--text);">' + cp + '% of players</strong> said ' + cl
+            + ' &nbsp;·&nbsp; ' + op + '% said ' + ol
+            + '<br><span style="font-size:11px;color:var(--text3);">Based on ' + tot + ' response' + (tot !== 1 ? 's' : '') + ' so far</span>';
+          hlFeed.classList.add('show');
+        }
+      }
+    } catch(e) {}
   }
 
   // Show rank
@@ -1482,11 +1518,18 @@ async function lookupZipProfile(zip) {
 }
 
 async function pickHL(choice) {
-  // Style the buttons
-  document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
-  document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
-
+  const hlH = document.getElementById('hlH');
+  const hlL = document.getElementById('hlL');
   const feed = document.getElementById('hlFeed');
+
+  // Style buttons
+  hlH.className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
+  hlL.className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
+
+  // Lock — remove click handlers and cursor
+  hlH.onclick = null; hlL.onclick = null;
+  hlH.style.cursor = 'default'; hlL.style.cursor = 'default';
+
   feed.innerHTML = 'Saving...';
   feed.classList.add('show');
 
@@ -1496,6 +1539,8 @@ async function pickHL(choice) {
       .update({ higher_lower: choice })
       .eq('user_id', currentUser.id)
       .eq('challenge_id', todayChallenge.id);
+    // Update savedGuessData so restore works on revisit
+    if (savedGuessData) savedGuessData.higher_lower = choice;
   }
 
   // Fetch real crowd data using secure database function
@@ -1699,6 +1744,14 @@ async function handleForgotPassword() {
   errEl.style.color = 'var(--green)';
   errEl.classList.add('show');
   setTimeout(() => { errEl.classList.remove('show'); errEl.style.color = ''; }, 4000);
+}
+
+function toggleSettings() {
+  const body = document.getElementById('settingsBody');
+  const chevron = document.getElementById('settingsChevron');
+  const open = body.style.display === 'block';
+  body.style.display = open ? 'none' : 'block';
+  chevron.style.transform = open ? '' : 'rotate(180deg)';
 }
 
 async function saveUsername() {
