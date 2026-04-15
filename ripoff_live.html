@@ -384,8 +384,8 @@ body::after {
         <div class="mini-stat-label">Avg Score</div>
       </div>
       <div class="mini-stat">
-        <div class="mini-stat-val" id="statIQ">500</div>
-        <div class="mini-stat-label">Market IQ</div>
+        <div class="mini-stat-val" id="statIQ">—</div>
+        <div class="mini-stat-label">Percentile</div>
       </div>
       <div class="mini-stat">
         <div class="mini-stat-val" id="statPlayed">0</div>
@@ -489,8 +489,8 @@ body::after {
     </div>
     <div class="iq-hero a2">
       <div class="iq-left">
-        <div class="iq-eyebrow">Market IQ</div>
-        <div class="iq-number" id="profileIQ">500</div>
+        <div class="iq-eyebrow">Average Accuracy</div>
+        <div class="iq-number" id="profileIQ">—%</div>
         <div class="iq-sub" id="profileIQSub">Keep playing to build your score</div>
       </div>
     </div>
@@ -1098,9 +1098,7 @@ function updateProfileUI() {
   const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
   const name = currentProfile.username || '';
   document.getElementById('profileGreeting').textContent = name ? greeting + ', ' + name + '.' : greeting + '.';
-  document.getElementById('profileIQ').textContent = currentProfile.market_iq || 500;
   document.getElementById('streakPill').textContent = '🔥 ' + liveStreak + ' Day Streak';
-  document.getElementById('statIQ').textContent = currentProfile.market_iq || 500;
   document.getElementById('statPlayed').textContent = currentProfile.total_played || 0;
   document.getElementById('pStatPlayed').textContent = currentProfile.total_played || 0;
   document.getElementById('pStatStreak').textContent = '🔥 ' + liveStreak;
@@ -1108,15 +1106,18 @@ function updateProfileUI() {
   document.getElementById('pStatTop10').textContent = currentProfile.total_top10 || 0;
   document.getElementById('pStatLongest').textContent = currentProfile.longest_streak || 0;
   document.getElementById('pStatWins').textContent = currentProfile.total_wins || 0;
-  const iqPct = Math.min(99, Math.round(((currentProfile.market_iq || 500) - 300) / 7));
-  document.getElementById('profileIQSub').textContent = (currentProfile.total_played || 0) > 0
-    ? 'Better than ' + iqPct + '% of players globally'
-    : 'Keep playing to build your score';
+
   if ((currentProfile.total_played || 0) > 0) {
-    const avg = Math.round((currentProfile.market_iq || 500) * 0.1) + '%';
-    document.getElementById('pStatAvg').textContent = avg;
-    document.getElementById('statAvg').textContent = avg;
+    // Calculate real average accuracy from guesses table
+    loadRealStats();
+  } else {
+    document.getElementById('profileIQ').textContent = '—%';
+    document.getElementById('profileIQSub').textContent = 'Play your first challenge to see your stats';
+    document.getElementById('pStatAvg').textContent = '—';
+    document.getElementById('statAvg').textContent = '—';
+    document.getElementById('statIQ').textContent = '—';
   }
+
   // Prefill zip code from profile
   if (currentProfile.home_zip) {
     const zipInput = document.getElementById('profileZipInput');
@@ -1125,6 +1126,56 @@ function updateProfileUI() {
     if (zipConfirm && currentProfile.home_city) { zipConfirm.textContent = '📍 ' + currentProfile.home_city; zipConfirm.style.color = 'var(--text3)'; }
   }
   loadHistory(showingFullHistory);
+}
+
+async function loadRealStats() {
+  if (!currentUser) return;
+  try {
+    // Get my average accuracy from actual guesses
+    const { data: myGuesses } = await sb
+      .from('guesses')
+      .select('accuracy')
+      .eq('user_id', currentUser.id);
+
+    if (!myGuesses || myGuesses.length === 0) return;
+
+    const myAvg = Math.round(myGuesses.reduce((sum, g) => sum + (g.accuracy || 0), 0) / myGuesses.length);
+
+    // Get all players' average accuracy to calculate real percentile
+    const { data: allGuesses } = await sb
+      .from('guesses')
+      .select('user_id, accuracy');
+
+    let realPercentile = 0;
+    if (allGuesses && allGuesses.length > 0) {
+      // Group by user and calculate each player's average
+      const byUser = {};
+      allGuesses.forEach(g => {
+        if (!byUser[g.user_id]) byUser[g.user_id] = { total: 0, count: 0 };
+        byUser[g.user_id].total += (g.accuracy || 0);
+        byUser[g.user_id].count++;
+      });
+      const allAvgs = Object.values(byUser).map(u => Math.round(u.total / u.count));
+      const totalPlayers = allAvgs.length;
+      const playersBelowMe = allAvgs.filter(avg => avg < myAvg).length;
+      realPercentile = Math.round((playersBelowMe / totalPlayers) * 100);
+    }
+
+    // Update UI with real data
+    const avgStr = myAvg + '%';
+    document.getElementById('profileIQ').textContent = avgStr;
+    document.getElementById('pStatAvg').textContent = avgStr;
+    document.getElementById('statAvg').textContent = avgStr;
+    document.getElementById('statIQ').textContent = 'Top ' + (100 - realPercentile) + '%';
+
+    if (realPercentile > 0) {
+      document.getElementById('profileIQSub').textContent = 'Better than ' + realPercentile + '% of players';
+    } else {
+      document.getElementById('profileIQSub').textContent = myGuesses.length + ' game' + (myGuesses.length !== 1 ? 's' : '') + ' played';
+    }
+  } catch (err) {
+    console.error('loadRealStats error:', err);
+  }
 }
 
 let showingFullHistory = false;
@@ -1204,13 +1255,11 @@ async function submitGuess() {
 
     // Update profile stats (NOT streak — streak is set by midnight function)
     const newPlayed = (currentProfile.total_played || 0) + 1;
-    const newIQ = Math.min(999, Math.max(100, Math.round((currentProfile.market_iq || 500) + (accuracy - 70) * 2)));
     const newTop50 = accuracy >= 50 ? (currentProfile.total_top50 || 0) + 1 : (currentProfile.total_top50 || 0);
     const newTop10 = accuracy >= 85 ? (currentProfile.total_top10 || 0) + 1 : (currentProfile.total_top10 || 0);
 
     await sb.from('profiles').update({
       total_played: newPlayed,
-      market_iq: newIQ,
       total_top50: newTop50,
       total_top10: newTop10
     }).eq('id', currentUser.id);
