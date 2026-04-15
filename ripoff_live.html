@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>Ripoff</title>
+<title>Ripoff — One price. One city. One winner.</title>
+<meta name="description" content="Guess the real price of everyday items in cities across America. One guess per day. Closest price wins.">
+<meta property="og:title" content="Ripoff — Can you guess the price?">
+<meta property="og:description" content="One price. One city. One winner. Guess today's item and see how you rank against everyone else.">
+<meta property="og:url" content="https://suhailchandihok.github.io/Ripoff/ripoff_live.html">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Ripoff — Can you guess the price?">
+<meta name="twitter:description" content="One price. One city. One winner. Play the daily price guessing game.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Syne:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -331,9 +339,13 @@ body::after {
     </div>
     <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid rgba(232,197,71,0.2);border-radius:var(--r-lg);padding:1rem 1.25rem;display:flex;align-items:center;gap:12px;">
       <div style="font-size:22px">⚔️</div>
-      <div>
+      <div style="flex:1;">
         <div style="font-size:13px;font-weight:700;color:var(--accent);">Daily Battle</div>
         <div style="font-size:11px;color:var(--text3);margin-top:2px;line-height:1.4;">One guess. Closest price wins the day. Results at midnight.</div>
+      </div>
+      <div style="text-align:right;">
+        <div style="font-family:'Instrument Serif',serif;font-size:22px;font-style:italic;color:var(--text);" id="livePlayerCount">—</div>
+        <div style="font-size:9px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);">playing today</div>
       </div>
     </div>
     <div class="guess-card a3">
@@ -470,6 +482,19 @@ body::after {
       <div id="historyList"><div class="empty-history">No games played yet.<br>Play today's challenge!</div></div>
     </div>
     <button class="signout-btn a5" onclick="signOut()">Sign out</button>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;">
+      <div class="section-header"><div class="section-title">Your username</div></div>
+      <div style="padding:1rem 1.5rem;display:flex;gap:10px;align-items:center;">
+        <input id="usernameInput" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" placeholder="Enter a username" oninput="this.style.borderColor='var(--accent)'">
+        <button onclick="saveUsername()" style="padding:10px 16px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Save</button>
+      </div>
+      <div id="usernameMsg" style="padding:0 1.5rem 1rem;font-size:12px;color:var(--green);display:none;">Username saved!</div>
+    </div>
+    <div id="winnerCard" style="display:none;margin:1rem 1.25rem 0;background:linear-gradient(135deg,rgba(232,197,71,0.15),rgba(232,197,71,0.05));border:0.5px solid rgba(232,197,71,0.3);border-radius:var(--r-xl);padding:1.5rem;">
+      <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;">Yesterday</div>
+      <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:var(--accent);">🏆 You won!</div>
+      <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6;" id="winnerCardSub">You had the closest guess yesterday.</div>
+    </div>
     <div style="padding:1.5rem 1.5rem 0;text-align:center;">
       <p style="font-size:10px;color:rgba(242,237,228,0.25);line-height:1.7;letter-spacing:0.3px;">
         Prices sourced from the US Bureau of Labor Statistics (BLS.gov) — public domain government data. Regional averages updated monthly. Actual prices vary by retailer and location.<br><br>
@@ -510,6 +535,40 @@ body::after {
     <div style="margin:0 1.25rem;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;" id="lbList">
       <div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>
     </div>
+  </div>
+</div>
+
+<!-- ONBOARDING SCREEN -->
+<div class="screen" id="s-onboarding">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:2rem 1.5rem;gap:0;">
+    <div style="font-family:'Instrument Serif',serif;font-size:52px;font-style:italic;margin-bottom:2rem;">Rip<span style="color:var(--accent);">off</span></div>
+    <div id="ob-slides">
+      <!-- Slide 1 -->
+      <div class="ob-slide" id="ob-0">
+        <div style="font-size:56px;margin-bottom:1.25rem;">🛒</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;margin-bottom:0.75rem;text-align:center;">Guess the real price</div>
+        <div style="font-size:14px;color:var(--text2);text-align:center;line-height:1.7;max-width:280px;">Every day, one everyday item in one American city. How much does it really cost?</div>
+      </div>
+      <!-- Slide 2 -->
+      <div class="ob-slide" id="ob-1" style="display:none;">
+        <div style="font-size:56px;margin-bottom:1.25rem;">⚔️</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;margin-bottom:0.75rem;text-align:center;">Battle everyone</div>
+        <div style="font-size:14px;color:var(--text2);text-align:center;line-height:1.7;max-width:280px;">One guess per day. At midnight, the closest guess wins. Top 25% of players keeps their streak alive.</div>
+      </div>
+      <!-- Slide 3 -->
+      <div class="ob-slide" id="ob-2" style="display:none;">
+        <div style="font-size:56px;margin-bottom:1.25rem;">🔥</div>
+        <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;margin-bottom:0.75rem;text-align:center;">Build your streak</div>
+        <div style="font-size:14px;color:var(--text2);text-align:center;line-height:1.7;max-width:280px;">Finish in the top 25% every day to keep your streak going. All prices are real — sourced from the US Bureau of Labor Statistics.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;margin:2rem 0 1.5rem;">
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--accent);" id="ob-dot-0"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--border2);" id="ob-dot-1"></div>
+      <div style="width:6px;height:6px;border-radius:50%;background:var(--border2);" id="ob-dot-2"></div>
+    </div>
+    <button id="obBtn" onclick="obNext()" style="width:100%;max-width:320px;padding:17px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:14px;font-weight:800;letter-spacing:1.5px;text-transform:uppercase;cursor:pointer;">Next</button>
+    <div onclick="finishOnboarding()" style="margin-top:1rem;font-size:12px;color:var(--text3);cursor:pointer;">Skip</div>
   </div>
 </div>
 
@@ -572,8 +631,25 @@ async function loadApp() {
   await loadProfile();
   await loadYesterdayTab();
   hideLoading();
-  document.getElementById('mainNav').style.display = 'flex';
   await maybeShowDailyStreakPopup();
+  await loadLivePlayerCount();
+  await checkWinnerCard();
+
+  // Prefill username input
+  if (currentProfile?.username) {
+    const uInput = document.getElementById('usernameInput');
+    if (uInput) uInput.value = currentProfile.username;
+  }
+
+  // Check onboarding
+  const onboarded = localStorage.getItem('ripoff_onboarded');
+  if (!onboarded) {
+    document.getElementById('mainNav').style.display = 'none';
+    goTo('onboarding');
+    return;
+  }
+
+  document.getElementById('mainNav').style.display = 'flex';
 
   if (alreadyPlayed && savedGuessData && todayChallenge) {
     userGuess = savedGuessData.guess_amount;
@@ -840,7 +916,7 @@ function updateChallengeUI() {
   document.getElementById('challengeDateLabel').textContent = dateStr + ' · Daily Challenge';
   document.getElementById('itemTag').textContent = item.emoji + ' ' + item.category;
   document.getElementById('itemTitle').textContent = item.name;
-  document.getElementById('itemLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('itemLocation').textContent = city.name + ', ' + city.state;
   document.getElementById('challengeNum').textContent = '#' + todayChallenge.challenge_date.replace('2026-0','').replace('2026-','');
   function tryDraw(attempts) {
     const mc = document.getElementById('mainCanvas');
@@ -995,7 +1071,7 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
 
   document.getElementById('disclaimerBanner').style.display = 'block';
   document.getElementById('revealItemName').textContent = item.name;
-  document.getElementById('revealLocation').textContent = city.name + ', ' + city.state + ' ' + city.zip;
+  document.getElementById('revealLocation').textContent = city.name + ', ' + city.state;
   document.getElementById('realPriceVal').textContent = '$' + realPrice.toFixed(2);
   document.getElementById('yourGuessVal').textContent = guess > 0 ? '$' + guess.toFixed(2) : '—';
   const revealDateEl = document.getElementById('revealDateLabel');
@@ -1194,6 +1270,63 @@ function goTo(name) {
         drawItemImage('mainCanvas', todayChallenge.items.name, todayChallenge.items.emoji, w, 300);
       }
     }, 200);
+  }
+}
+
+// ── USERNAME ──────────────────────────────────────────
+async function saveUsername() {
+  const val = document.getElementById('usernameInput').value.trim();
+  if (!val) return;
+  const msg = document.getElementById('usernameMsg');
+  await sb.from('profiles').update({ username: val }).eq('id', currentUser.id);
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 2500);
+  if (currentProfile) currentProfile.username = val;
+}
+
+// ── LIVE PLAYER COUNT ─────────────────────────────────
+async function loadLivePlayerCount() {
+  if (!todayChallenge) return;
+  const { count } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
+  const el = document.getElementById('livePlayerCount');
+  if (el) el.textContent = count || 0;
+}
+
+// ── WINNER CARD ───────────────────────────────────────
+async function checkWinnerCard() {
+  if (!currentUser || !yesterdayGuessData) return;
+  if (yesterdayGuessData.rank_at_close !== 1) return;
+  const card = document.getElementById('winnerCard');
+  const sub = document.getElementById('winnerCardSub');
+  if (!card) return;
+  card.style.display = 'block';
+  const total = yesterdayGuessData.total_players_that_day || 0;
+  if (sub && total > 0) sub.textContent = 'You beat ' + (total - 1) + ' other player' + (total - 1 !== 1 ? 's' : '') + ' yesterday.';
+}
+
+// ── ONBOARDING ────────────────────────────────────────
+let obSlide = 0;
+function obNext() {
+  if (obSlide < 2) {
+    document.getElementById('ob-' + obSlide).style.display = 'none';
+    document.getElementById('ob-dot-' + obSlide).style.background = 'var(--border2)';
+    obSlide++;
+    document.getElementById('ob-' + obSlide).style.display = 'flex';
+    document.getElementById('ob-' + obSlide).style.flexDirection = 'column';
+    document.getElementById('ob-' + obSlide).style.alignItems = 'center';
+    document.getElementById('ob-dot-' + obSlide).style.background = 'var(--accent)';
+    if (obSlide === 2) document.getElementById('obBtn').textContent = "Let's Play";
+  } else {
+    finishOnboarding();
+  }
+}
+function finishOnboarding() {
+  localStorage.setItem('ripoff_onboarded', '1');
+  document.getElementById('mainNav').style.display = 'flex';
+  if (alreadyPlayed && savedGuessData && todayChallenge) {
+    showReveal(userGuess, parseFloat(todayChallenge.real_price), currentAccuracy, null, null);
+  } else {
+    goTo('challenge');
   }
 }
 
