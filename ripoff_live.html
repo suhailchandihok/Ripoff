@@ -295,7 +295,18 @@ body::after {
     <div class="sp-title" id="streakPopupTitle">Results are in</div>
     <div class="sp-rank" id="streakPopupRank"></div>
     <div class="sp-streak" id="streakPopupStreak"></div>
-    <button class="sp-btn" onclick="dismissStreakPopup()">Got it</button>
+    <div id="winnerDivider" style="display:none;border-top:0.5px solid var(--border2);margin:1rem 0;"></div>
+    <div id="winnerSection" style="display:none;">
+      <div style="font-size:9px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:6px;">Yesterday's winner</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div style="font-size:28px;">👑</div>
+        <div>
+          <div style="font-size:16px;font-weight:700;color:var(--accent);" id="winnerPopupName">—</div>
+          <div style="font-size:12px;color:var(--text2);margin-top:2px;" id="winnerPopupDetail">—</div>
+        </div>
+      </div>
+    </div>
+    <button class="sp-btn" style="margin-top:1.25rem;" onclick="dismissStreakPopup()">Got it</button>
   </div>
 </div>
 
@@ -484,6 +495,15 @@ body::after {
       <div class="stat-tile"><div class="st-val" id="pStatTop50">0</div><div class="st-label">Top 50%</div></div>
       <div class="stat-tile"><div class="st-val" id="pStatTop10" style="color:var(--green)">0</div><div class="st-label">Top 10%</div></div>
       <div class="stat-tile"><div class="st-val" id="pStatLongest">0</div><div class="st-label">Best Streak</div></div>
+      <div class="stat-tile" style="grid-column:span 3;background:linear-gradient(135deg,rgba(232,197,71,0.12),rgba(232,197,71,0.04));border-color:rgba(232,197,71,0.2);">
+        <div style="display:flex;align-items:center;justify-content:center;gap:10px;">
+          <div style="font-size:28px;">👑</div>
+          <div>
+            <div class="st-val" id="pStatWins" style="color:var(--accent);">0</div>
+            <div class="st-label">Daily Wins</div>
+          </div>
+        </div>
+      </div>
     </div>
     <div class="history-wrap a4">
       <div class="section-header" style="display:flex;align-items:center;justify-content:space-between;">
@@ -571,6 +591,7 @@ body::after {
       <button onclick="switchLB('weekly')" id="lt-weekly" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">This Week</button>
       <button onclick="switchLB('streaks')" id="lt-streaks" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">Streaks</button>
       <button onclick="switchLB('alltime')" id="lt-alltime" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">All Time</button>
+      <button onclick="switchLB('winners')" id="lt-winners" style="flex:1;min-width:calc(50% - 3px);padding:10px;border-radius:var(--r-md);border:0.5px solid rgba(232,197,71,0.3);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--accent);cursor:pointer;font-family:'Syne',sans-serif;">👑 Wall of Winners</button>
     </div>
     <div style="margin:0 1.25rem;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;" id="lbList">
       <div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>
@@ -818,13 +839,25 @@ async function loadYesterdayTab() {
 
 // ── STREAK POPUP ──────────────────────────────────────
 async function maybeShowDailyStreakPopup() {
-  if (!yesterdayGuessData || yesterdayGuessData.rank_at_close == null) return;
-
+  // Always show popup if we haven't shown it today — even if user didn't play
   const meta = currentUser?.user_metadata || {};
   const lastShownAt = meta.last_streak_popup_shown_at ? new Date(meta.last_streak_popup_shown_at) : null;
   const isRecent = lastShownAt && (Date.now() - lastShownAt.getTime()) < 24 * 60 * 60 * 1000;
-  const sameChallenge = String(meta.last_streak_popup_challenge_id || '') === String(yesterdayGuessData.challenge_id || '');
-  if (isRecent && sameChallenge) return;
+  const todayStr = new Date().toISOString().split('T')[0];
+  const lastShownDate = lastShownAt ? lastShownAt.toISOString().split('T')[0] : null;
+  if (lastShownDate === todayStr) return; // Already shown today
+
+  // Fetch yesterday's winner
+  const yesterdayStr = new Date(Date.now() - 86400000).toISOString().split('T')[0];
+  const { data: winnerData } = await sb
+    .from('daily_winners')
+    .select('user_id, accuracy, challenge_date, profiles(username), challenges(items(name, emoji), cities(name, state))')
+    .eq('challenge_date', yesterdayStr)
+    .maybeSingle();
+
+  // Only show popup if user played yesterday OR there's a winner to announce
+  const hasYesterdayResult = yesterdayGuessData && yesterdayGuessData.rank_at_close != null;
+  if (!hasYesterdayResult && !winnerData) return;
 
   pendingStreakPopupGuess = yesterdayGuessData;
   const wrap = document.getElementById('streakPopupWrap');
@@ -832,33 +865,54 @@ async function maybeShowDailyStreakPopup() {
   const title = document.getElementById('streakPopupTitle');
   const rankEl = document.getElementById('streakPopupRank');
   const streakEl = document.getElementById('streakPopupStreak');
+  const winnerSection = document.getElementById('winnerSection');
+  const winnerDivider = document.getElementById('winnerDivider');
 
-  const survived = !!yesterdayGuessData.streak_survived;
-  const rank = parseInt(yesterdayGuessData.rank_at_close || 0);
-  const total = parseInt(yesterdayGuessData.total_players_that_day || 0);
-  const liveStreak = Number(currentProfile?.streak || 0);
+  if (hasYesterdayResult) {
+    const survived = !!yesterdayGuessData.streak_survived;
+    const rank = parseInt(yesterdayGuessData.rank_at_close || 0);
+    const total = parseInt(yesterdayGuessData.total_players_that_day || 0);
+    const liveStreak = Number(currentProfile?.streak || 0);
+    card.className = 'streak-popup-card ' + (survived ? 'good' : 'bad');
+    title.textContent = survived ? '🔥 Streak survived!' : 'Streak reset';
+    rankEl.textContent = rank > 0 && total > 0 ? 'You finished #' + rank + ' out of ' + total + ' players.' : '';
+    streakEl.textContent = survived ? 'Current streak: ' + liveStreak + ' days' : 'Your streak has reset to 0.';
+    streakEl.className = 'sp-streak ' + (survived ? 'good' : 'bad');
+  } else {
+    card.className = 'streak-popup-card';
+    title.textContent = 'Daily Results';
+    rankEl.textContent = 'You didn\'t play yesterday.';
+    streakEl.textContent = '';
+    streakEl.className = 'sp-streak';
+  }
 
-  card.className = 'streak-popup-card ' + (survived ? 'good' : 'bad');
-  title.textContent = survived ? '🔥 Streak survived!' : 'Streak reset';
-  rankEl.textContent = rank > 0 && total > 0 ? 'Yesterday you finished #' + rank + ' out of ' + total + ' players.' : '';
-  streakEl.textContent = survived ? 'Current streak: ' + liveStreak + ' days' : 'Your streak has reset to 0.';
-  streakEl.className = 'sp-streak ' + (survived ? 'good' : 'bad');
+  // Show winner section
+  if (winnerData) {
+    winnerSection.style.display = 'block';
+    winnerDivider.style.display = 'block';
+    const wName = winnerData.profiles?.username || 'Anonymous';
+    const wAcc = winnerData.accuracy || 0;
+    const wItem = winnerData.challenges?.items?.name || '';
+    const wCity = winnerData.challenges?.cities?.name || '';
+    document.getElementById('winnerPopupName').textContent = wName;
+    document.getElementById('winnerPopupDetail').textContent = wAcc + '% · ' + wItem + (wCity ? ' · ' + wCity : '');
+  } else {
+    winnerSection.style.display = 'none';
+    winnerDivider.style.display = 'none';
+  }
 
   wrap.style.display = 'flex';
 }
 
 async function dismissStreakPopup() {
   document.getElementById('streakPopupWrap').style.display = 'none';
-  if (!pendingStreakPopupGuess || !currentUser) return;
+  if (!currentUser) return;
   try {
     const currentMeta = currentUser.user_metadata || {};
-    await sb.auth.updateUser({
-      data: {
-        ...currentMeta,
-        last_streak_popup_shown_at: new Date().toISOString(),
-        last_streak_popup_challenge_id: pendingStreakPopupGuess.challenge_id
-      }
+    const { data } = await sb.auth.updateUser({
+      data: { ...currentMeta, last_streak_popup_shown_at: new Date().toISOString() }
     });
+    if (data?.user) currentUser = data.user;
   } catch (err) {
     console.error('Failed to persist popup state:', err);
   }
@@ -1036,6 +1090,7 @@ function updateProfileUI() {
   document.getElementById('pStatTop50').textContent = currentProfile.total_top50 || 0;
   document.getElementById('pStatTop10').textContent = currentProfile.total_top10 || 0;
   document.getElementById('pStatLongest').textContent = currentProfile.longest_streak || 0;
+  document.getElementById('pStatWins').textContent = currentProfile.total_wins || 0;
   const iqPct = Math.min(99, Math.round(((currentProfile.market_iq || 500) - 300) / 7));
   document.getElementById('profileIQSub').textContent = (currentProfile.total_played || 0) > 0
     ? 'Better than ' + iqPct + '% of players globally'
@@ -1275,11 +1330,14 @@ function doShare() {
 // ── NAVIGATION ────────────────────────────────────────
 async function switchLB(tab) {
   currentLBTab = tab;
-  ['daily', 'weekly', 'streaks', 'alltime'].forEach(t => {
+  ['daily', 'weekly', 'streaks', 'alltime', 'winners'].forEach(t => {
     const el = document.getElementById('lt-' + t);
     if (!el) return;
-    if (t === tab) { el.style.background = 'var(--s2)'; el.style.borderColor = 'var(--border3)'; el.style.color = 'var(--text)'; }
-    else { el.style.background = 'var(--s1)'; el.style.borderColor = 'var(--border2)'; el.style.color = 'var(--text3)'; }
+    if (t === tab) {
+      el.style.background = 'var(--s2)'; el.style.borderColor = 'var(--border3)'; el.style.color = t === 'winners' ? 'var(--accent)' : 'var(--text)';
+    } else {
+      el.style.background = 'var(--s1)'; el.style.borderColor = t === 'winners' ? 'rgba(232,197,71,0.3)' : 'var(--border2)'; el.style.color = t === 'winners' ? 'var(--accent)' : 'var(--text3)';
+    }
   });
   await loadLeaderboard(tab);
 }
@@ -1306,7 +1364,10 @@ async function loadLeaderboard(tab) {
         .eq('challenge_id', todayChallenge.id)
         .order('accuracy', { ascending: false }).limit(20);
       if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No players yet today. Be the first!</div>'; return; }
-      list.innerHTML = data.map((g, i) => row(i, g.profiles?.username, g.user_id === currentUser?.id, 'Guessed $' + parseFloat(g.guess_amount).toFixed(2), g.accuracy + '%', null)).join('');
+      list.innerHTML = data.map((g, i) => {
+        const crownPrefix = i === 0 ? '👑 ' : '';
+        return row(i, crownPrefix + (g.profiles?.username || 'Player'), g.user_id === currentUser?.id, 'Guessed $' + parseFloat(g.guess_amount).toFixed(2), g.accuracy + '%', null);
+      }).join('');
 
     } else if (tab === 'weekly') {
       const { data } = await sb.from('guesses')
@@ -1329,12 +1390,31 @@ async function loadLeaderboard(tab) {
       if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No streaks yet.</div>'; return; }
       list.innerHTML = data.map((p, i) => row(i, p.username, p.id === currentUser?.id, 'Best ever: ' + (p.longest_streak || 0) + ' days', '🔥 ' + (p.streak || 0), 'var(--accent)')).join('');
 
-    } else {
+    } else if (tab === 'alltime') {
       const { data } = await sb.from('guesses')
         .select('accuracy, guess_amount, user_id, profiles(username), challenges(challenge_date, items(name,emoji), cities(name))')
         .order('accuracy', { ascending: false }).limit(10);
       if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No records yet.</div>'; return; }
       list.innerHTML = data.map((g, i) => row(i, g.profiles?.username, g.user_id === currentUser?.id, (g.challenges?.items?.emoji || '') + ' ' + (g.challenges?.items?.name || '') + ' · ' + (g.challenges?.cities?.name || ''), g.accuracy + '%', 'var(--green)')).join('');
+
+    } else if (tab === 'winners') {
+      const { data } = await sb.from('daily_winners')
+        .select('challenge_date, accuracy, profiles(username, id), challenges(items(name, emoji), cities(name, state))')
+        .order('challenge_date', { ascending: false }).limit(50);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No winners yet. Check back after midnight!</div>'; return; }
+      list.innerHTML = data.map(w => {
+        const isYou = w.profiles?.id === currentUser?.id;
+        const date = new Date(w.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
+        const item = (w.challenges?.items?.emoji || '') + ' ' + (w.challenges?.items?.name || '');
+        const city = w.challenges?.cities?.name || '';
+        return '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
+          + '<div style="font-size:22px;flex-shrink:0;">👑</div>'
+          + '<div style="flex:1;min-width:0;">'
+          + '<div style="font-size:14px;font-weight:700;color:var(--accent);">' + (w.profiles?.username || 'Anonymous') + (isYou ? ' <span style="font-size:10px;color:var(--text3);">(you)</span>' : '') + '</div>'
+          + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + date + ' · ' + item + (city ? ' · ' + city : '') + '</div>'
+          + '</div>'
+          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--green);white-space:nowrap;">' + (w.accuracy || 0) + '%</div></div>';
+      }).join('');
     }
   } catch (err) {
     list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Could not load.</div>';
