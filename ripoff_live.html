@@ -311,6 +311,9 @@ body::after {
       <div class="auth-error" id="authError"></div>
       <button class="auth-btn" id="authBtn" onclick="handleAuth()">Get Started</button>
       <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">Already have an account? <span>Sign in</span></div>
+      <div id="forgotWrap" style="display:none;text-align:center;">
+        <div onclick="handleForgotPassword()" style="font-size:12px;color:var(--text3);cursor:pointer;margin-top:4px;">Forgot password? <span style="color:var(--accent);">Reset it</span></div>
+      </div>
     </div>
   </div>
 </div>
@@ -494,6 +497,34 @@ body::after {
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;">Yesterday</div>
       <div style="font-family:'Instrument Serif',serif;font-size:28px;font-style:italic;color:var(--accent);">🏆 You won!</div>
       <div style="font-size:13px;color:var(--text2);margin-top:6px;line-height:1.6;" id="winnerCardSub">You had the closest guess yesterday.</div>
+    </div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;">
+      <div class="section-header"><div class="section-title">About & FAQ</div></div>
+      <div style="padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Where do prices come from?</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">All prices are real — sourced from the US Bureau of Labor Statistics Consumer Price Index (CPI). Updated monthly. BLS.gov is public domain government data.</div>
+      </div>
+      <div style="padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">How does the streak work?</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">Finish in the top 25% of players for the day and your streak survives. Miss it and your streak resets to 0. Results are calculated every night at midnight.</div>
+      </div>
+      <div style="padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">How is accuracy calculated?</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">Accuracy = how close your guess was to the real price as a percentage. 100% means you guessed exactly right. 0% means you were very far off.</div>
+      </div>
+      <div style="padding:1rem 1.5rem;">
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Who wins the day?</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;">One player per day — whoever had the closest guess (highest accuracy). In the event of a tie, the earlier submission wins.</div>
+      </div>
+    </div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;">
+      <div class="section-header"><div class="section-title">Report a price</div></div>
+      <div style="padding:1rem 1.5rem;">
+        <div style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:1rem;">Think a price looks wrong? Let us know and we'll verify it against the latest BLS data.</div>
+        <textarea id="reportText" placeholder="Describe the issue (e.g. 'Eggs in NYC seem too low')" style="width:100%;padding:12px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:13px;outline:none;resize:none;height:80px;line-height:1.5;"></textarea>
+        <button onclick="submitReport()" style="margin-top:10px;width:100%;padding:12px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text2);font-family:'Syne',sans-serif;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Submit Report</button>
+        <div id="reportMsg" style="display:none;margin-top:8px;font-size:12px;color:var(--green);text-align:center;">Thanks! We'll look into it.</div>
+      </div>
     </div>
     <div style="padding:1.5rem 1.5rem 0;text-align:center;">
       <p style="font-size:10px;color:rgba(242,237,228,0.25);line-height:1.7;letter-spacing:0.3px;">
@@ -823,6 +854,7 @@ function toggleAuthMode() {
   document.getElementById('authSwitch').innerHTML = isAuthMode === 'signup'
     ? 'Already have an account? <span>Sign in</span>'
     : "Don't have an account? <span>Sign up</span>";
+  document.getElementById('forgotWrap').style.display = isAuthMode === 'signin' ? 'block' : 'none';
   document.getElementById('authError').classList.remove('show');
 }
 
@@ -957,8 +989,9 @@ function updateProfileUI() {
   if (!currentProfile) return;
   const liveStreak = Number(currentProfile.streak || 0);
   const hour = new Date().getHours();
-  const greeting = hour < 12 ? 'Good morning.' : hour < 17 ? 'Good afternoon.' : 'Good evening.';
-  document.getElementById('profileGreeting').textContent = greeting;
+  const greeting = hour < 12 ? 'Good morning' : hour < 17 ? 'Good afternoon' : 'Good evening';
+  const name = currentProfile.username || '';
+  document.getElementById('profileGreeting').textContent = name ? greeting + ', ' + name + '.' : greeting + '.';
   document.getElementById('profileIQ').textContent = currentProfile.market_iq || 500;
   document.getElementById('streakPill').textContent = '🔥 ' + liveStreak + ' Day Streak';
   document.getElementById('statIQ').textContent = currentProfile.market_iq || 500;
@@ -1014,6 +1047,19 @@ async function submitGuess() {
     setTimeout(() => row.style.borderColor = '', 700);
     return;
   }
+
+  // Lock-in animation
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = true;
+  btn.textContent = 'Locking in...';
+  btn.style.background = 'var(--s3)';
+  btn.style.color = 'var(--text3)';
+  await new Promise(r => setTimeout(r, 600));
+  btn.textContent = '✓ Guess locked';
+  btn.style.background = 'var(--green-dim)';
+  btn.style.color = 'var(--green)';
+  btn.style.border = '0.5px solid rgba(74,222,128,0.3)';
+  await new Promise(r => setTimeout(r, 800));
   userGuess = val;
   const realPrice = parseFloat(todayChallenge.real_price);
   const diff = Math.abs(val - realPrice);
@@ -1052,7 +1098,7 @@ async function submitGuess() {
   // Get live rank
   try {
     const { count: tot } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
-    const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id', todayChallenge.id).gt('accuracy', accuracy);
+    const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id', todayChallenge.id).gt('accuracy', accuracy).neq('user_id', currentUser.id);
     const liveRank = (better?.length || 0) + 1;
     showReveal(val, realPrice, accuracy, liveRank, tot || 1);
   } catch (e) {
@@ -1277,7 +1323,35 @@ function goTo(name) {
   }
 }
 
+// ── REPORT A PRICE ────────────────────────────────────
+async function submitReport() {
+  const text = document.getElementById('reportText').value.trim();
+  if (!text) return;
+  const msg = document.getElementById('reportMsg');
+  const challengeInfo = todayChallenge ? (todayChallenge.items?.name + ' in ' + todayChallenge.cities?.name) : 'unknown';
+  await sb.from('guesses').update({ higher_lower: 'report:' + text.substring(0, 100) })
+    .eq('user_id', currentUser.id)
+    .eq('challenge_id', todayChallenge?.id || '');
+  document.getElementById('reportText').value = '';
+  msg.style.display = 'block';
+  setTimeout(() => msg.style.display = 'none', 3000);
+}
+
 // ── USERNAME ──────────────────────────────────────────
+async function handleForgotPassword() {
+  const email = document.getElementById('authEmail').value.trim();
+  if (!email) { showAuthError('Enter your email above first.'); return; }
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: 'https://suhailchandihok.github.io/Ripoff/ripoff_live.html'
+  });
+  if (error) { showAuthError(error.message); return; }
+  const errEl = document.getElementById('authError');
+  errEl.textContent = 'Password reset email sent! Check your inbox.';
+  errEl.style.color = 'var(--green)';
+  errEl.classList.add('show');
+  setTimeout(() => { errEl.classList.remove('show'); errEl.style.color = ''; }, 4000);
+}
+
 async function saveUsername() {
   const val = document.getElementById('usernameInput').value.trim();
   if (!val) return;
