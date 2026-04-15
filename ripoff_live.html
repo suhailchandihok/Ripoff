@@ -527,10 +527,11 @@ body::after {
       <div style="font-family:'Instrument Serif',serif;font-size:36px;font-style:italic;color:var(--text);">Leaderboard</div>
       <div style="font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-top:6px;">One price. One city. One winner.</div>
     </div>
-    <div style="display:flex;gap:8px;margin:0 1.25rem 1rem;">
-      <button onclick="switchLB('daily')" id="lt-daily" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border3);background:var(--s2);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;">Today</button>
-      <button onclick="switchLB('weekly')" id="lt-weekly" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">This Week</button>
-      <button onclick="switchLB('alltime')" id="lt-alltime" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">All Time</button>
+    <div style="display:flex;gap:6px;margin:0 1.25rem 1rem;flex-wrap:wrap;">
+      <button onclick="switchLB('daily')" id="lt-daily" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border3);background:var(--s2);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text);cursor:pointer;font-family:'Syne',sans-serif;">Today</button>
+      <button onclick="switchLB('weekly')" id="lt-weekly" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">This Week</button>
+      <button onclick="switchLB('streaks')" id="lt-streaks" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">Streaks</button>
+      <button onclick="switchLB('alltime')" id="lt-alltime" style="flex:1;padding:10px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s1);font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;font-family:'Syne',sans-serif;">All Time</button>
     </div>
     <div style="margin:0 1.25rem;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);overflow:hidden;" id="lbList">
       <div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>
@@ -1181,7 +1182,7 @@ function doShare() {
 // ── NAVIGATION ────────────────────────────────────────
 async function switchLB(tab) {
   currentLBTab = tab;
-  ['daily', 'weekly', 'alltime'].forEach(t => {
+  ['daily', 'weekly', 'streaks', 'alltime'].forEach(t => {
     const el = document.getElementById('lt-' + t);
     if (!el) return;
     if (t === tab) { el.style.background = 'var(--s2)'; el.style.borderColor = 'var(--border3)'; el.style.color = 'var(--text)'; }
@@ -1194,6 +1195,16 @@ async function loadLeaderboard(tab) {
   const list = document.getElementById('lbList');
   if (!list) return;
   list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Loading...</div>';
+  const medals = ['🥇', '🥈', '🥉'];
+
+  function row(i, username, isYou, sub, rightVal, rightColor) {
+    return '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
+      + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;flex-shrink:0;">' + (medals[i] || i + 1) + '</div>'
+      + '<div style="flex:1;min-width:0;"><div style="font-size:14px;font-weight:600;">' + (username || 'Player') + (isYou ? ' <span style="font-size:10px;color:var(--accent);">(you)</span>' : '') + '</div>'
+      + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + sub + '</div></div>'
+      + '<div style="font-family:\'Instrument Serif\',serif;font-size:20px;font-style:italic;color:' + (rightColor || 'var(--accent)') + ';white-space:nowrap;">' + rightVal + '</div></div>';
+  }
+
   try {
     if (tab === 'daily') {
       if (!todayChallenge) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No challenge today.</div>'; return; }
@@ -1202,15 +1213,8 @@ async function loadLeaderboard(tab) {
         .eq('challenge_id', todayChallenge.id)
         .order('accuracy', { ascending: false }).limit(20);
       if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No players yet today. Be the first!</div>'; return; }
-      const medals = ['🥇', '🥈', '🥉'];
-      list.innerHTML = data.map((g, i) => {
-        const isYou = g.user_id === currentUser?.id;
-        return '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
-          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (medals[i] || i + 1) + '</div>'
-          + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (g.profiles?.username || 'Player') + (isYou ? ' (you)' : '') + '</div>'
-          + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">Guessed $' + parseFloat(g.guess_amount).toFixed(2) + '</div></div>'
-          + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + g.accuracy + '%</div></div>';
-      }).join('');
+      list.innerHTML = data.map((g, i) => row(i, g.profiles?.username, g.user_id === currentUser?.id, 'Guessed $' + parseFloat(g.guess_amount).toFixed(2), g.accuracy + '%', null)).join('');
+
     } else if (tab === 'weekly') {
       const { data } = await sb.from('guesses')
         .select('accuracy, user_id, profiles(username)')
@@ -1223,21 +1227,21 @@ async function loadLeaderboard(tab) {
         byUser[g.user_id].total += g.accuracy; byUser[g.user_id].count++;
       });
       const sorted = Object.values(byUser).map(v => ({ ...v, avg: Math.round(v.total / v.count) })).sort((a, b) => b.avg - a.avg);
-      list.innerHTML = sorted.map((u, i) => '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (u.isYou ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
-        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (i + 1) + '</div>'
-        + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (u.username || 'Player') + (u.isYou ? ' (you)' : '') + '</div>'
-        + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + u.count + ' games this week</div></div>'
-        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + u.avg + '%</div></div>').join('');
+      list.innerHTML = sorted.map((u, i) => row(i, u.username, u.isYou, u.count + ' games this week', u.avg + '%', null)).join('');
+
+    } else if (tab === 'streaks') {
+      const { data } = await sb.from('profiles')
+        .select('id, username, streak, longest_streak')
+        .order('streak', { ascending: false }).limit(20);
+      if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No streaks yet.</div>'; return; }
+      list.innerHTML = data.map((p, i) => row(i, p.username, p.id === currentUser?.id, 'Best ever: ' + (p.longest_streak || 0) + ' days', '🔥 ' + (p.streak || 0), 'var(--accent)')).join('');
+
     } else {
       const { data } = await sb.from('guesses')
         .select('accuracy, guess_amount, user_id, profiles(username), challenges(challenge_date, items(name,emoji), cities(name))')
         .order('accuracy', { ascending: false }).limit(10);
       if (!data || data.length === 0) { list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">No records yet.</div>'; return; }
-      list.innerHTML = data.map((g, i) => '<div style="display:flex;align-items:center;gap:12px;padding:1rem 1.5rem;border-bottom:0.5px solid var(--border);background:' + (g.user_id === currentUser?.id ? 'rgba(232,197,71,0.06)' : 'transparent') + '">'
-        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:' + (i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text3)') + ';width:28px;">' + (i + 1) + '</div>'
-        + '<div style="flex:1;"><div style="font-size:14px;font-weight:600;">' + (g.profiles?.username || 'Player') + (g.user_id === currentUser?.id ? ' (you)' : '') + '</div>'
-        + '<div style="font-size:11px;color:var(--text3);margin-top:2px;">' + (g.challenges?.items?.emoji || '') + ' ' + (g.challenges?.items?.name || '') + ' · ' + (g.challenges?.cities?.name || '') + '</div></div>'
-        + '<div style="font-family:\'Instrument Serif\',serif;font-size:18px;font-style:italic;color:var(--accent);">' + g.accuracy + '%</div></div>').join('');
+      list.innerHTML = data.map((g, i) => row(i, g.profiles?.username, g.user_id === currentUser?.id, (g.challenges?.items?.emoji || '') + ' ' + (g.challenges?.items?.name || '') + ' · ' + (g.challenges?.cities?.name || ''), g.accuracy + '%', 'var(--green)')).join('');
     }
   } catch (err) {
     list.innerHTML = '<div style="padding:2rem;text-align:center;font-size:13px;color:var(--text3);">Could not load.</div>';
