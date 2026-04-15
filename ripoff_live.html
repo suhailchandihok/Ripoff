@@ -456,12 +456,11 @@ body::after {
       <div id="cityList"></div>
     </div>
     <div class="hl-section a4">
-      <div class="hl-q">How does this compare to<br><em>your zip code?</em></div>
-      <div style="display:flex;gap:10px;align-items:center;">
-        <input id="hlZipInput" type="text" maxlength="5" inputmode="numeric" pattern="[0-9]*" placeholder="Enter your zip code" style="flex:1;padding:14px 16px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:16px;outline:none;" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipReveal(this.value)">
-        <div id="hlZipSpinner" style="display:none;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+      <div class="hl-q">Is this higher or lower than<br><em>where you live?</em></div>
+      <div class="hl-btns">
+        <button class="hl-b" id="hlH" onclick="pickHL('higher')">↑ Higher</button>
+        <button class="hl-b" id="hlL" onclick="pickHL('lower')">↓ Lower</button>
       </div>
-      <div id="hlZipConfirm" style="font-size:12px;color:var(--text3);margin-top:6px;"></div>
       <div class="hl-feedback" id="hlFeed"></div>
     </div>
     <div class="why-box a5" id="whyBox" style="display:none">
@@ -1431,11 +1430,50 @@ async function lookupZipProfile(zip) {
 }
 
 async function pickHL(choice) {
+  // Style the buttons
+  document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
+  document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
+
   const feed = document.getElementById('hlFeed');
-  feed.textContent = 'Got it — noted for your location.';
+  feed.innerHTML = 'Saving...';
   feed.classList.add('show');
+
+  // Save to database
   if (currentUser && todayChallenge) {
-    await sb.from('guesses').update({ higher_lower: choice }).eq('user_id', currentUser.id).eq('challenge_id', todayChallenge.id);
+    await sb.from('guesses')
+      .update({ higher_lower: choice })
+      .eq('user_id', currentUser.id)
+      .eq('challenge_id', todayChallenge.id);
+  }
+
+  // Fetch real crowd data from all guesses for today
+  try {
+    const { data: allGuesses } = await sb
+      .from('guesses')
+      .select('higher_lower')
+      .eq('challenge_id', todayChallenge.id)
+      .not('higher_lower', 'is', null)
+      .in('higher_lower', ['higher', 'lower']);
+
+    if (allGuesses && allGuesses.length > 0) {
+      const total = allGuesses.length;
+      const higherCount = allGuesses.filter(g => g.higher_lower === 'higher').length;
+      const lowerCount = total - higherCount;
+      const higherPct = Math.round((higherCount / total) * 100);
+      const lowerPct = 100 - higherPct;
+      const chosenPct = choice === 'higher' ? higherPct : lowerPct;
+      const otherPct = choice === 'higher' ? lowerPct : higherPct;
+      const chosenLabel = choice === 'higher' ? '↑ higher' : '↓ lower';
+      const otherLabel = choice === 'higher' ? '↓ lower' : '↑ higher';
+
+      feed.innerHTML = '<strong style="color:var(--text);">' + chosenPct + '% of players</strong> said ' + chosenLabel
+        + ' &nbsp;·&nbsp; ' + otherPct + '% said ' + otherLabel
+        + '<br><span style="font-size:11px;color:var(--text3);">Based on ' + total + ' response' + (total !== 1 ? 's' : '') + ' so far</span>';
+    } else {
+      feed.innerHTML = 'You\'re the first to answer! Check back later to see the crowd result.';
+    }
+  } catch (err) {
+    feed.innerHTML = 'Got it — noted for your location.';
   }
 }
 
