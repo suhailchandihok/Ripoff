@@ -319,6 +319,12 @@ body::after {
       <div class="auth-title" id="authTitle">Create account</div>
       <input class="auth-input" type="email" id="authEmail" placeholder="Email address" autocomplete="email">
       <input class="auth-input" type="password" id="authPassword" placeholder="Password (min 6 characters)" autocomplete="current-password">
+      <div id="signupCityWrap" style="display:block;">
+        <div style="position:relative;">
+          <input class="auth-input" type="text" id="authZip" placeholder="Your zip code (optional)" maxlength="5" inputmode="numeric" pattern="[0-9]*" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipSignup(this.value)">
+          <div id="authZipResult" style="font-size:12px;color:var(--green);margin-top:4px;padding:0 2px;min-height:16px;"></div>
+        </div>
+      </div>
       <div class="auth-error" id="authError"></div>
       <button class="auth-btn" id="authBtn" onclick="handleAuth()">Get Started</button>
       <div class="auth-switch" id="authSwitch" onclick="toggleAuthMode()">Already have an account? <span>Sign in</span></div>
@@ -450,11 +456,12 @@ body::after {
       <div id="cityList"></div>
     </div>
     <div class="hl-section a4">
-      <div class="hl-q">Is this higher or lower than<br><em>where you live?</em></div>
-      <div class="hl-btns">
-        <button class="hl-b" id="hlH" onclick="pickHL('higher')">↑ Higher</button>
-        <button class="hl-b" id="hlL" onclick="pickHL('lower')">↓ Lower</button>
+      <div class="hl-q">How does this compare to<br><em>your zip code?</em></div>
+      <div style="display:flex;gap:10px;align-items:center;">
+        <input id="hlZipInput" type="text" maxlength="5" inputmode="numeric" pattern="[0-9]*" placeholder="Enter your zip code" style="flex:1;padding:14px 16px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:16px;outline:none;" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipReveal(this.value)">
+        <div id="hlZipSpinner" style="display:none;width:20px;height:20px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
       </div>
+      <div id="hlZipConfirm" style="font-size:12px;color:var(--text3);margin-top:6px;"></div>
       <div class="hl-feedback" id="hlFeed"></div>
     </div>
     <div class="why-box a5" id="whyBox" style="display:none">
@@ -519,7 +526,14 @@ body::after {
         <input id="usernameInput" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" placeholder="Enter a username" oninput="this.style.borderColor='var(--accent)'">
         <button onclick="saveUsername()" style="padding:10px 16px;border-radius:var(--r-md);border:none;background:var(--accent);color:#080808;font-family:'Syne',sans-serif;font-size:12px;font-weight:800;letter-spacing:1px;text-transform:uppercase;cursor:pointer;">Save</button>
       </div>
-      <div id="usernameMsg" style="padding:0 1.5rem 1rem;font-size:12px;color:var(--green);display:none;">Username saved!</div>
+      <div style="padding:0 1.5rem 1rem;">
+        <div style="display:flex;gap:10px;align-items:center;">
+          <input id="profileZipInput" type="text" maxlength="5" inputmode="numeric" pattern="[0-9]*" placeholder="Your zip code" style="flex:1;padding:10px 14px;border-radius:var(--r-md);border:0.5px solid var(--border2);background:var(--s2);color:var(--text);font-family:'Syne',sans-serif;font-size:14px;outline:none;" oninput="this.value=this.value.replace(/\D/g,''); if(this.value.length===5) lookupZipProfile(this.value)">
+          <div id="profileZipSpinner" style="display:none;width:18px;height:18px;border:2px solid var(--border2);border-top-color:var(--accent);border-radius:50%;animation:spin 0.8s linear infinite;flex-shrink:0;"></div>
+        </div>
+        <div id="profileZipConfirm" style="font-size:12px;color:var(--green);margin-top:4px;"></div>
+      </div>
+      <div id="usernameMsg" style="padding:0 1.5rem 1rem;font-size:12px;color:var(--green);display:none;">Saved!</div>
     </div>
     <div id="winnerCard" style="display:none;margin:1rem 1.25rem 0;background:linear-gradient(135deg,rgba(232,197,71,0.15),rgba(232,197,71,0.05));border:0.5px solid rgba(232,197,71,0.3);border-radius:var(--r-xl);padding:1.5rem;">
       <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent2);margin-bottom:6px;">Yesterday</div>
@@ -935,6 +949,7 @@ function toggleAuthMode() {
     ? 'Already have an account? <span>Sign in</span>'
     : "Don't have an account? <span>Sign up</span>";
   document.getElementById('forgotWrap').style.display = isAuthMode === 'signin' ? 'block' : 'none';
+  document.getElementById('signupCityWrap').style.display = isAuthMode === 'signup' ? 'block' : 'none';
   document.getElementById('authError').classList.remove('show');
 }
 
@@ -955,7 +970,10 @@ async function handleAuth() {
         // Check if profile already exists before inserting
         const { data: existing } = await sb.from('profiles').select('id').eq('id', result.data.user.id).maybeSingle();
         if (!existing) {
-          await sb.from('profiles').insert({ id: result.data.user.id, username: '' });
+          const zipResultEl = document.getElementById('authZipResult');
+          const homeZip = zipResultEl?.dataset?.zip || '';
+          const homeCity = zipResultEl?.dataset?.city || '';
+          await sb.from('profiles').insert({ id: result.data.user.id, username: '', home_zip: homeZip, home_city: homeCity });
         }
         currentUser = result.data.user;
       }
@@ -1099,6 +1117,13 @@ function updateProfileUI() {
     const avg = Math.round((currentProfile.market_iq || 500) * 0.1) + '%';
     document.getElementById('pStatAvg').textContent = avg;
     document.getElementById('statAvg').textContent = avg;
+  }
+  // Prefill zip code from profile
+  if (currentProfile.home_zip) {
+    const zipInput = document.getElementById('profileZipInput');
+    if (zipInput) zipInput.value = currentProfile.home_zip;
+    const zipConfirm = document.getElementById('profileZipConfirm');
+    if (zipConfirm && currentProfile.home_city) { zipConfirm.textContent = '📍 ' + currentProfile.home_city; zipConfirm.style.color = 'var(--text3)'; }
   }
   loadHistory(showingFullHistory);
 }
@@ -1261,6 +1286,15 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   goTo('reveal');
   startCountdown();
 
+  // Prefill zip from profile
+  // Prefill zip from profile
+  if (currentProfile?.home_zip) {
+    const zipEl = document.getElementById('hlZipInput');
+    if (zipEl) zipEl.value = currentProfile.home_zip;
+    const confirm = document.getElementById('hlZipConfirm');
+    if (confirm && currentProfile.home_city) { confirm.textContent = '📍 ' + currentProfile.home_city; confirm.style.color = 'var(--text3)'; }
+  }
+
   // Show rank
   if (liveRank && totalPlayers) {
     const rn = document.getElementById('rankNum'); if (rn) rn.textContent = '#' + liveRank;
@@ -1296,9 +1330,107 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
 }
 
 // ── HIGHER LOWER ──────────────────────────────────────
+// ── ZIP CODE LOOKUP ───────────────────────────────────
+async function lookupZipSignup(zip) {
+  const resultEl = document.getElementById('authZipResult');
+  resultEl.textContent = 'Looking up...';
+  resultEl.style.color = 'var(--text3)';
+  try {
+    const res = await fetch('https://api.zippopotam.us/us/' + zip);
+    if (!res.ok) { resultEl.textContent = 'Zip not found.'; resultEl.style.color = 'var(--red)'; return; }
+    const data = await res.json();
+    const city = data.places[0]['place name'];
+    const state = data.places[0]['state abbreviation'];
+    resultEl.textContent = '📍 ' + city + ', ' + state;
+    resultEl.style.color = 'var(--green)';
+    resultEl.dataset.city = city + ', ' + state;
+    resultEl.dataset.zip = zip;
+  } catch (err) {
+    resultEl.textContent = 'Could not look up zip code.';
+    resultEl.style.color = 'var(--red)';
+  }
+}
+
+async function lookupZipReveal(zip) {
+  const feed = document.getElementById('hlFeed');
+  const confirm = document.getElementById('hlZipConfirm');
+  const spinner = document.getElementById('hlZipSpinner');
+  spinner.style.display = 'block';
+  confirm.textContent = '';
+  feed.classList.remove('show');
+  try {
+    const res = await fetch('https://api.zippopotam.us/us/' + zip);
+    if (!res.ok) { spinner.style.display = 'none'; confirm.textContent = 'Zip not found.'; confirm.style.color = 'var(--red)'; return; }
+    const data = await res.json();
+    const city = data.places[0]['place name'];
+    const state = data.places[0]['state abbreviation'];
+    const locationLabel = city + ', ' + state;
+    spinner.style.display = 'none';
+    confirm.textContent = '📍 ' + locationLabel;
+    confirm.style.color = 'var(--text3)';
+
+    // Save to profile
+    if (currentUser) {
+      await sb.from('profiles').update({ home_zip: zip, home_city: locationLabel }).eq('id', currentUser.id);
+      if (currentProfile) { currentProfile.home_zip = zip; currentProfile.home_city = locationLabel; }
+      await sb.from('guesses').update({ higher_lower: zip + ':' + locationLabel })
+        .eq('user_id', currentUser.id).eq('challenge_id', todayChallenge?.id);
+    }
+
+    // Show price comparison
+    const todayPrice = parseFloat(todayChallenge?.real_price || 0);
+    const { data: cityPriceData } = await sb
+      .from('city_prices')
+      .select('price, cities(name)')
+      .eq('challenge_id', todayChallenge.id)
+      .ilike('cities.name', '%' + city + '%')
+      .maybeSingle();
+
+    if (cityPriceData?.price) {
+      const cityPrice = parseFloat(cityPriceData.price);
+      const diff = todayPrice - cityPrice;
+      const pct = Math.abs(Math.round((diff / cityPrice) * 100));
+      const direction = diff > 0 ? 'higher' : diff < 0 ? 'lower' : 'the same';
+      const color = diff > 0 ? 'var(--red)' : diff < 0 ? 'var(--green)' : 'var(--text)';
+      const arrow = diff > 0 ? '↑' : diff < 0 ? '↓' : '→';
+      feed.innerHTML = '<span style="color:' + color + ';font-weight:700;font-size:15px;">' + arrow + ' ' + pct + '% ' + direction + ' than your area</span>'
+        + '<br><span style="font-size:11px;color:var(--text3);">Your area: $' + cityPrice.toFixed(2) + ' · Today: $' + todayPrice.toFixed(2) + '</span>';
+    } else {
+      feed.innerHTML = 'We don\'t have BLS data for ' + locationLabel + ' yet.';
+    }
+    feed.classList.add('show');
+  } catch (err) {
+    spinner.style.display = 'none';
+    confirm.textContent = 'Could not look up zip code.';
+    confirm.style.color = 'var(--red)';
+  }
+}
+
+async function lookupZipProfile(zip) {
+  const confirm = document.getElementById('profileZipConfirm');
+  const spinner = document.getElementById('profileZipSpinner');
+  spinner.style.display = 'block';
+  confirm.textContent = '';
+  try {
+    const res = await fetch('https://api.zippopotam.us/us/' + zip);
+    if (!res.ok) { spinner.style.display = 'none'; confirm.textContent = 'Zip not found.'; confirm.style.color = 'var(--red)'; return; }
+    const data = await res.json();
+    const city = data.places[0]['place name'];
+    const state = data.places[0]['state abbreviation'];
+    const locationLabel = city + ', ' + state;
+    spinner.style.display = 'none';
+    confirm.textContent = '📍 ' + locationLabel + ' — saved!';
+    confirm.style.color = 'var(--green)';
+    await sb.from('profiles').update({ home_zip: zip, home_city: locationLabel }).eq('id', currentUser.id);
+    if (currentProfile) { currentProfile.home_zip = zip; currentProfile.home_city = locationLabel; }
+  } catch (err) {
+    spinner.style.display = 'none';
+    confirm.textContent = 'Could not look up zip code.';
+    confirm.style.color = 'var(--red)';
+  }
+}
+
 async function pickHL(choice) {
-  document.getElementById('hlH').className = 'hl-b' + (choice === 'higher' ? ' picked-h' : '');
-  document.getElementById('hlL').className = 'hl-b' + (choice === 'lower' ? ' picked-l' : '');
   const feed = document.getElementById('hlFeed');
   feed.textContent = 'Got it — noted for your location.';
   feed.classList.add('show');
