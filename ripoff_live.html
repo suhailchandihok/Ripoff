@@ -717,6 +717,17 @@ window.addEventListener('load', async () => {
 });
 
 async function loadApp() {
+  // Reset all state for fresh session
+  alreadyPlayed = false;
+  savedGuessData = null;
+  userGuess = 0;
+  currentAccuracy = 0;
+  todayChallenge = null;
+  todayCityPrices = [];
+  yesterdayGuessData = null;
+  pendingStreakPopupGuess = null;
+  showingFullHistory = false;
+
   await loadChallenge();
   await loadProfile();
   await loadYesterdayTab();
@@ -1009,7 +1020,16 @@ function showAuthError(msg) {
 
 async function signOut() {
   await sb.auth.signOut();
-  currentUser = null; currentProfile = null;
+  currentUser = null;
+  currentProfile = null;
+  alreadyPlayed = false;
+  savedGuessData = null;
+  userGuess = 0;
+  currentAccuracy = 0;
+  todayChallenge = null;
+  todayCityPrices = [];
+  yesterdayGuessData = null;
+  pendingStreakPopupGuess = null;
   document.getElementById('mainNav').style.display = 'none';
   goTo('auth');
 }
