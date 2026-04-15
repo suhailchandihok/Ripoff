@@ -433,16 +433,12 @@ body::after {
       </div>
       <div class="track"><div class="track-fill great" id="trackFill"></div></div>
     </div>
-    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;">
-      <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:0.75rem;">
-        <div style="font-size:10px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--text3);">Your rank today</div>
-        <div style="font-family:'Instrument Serif',serif;font-size:44px;font-style:italic;line-height:1;color:var(--accent);" id="rankNum">—</div>
+    <div style="margin:1rem 1.25rem 0;background:var(--s1);border:0.5px solid var(--border2);border-radius:var(--r-xl);padding:1.5rem;display:flex;align-items:center;gap:14px;">
+      <div style="font-size:28px;">🏆</div>
+      <div>
+        <div style="font-size:13px;font-weight:700;color:var(--text);margin-bottom:4px;">Rankings finalize at midnight</div>
+        <div style="font-size:12px;color:var(--text3);line-height:1.6;">Check the <strong style="color:var(--accent);">Yesterday</strong> tab tomorrow morning to see your final rank and how many players you beat.</div>
       </div>
-      <div style="font-size:13px;color:var(--text3);margin-bottom:8px;" id="rankTotal">of — players so far</div>
-      <div style="height:6px;background:var(--s3);border-radius:3px;overflow:hidden;margin-bottom:10px;">
-        <div style="height:100%;border-radius:3px;background:var(--accent);transition:width 1.2s cubic-bezier(0.16,1,0.3,1);width:0%;" id="rankBarFill"></div>
-      </div>
-      <div style="font-size:12px;color:var(--text2);line-height:1.5;" id="rankNote">Rankings update as more players submit. Final standings at midnight.</div>
     </div>
     <div style="margin:1rem 1.25rem 0;background:rgba(232,197,71,0.06);border:0.5px solid rgba(232,197,71,0.15);border-radius:var(--r-xl);padding:1.25rem 1.5rem;display:flex;align-items:center;gap:12px;">
       <div style="font-size:22px;">⏳</div>
@@ -1369,24 +1365,6 @@ function showReveal(guess, realPrice, accuracy, liveRank, totalPlayers) {
   }
 
   // Show rank
-  if (liveRank && totalPlayers) {
-    const rn = document.getElementById('rankNum'); if (rn) rn.textContent = '#' + liveRank;
-    const rt = document.getElementById('rankTotal'); if (rt) rt.textContent = 'of ' + totalPlayers + ' players so far today';
-    const pct = Math.round((1 - liveRank / totalPlayers) * 100);
-    setTimeout(() => { const rb = document.getElementById('rankBarFill'); if (rb) rb.style.width = Math.max(5, pct) + '%'; }, 400);
-    if (liveRank === 1) { const rno = document.getElementById('rankNote'); if (rno) rno.innerHTML = '🏆 <strong>You\'re in 1st place!</strong> Final standings at midnight.'; }
-  } else {
-    setTimeout(async () => {
-      if (!todayChallenge) return;
-      const { count: tot } = await sb.from('guesses').select('*', { count: 'exact', head: true }).eq('challenge_id', todayChallenge.id);
-      const { data: better } = await sb.from('guesses').select('accuracy').eq('challenge_id', todayChallenge.id).gt('accuracy', accuracy);
-      const r = (better?.length || 0) + 1; const t = tot || 1;
-      const rn = document.getElementById('rankNum'); if (rn) rn.textContent = '#' + r;
-      const rt = document.getElementById('rankTotal'); if (rt) rt.textContent = 'of ' + t + ' players so far today';
-      setTimeout(() => { const rb = document.getElementById('rankBarFill'); if (rb) rb.style.width = Math.max(5, Math.round((1 - r / t) * 100)) + '%'; }, 200);
-    }, 600);
-  }
-
   setTimeout(() => {
     document.getElementById('trackFill').style.width = accuracy + '%';
     todayCityPrices.forEach((_, i) => {
@@ -1565,7 +1543,7 @@ function doShare() {
     : new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
 
   const streakLine = streak > 0 ? `🔥 ${streak} day streak\n` : '';
-  const txt = `Ripoff — ${challengeDate}\n\n${emoji} ${item}\n📍 ${city}, ${state}\n\n🎯 Accuracy: ${acc}\n🏆 Rank: ${rank}\n${streakLine}\nThink you can beat me?\n👉 suhailchandihok.github.io/Ripoff/ripoff_live.html`;
+  const txt = `Ripoff — ${challengeDate}\n\n${emoji} ${item}\n📍 ${city}, ${state}\n\n🎯 Accuracy: ${acc}\n${streakLine}\nThink you can beat me?\n👉 suhailchandihok.github.io/Ripoff/ripoff_live.html`;
 
   if (navigator.share) { navigator.share({ title: 'Ripoff', text: txt, url: 'https://suhailchandihok.github.io/Ripoff/ripoff_live.html' }); }
   else { navigator.clipboard?.writeText(txt); showToast('Result copied to clipboard!'); }
