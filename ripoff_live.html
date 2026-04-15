@@ -1087,13 +1087,18 @@ function doShare() {
   const acc = document.getElementById('accNum').textContent;
   const item = todayChallenge?.items?.name || 'Daily Item';
   const city = todayChallenge?.cities?.name || 'Unknown City';
+  const state = todayChallenge?.cities?.state || '';
+  const emoji = todayChallenge?.items?.emoji || '🛒';
   const rank = document.getElementById('rankNum')?.textContent || '—';
   const streak = currentProfile?.streak || 0;
   const challengeDate = todayChallenge?.challenge_date
-    ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
-    : new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-  const txt = `RIPOFF — ${challengeDate}\n${todayChallenge?.items?.emoji || '🛒'} ${item} · ${city}\n\nAccuracy: ${acc} · Rank: ${rank}\n🔥 ${streak} Day Streak\n\nCan you beat me? ripoff.game`;
-  if (navigator.share) { navigator.share({ text: txt }); }
+    ? new Date(todayChallenge.challenge_date + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })
+    : new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
+
+  const streakLine = streak > 0 ? `🔥 ${streak} day streak\n` : '';
+  const txt = `Ripoff — ${challengeDate}\n\n${emoji} ${item}\n📍 ${city}, ${state}\n\n🎯 Accuracy: ${acc}\n🏆 Rank: ${rank}\n${streakLine}\nThink you can beat me?\n👉 suhailchandihok.github.io/Ripoff/ripoff_live.html`;
+
+  if (navigator.share) { navigator.share({ title: 'Ripoff', text: txt, url: 'https://suhailchandihok.github.io/Ripoff/ripoff_live.html' }); }
   else { navigator.clipboard?.writeText(txt); showToast('Result copied to clipboard!'); }
 }
 
